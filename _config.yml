@@ -20,7 +20,7 @@ linkedin_username: "elias-prescott"
 #########################################################################################
 # theme: "minima"
 
-remote_theme: pages-themes/midnight@v0.2.0
+remote_theme: jekyll/minima
 
 rss: rss
     
@@ -28,6 +28,9 @@ plugins:
   - jekyll-feed
   - jekyll-sitemap
   - jekyll-remote-theme
+
+minima:
+  skin: dark
 
 titles_from_headings:
   strip_title: true
