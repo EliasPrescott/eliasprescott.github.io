@@ -1,5 +1,3 @@
-Here you can say lots of fun things about your site.
+I am professional software developer with a passion for writing effective and (occasionally) elegant code.
 
-Maybe say a some things about yourself.
-
-Or maybe what you plan to blog about.
+Some of my interests include: functional programming, web development, language design, front-end testing, and game development.
