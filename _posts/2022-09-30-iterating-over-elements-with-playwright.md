@@ -7,7 +7,7 @@ tags: [Playwright, Web Scraping, TypeScript]
 
 ## Iterating over Elements with Playwright
 
-Playwright is a Microsoft library for automated web testing.
+[Playwright](https://playwright.dev/) is a Microsoft library for automated web testing.
 Playwright is designed to handle reactive web pages, which makes it ideal for testing modern web applications. I have worked with Playwright quite a bit recently, so I have found myself writing a lot of helper functions for it. The one helper function I always find myself needing is a way to iterate over elements.
 
 #### Selecting Elements
@@ -24,7 +24,7 @@ From this brief sample, you can see the basics of Playwright's API design. You c
 
 In the above example, both actions take in plain CSS selectors, which allow you to identify elements based on their tag name, ID, class, and other attributes. Playwright supports other selector formats, but CSS selectors are often the simplest and best way to locate elements.
 
-Locating elements is so important to Playwright, there is even a method for saving a selector as an object. This is the ```page.locator()``` method, which returns a Locator object. After saving a Locator, you can perform many of the same actions on it as you could on the page object. Here is a basic example:
+Locating elements is so important to Playwright, there is even a method for saving a selector as an object. This is the [```page.locator()```](https://playwright.dev/docs/api/class-page#page-locator) method, which returns a [Locator](https://playwright.dev/docs/api/class-locator) object. After saving a Locator, you can perform many of the same actions on it as you could on the page object. Here is a basic example:
 
 ```javascript
 let importantBtn = page.locator('#importantBtn');
@@ -38,7 +38,7 @@ The reason I bring all this up is because Locator objects are going to be very i
 
 #### Why do we want to Select Multiple Elements?
 
-Repetition of elements is extremely common on web pages. Most web frameworks make it extremely easy to repeat an element any number of times. This is great for writing web sites, but it can make the sites more difficult to test.
+Repetition of elements is extremely common on web pages. Most web frameworks make it very easy to repeat an element any number of times. This is great for writing web sites, but it can make the sites more difficult to test.
 
 Whenever an element is repeated, all its attributes will also be repeated. This means that all its identifying information will be shared between every instance of the element. So, if I call ```page.click('button.actionBtn')```, and there are five elements that match that selector, which element should Playwright click? Playwright will try to click on the first match by default, but relying on this behavior can be dangerous. Whenever an element is repeated on a page, the number of repetitions is often variable. I may visit a page and see five action buttons, but someone else could visit the same page and see zero buttons. All manner of variables can affect how many elements will show on a web page, so it is vital to write Playwright tests that can handle that.
 
