@@ -18,19 +18,13 @@ linkedin_username: "elias-prescott"
 #########################################################################################
 ######### Nothing below needs to be changed (unless you know what you're doing) #########
 #########################################################################################
-# theme: "minima"
-
-remote_theme: jekyll/minima
+theme: "minima"
 
 rss: rss
     
 plugins:
   - jekyll-feed
   - jekyll-sitemap
-  - jekyll-remote-theme
-
-minima:
-  skin: dark
 
 titles_from_headings:
   strip_title: true
