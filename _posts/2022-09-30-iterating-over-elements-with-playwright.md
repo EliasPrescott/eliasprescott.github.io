@@ -1,3 +1,10 @@
+---
+layout: post
+title: "Iterating over Elements with Playwright"
+description: "Learning to handle repeated web elements with Playwright"
+tags: [Playwright, Web Scraping, TypeScript]
+---
+
 ## Iterating over Elements with Playwright
 
 Playwright is a Microsoft library for automated web testing.
