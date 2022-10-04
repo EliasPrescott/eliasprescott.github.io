@@ -10,4 +10,8 @@
         <loc>https://eliasprescott.github.io/blog/iterating-over-elements-with-playwright/</loc>
         <lastmod>2022-09-30</lastmod>
     </url>
+    <url>
+        <loc>https://eliasprescott.github.io/blog/making-virtual-instruments-with-sveltekit-part-1/</loc>
+        <lastmod>2022-10-03</lastmod>
+    </url>
 </urlset>
