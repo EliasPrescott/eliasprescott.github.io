@@ -49,7 +49,7 @@
 </span><span style="color:#bf616a;">npm</span><span> run dev -- --open
 </span></code></pre>
 <p>Here is the result of my NPM install:</p>
-<p><img src="/images/2022-10-03/no-vulnerabilities.png" alt="Dependency install result" /></p>
+<p><img src="/images/2022-10-03/no-vulnerabilities.PNG" alt="Dependency install result" /></p>
 <p>I am used to large Angular projects that report +50 vulnerabilities every time I update them, so it is refreshing to see 0 vulnerabilities 😊</p>
 <p>After running all the commands, you should be greeted by a mostly blank web page. Our first order of business will be researching the <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API">Web Audio API</a> and adding some basic audio generation. To hold our instrument logic, we will create a new file at <code>src/lib/instrument.ts</code>. The goal for this <code>instrument.ts</code> file is to hold all the Web Audio code, and expose a clean API for our front-end code to utilize.</p>
 <p>I don't know very much about audio synthesis, so I will be using <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API/Advanced_techniques">these</a> <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API/Advanced_techniques#putting_it_all_together">two</a> MDN tutorials to learn the Web Audio basics (AKA: I'm gonna steal code from them). I would recommend reading through these two tutorials and any of the other great resources on the Web Audio API if you are interested in learning more about audio programming.</p>
