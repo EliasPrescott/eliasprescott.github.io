@@ -5,7 +5,7 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Unwrapping Code Patterns</title>
-        <link rel="stylesheet" href="https://eliasprescott.github.io/style.css">
+        <link rel="stylesheet" href="{{ get_url(path="style.css") }}">
     </head>
 
     <body>
@@ -24,23 +24,7 @@
 
         <section class="section">
             <div class="container">
-            
-<h1 class="title">
-  All Posts
-</h1>
-<ul class="blog-post-list">
-  <!-- If you are using pagination, section.pages will be empty. You need to use the paginator object -->  
-    
-    <li>
-        <a href="https://eliasprescott.github.io/blog/iterating-over-elements-with-playwright/">Iterating over Elements with Playwright</a>
-    </li>
-    
-    <li>
-        <a href="https://eliasprescott.github.io/blog/making-virtual-instruments-with-sveltekit-part-1/">Making Virtual Instruments with SvelteKit - Part 1</a>
-    </li>
-    
-</ul>
-
+            {% block content %} {% endblock %}
             </div>
         </section>
     </body>
