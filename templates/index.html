@@ -25,7 +25,7 @@
 
 <ul class="blog-post-list">
   <!-- If you are using pagination, section.pages will be empty. You need to use the paginator object -->  
-    {% for page in blog_section.pages | reverse | slice(end=5) %}
+    {% for page in blog_section.pages | slice(end=5) %}
     <li>
         <a href="{{ page.permalink | safe }}">{{ page.title }}</a>
     </li>

@@ -88,8 +88,9 @@ So, our Instrument API here takes in a reference to the page's ```AudioContext``
 
 Now that we have our class ready for testing, we can move to the index page file located at ```src/routes/+page.svelte```. We can replace whatever default content ```+page.svelte``` has with this:
 
-src/routes/+page.svelte
 ```html
+<!-- src/routes/+page.svelte -->
+
 <script>
     import { Piano } from '$lib/instrument';
 
@@ -113,8 +114,9 @@ AudioContext is not defined
 
 Initializing an ```AudioContext``` requires the window to be initialized and ready, which it isn't whenever our script block is currently executing. To ensure we initialize our ```AudioContext``` at the proper time, we can use the ```onMount``` hook provided by the Svelte runtime:
 
-src/routes/+page.svelte
 ```html
+<!-- src/routes/+page.svelte -->
+
 <script lang="ts">
     import { Piano } from '$lib/instrument';
     import { onMount } from 'svelte';

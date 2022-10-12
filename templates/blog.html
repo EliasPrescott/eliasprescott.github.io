@@ -6,7 +6,7 @@
 </h1>
 <ul class="blog-post-list">
   <!-- If you are using pagination, section.pages will be empty. You need to use the paginator object -->  
-    {% for page in section.pages | reverse %}
+    {% for page in section.pages %}
     <li>
         <a href="{{ page.permalink | safe }}">{{ page.title }}</a>
     </li>
