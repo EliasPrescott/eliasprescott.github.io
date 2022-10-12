@@ -1,0 +1,35 @@
+{% extends "base.html" %} 
+
+{% block content %}
+
+<div class="home-page-content">
+  <p>
+    I am a professional software developer with a passion for writing effective and (occasionally) elegant code.
+  </p>
+  
+  <p>
+    Some of my interests include:
+    <ul>
+      <li>functional programming,</li>
+      <li>web development,</li>
+      <li>language design,</li>
+      <li>front-end testing,</li>
+      <li>and game development</li>
+    </ul>
+  </p>
+</div>
+
+<h4 style="margin-top: 3em;">Latest Posts</h4>
+
+{% set blog_section = get_section(path="blog/_index.md") %}
+
+<ul class="blog-post-list">
+  <!-- If you are using pagination, section.pages will be empty. You need to use the paginator object -->  
+    {% for page in blog_section.pages | reverse | slice(end=5) %}
+    <li>
+        <a href="{{ page.permalink | safe }}">{{ page.title }}</a>
+    </li>
+    {% endfor %}
+</ul>
+
+{% endblock content %}
