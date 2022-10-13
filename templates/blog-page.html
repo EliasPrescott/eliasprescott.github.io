@@ -2,15 +2,49 @@
 
 {% block content %}
 <h1 class="title">
-  {{ page.title }}
+    {{ page.title }}
 </h1>
+
+{% set author_count = page.taxonomies.authors | length %}
+
+{% if author_count > 1 %}
+<p>
+    Written by 
+    {% for author in page.taxonomies.authors %}
+        {% if loop.index == author_count - 1 %}
+            <a href="/authors/{{ author | lower | replace(from=" ", to="-") }}">{{ author | title }}</a>
+        {% else %}
+            {{ author | title }} and
+        {% endif %}
+    {% endfor %}
+</p>
+{% elif author_count == 1 %}
+<p>
+    Written by <a href="/authors/{{ page.taxonomies.authors.0 | lower | replace(from=" ", to="-") }}">{{ page.taxonomies.authors.0 | title }}</a>
+</p>
+{% endif %}
+
+{% set tag_count = page.taxonomies.tags | length %}
+
+{% if tag_count > 1 %}
+<p>
+    Tags:
+    {% for tag in page.taxonomies.tags %}
+        {% if loop.index == tag_count %}
+            <a href="/tags/{{ tag | lower | replace(from=" ", to="-") }}">{{ tag | title }}</a>
+        {% else %}
+            <a href="/tags/{{ tag | lower | replace(from=" ", to="-") }}">{{ tag | title }}</a>,
+        {% endif %}
+    {% endfor %}
+</p>
+{% endif %}
 
 <p class="subtitle">
     <strong>{{ page.date }}</strong>
 </p>
 
 <p class="subtitle">
-  <strong>{{ page.reading_time }} minute read</strong>
+    <strong>{{ page.reading_time }} minute read</strong>
 </p>
 
 <div class="content blog-page-content">
