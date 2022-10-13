@@ -1,6 +1,9 @@
 +++
 title = "Iterating over Elements with Playwright"
 date = 2022-09-30
+[taxonomies]
+authors = ["Elias Prescott"]
+tags = ["Playwright", "TypeScript", "Functional Testing"]
 +++
 
 [Playwright](https://playwright.dev/) is a Microsoft library for automated web testing.

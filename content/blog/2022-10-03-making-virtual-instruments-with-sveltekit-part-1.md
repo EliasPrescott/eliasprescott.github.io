@@ -1,6 +1,9 @@
 +++
 title = "Making Virtual Instruments with SvelteKit - Part 1"
 date = 2022-10-03
+[taxonomies]
+authors = ["Elias Prescott"]
+tags = ["Svelte", "TypeScript", "WebAudio API"]
 +++
 
 In this tutorial, I will be using SvelteKit and the Web Audio API to make a basic instrument. For the uninitiated, [SvelteKit](https://kit.svelte.dev/) is a framework for building reactive web applications.

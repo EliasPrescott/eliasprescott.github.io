@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1 class="title">
+  {{ taxonomy.name | title | trim_end_matches(pat="/s/") }}: {{ term.name | title }}
+</h1>
+<ul class="blog-post-list">
+  <!-- If you are using pagination, section.pages will be empty. You need to use the paginator object -->  
+    {% for page in term.pages %}
+    <li>
+        <a href="{{ page.permalink | safe }}">{{ page.title }}</a>
+    </li>
+    {% endfor %}
+</ul>
+{% endblock content %}
