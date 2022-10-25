@@ -2,7 +2,7 @@
 
 {% block content %}
 <h1 class="title">
-  {{ taxonomy.name | title | trim_end_matches(pat="/s/") }}: {{ term.name | title }}
+  {{ taxonomy.name | title | trim_end_matches(pat="s") }}: {{ term.name }}
 </h1>
 <ul class="blog-post-list">
   <!-- If you are using pagination, section.pages will be empty. You need to use the paginator object -->  

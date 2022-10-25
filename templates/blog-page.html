@@ -7,40 +7,51 @@
 
 {% set author_count = page.taxonomies.authors | length %}
 
-{% if author_count > 1 %}
 <p>
-    Written by 
-    {% for author in page.taxonomies.authors %}
-        {% if loop.index == author_count - 1 %}
-            <a href="/authors/{{ author | lower | replace(from=" ", to="-") }}">{{ author | title }}</a>
-        {% else %}
-            {{ author | title }} and
-        {% endif %}
-    {% endfor %}
+    {% if author_count > 2 %}
+    <strong>
+        Written by 
+        {% for author in page.taxonomies.authors %}
+            {% if loop.index == author_count %}
+                and <a href="/authors/{{ author | slugify }}">{{ author }}</a>
+            {% else %}
+                <a href="/authors/{{ author | slugify }}">{{ author }}</a>,
+            {% endif %}
+        {% endfor %}
+    </strong>
+    {% elif author_count == 2 %}
+    <strong>
+        Written by 
+        <a href="/authors/{{ page.taxonomies.authors.0 | slugify }}">{{ page.taxonomies.authors.0 }}</a> 
+        and 
+        <a href="/authors/{{ page.taxonomies.authors.1 | slugify }}">{{ page.taxonomies.authors.1 }}</a>
+    </strong>
+    {% elif author_count == 1 %}
+    <strong>
+        Written by <a href="/authors/{{ page.taxonomies.authors.0 | slugify }}">{{ page.taxonomies.authors.0 }}</a>
+    </strong>
+    {% endif %}
 </p>
-{% elif author_count == 1 %}
-<p>
-    Written by <a href="/authors/{{ page.taxonomies.authors.0 | lower | replace(from=" ", to="-") }}">{{ page.taxonomies.authors.0 | title }}</a>
-</p>
-{% endif %}
 
 {% set tag_count = page.taxonomies.tags | length %}
 
 {% if tag_count > 1 %}
 <p>
-    Tags:
-    {% for tag in page.taxonomies.tags %}
-        {% if loop.index == tag_count %}
-            <a href="/tags/{{ tag | lower | replace(from=" ", to="-") }}">{{ tag | title }}</a>
-        {% else %}
-            <a href="/tags/{{ tag | lower | replace(from=" ", to="-") }}">{{ tag | title }}</a>,
-        {% endif %}
-    {% endfor %}
+    <strong>
+        Tags:
+        {% for tag in page.taxonomies.tags %}
+            {% if loop.index == tag_count %}
+                <a href="/tags/{{ tag | slugify }}">{{ tag }}</a>
+            {% else %}
+                <a href="/tags/{{ tag | slugify }}">{{ tag }}</a>,
+            {% endif %}
+        {% endfor %}
+    </strong>
 </p>
 {% endif %}
 
 <p class="subtitle">
-    <strong>{{ page.date }}</strong>
+    <strong>Date Created: {{ page.date }}</strong>
 </p>
 
 <p class="subtitle">
