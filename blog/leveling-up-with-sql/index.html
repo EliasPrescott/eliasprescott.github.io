@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Unwrapping Code Patterns 🔍</title>
+        <link rel="stylesheet" href="https://eliasprescott.github.io/style.css">
+    </head>
+
+    <body>
+        <div>
+            <header>
+                <a href="/">
+                    <h1>Unwrapping Code Patterns 🔍</h1>
+                </a>
+            </header>
+
+            <nav>
+                <a href="/">Home</a>
+                <a href="/blog">Blog</a>
+                <a href="https://github.com/eliasprescott/">GitHub</a>
+                <a href="https://www.linkedin.com/in/elias-prescott/">LinkedIn</a>
+            </nav>
+        </div>
+
+        <section class="section">
+            <div class="container">
+            
+<h1 class="title">
+    Leveling Up with SQL: Using Dapper, Result Sets, and Temp Tables
+</h1>
+
+
+
+<p>
+    
+    <strong>
+        Written by <a href="/authors/elias-prescott">Elias Prescott</a>
+    </strong>
+    
+</p>
+
+
+
+
+<p>
+    <strong>
+        Tags:
+        
+            
+                <a href="/tags/sql">SQL</a>,
+            
+        
+            
+                <a href="/tags/c">C#</a>,
+            
+        
+            
+                <a href="/tags/dapper">Dapper</a>
+            
+        
+    </strong>
+</p>
+
+
+<p class="subtitle">
+    <strong>Date Created: 2022-10-24</strong>
+</p>
+
+<p class="subtitle">
+    <strong>11 minute read</strong>
+</p>
+
+<div class="content blog-page-content">
+    <p>Persisting data in a database is an extremely common requirement in many types of applications. For the majority of use cases, querying databases should be a simple task. Most database queries should be easy to read and write and quick to run, but there are some exceptions.</p>
+<p>A notable exception that I ran into recently comes when I needed to query large amounts of nested objects. Querying a list of objects is fairly simple, but it becomes more complicated when each object in the list also has a list of child objects stored in a different DB table. Then, if those child objects can have their own nested child objects stored in a third table, things become even more complicated.</p>
+<p>It is definitely possible to solve this kind of challenge without any SQL wizardry, but there are some big advantages to digging deeper and using some advanced techniques. So, I want to go over a basic example and show some advanced SQL techniques that you can use to level up your queries.</p>
+<p>For this example, I will create a simple C# console application. I will also be using <a href="https://www.learndapper.com/">Dapper</a> to simplify our DB connection code. You will probably need to manually add <code>System.Data.SqlClient</code> to use the <code>SqlConnection</code> class. I'll start by initializing the project and adding the starting dependencies:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">dotnet</span><span> new console</span><span style="color:#bf616a;"> -o</span><span> mighty-query-example
+</span><span>
+</span><span style="color:#96b5b4;">cd</span><span> mighty-query-example
+</span><span>
+</span><span style="color:#bf616a;">dotnet</span><span> add package System.Data.SqlClient</span><span style="color:#bf616a;"> --version</span><span> 4.8.3
+</span><span>
+</span><span style="color:#bf616a;">dotnet</span><span> add package Dapper</span><span style="color:#bf616a;"> --version</span><span> 2.0.123
+</span></code></pre>
+<p>For our example scenario, let's say that we are modeling lists of vehicles, their passengers, and any items those passengers are holding. To make things more complicated, our vehicle class will also be able to hold its own list of items as well. To make things even more complicated, each vehicle will be able to tow (or contain) another vehicle. Here is the final model I came up with:</p>
+<pre data-lang="c#" style="background-color:#2b303b;color:#c0c5ce;" class="language-c# "><code class="language-c#" data-lang="c#"><span style="color:#65737e;">// Models.cs
+</span><span>
+</span><span style="color:#b48ead;">public class </span><span style="color:#ebcb8b;">Vehicle </span><span style="color:#eff1f5;">{
+</span><span style="color:#eff1f5;">    </span><span style="color:#b48ead;">public int </span><span style="color:#bf616a;">Id </span><span style="color:#eff1f5;">{ </span><span style="color:#b48ead;">get</span><span style="color:#eff1f5;">; </span><span style="color:#b48ead;">set</span><span style="color:#eff1f5;">; }
+</span><span style="color:#eff1f5;">    </span><span style="color:#b48ead;">public string? </span><span style="color:#bf616a;">Make </span><span style="color:#eff1f5;">{ </span><span style="color:#b48ead;">get</span><span style="color:#eff1f5;">; </span><span style="color:#b48ead;">set</span><span style="color:#eff1f5;">; }
+</span><span style="color:#eff1f5;">    </span><span style="color:#b48ead;">public string? </span><span style="color:#bf616a;">Model </span><span style="color:#eff1f5;">{ </span><span style="color:#b48ead;">get</span><span style="color:#eff1f5;">; </span><span style="color:#b48ead;">set</span><span style="color:#eff1f5;">; }
+</span><span style="color:#eff1f5;">    </span><span style="color:#b48ead;">public int? </span><span style="color:#bf616a;">Year </span><span style="color:#eff1f5;">{ </span><span style="color:#b48ead;">get</span><span style="color:#eff1f5;">; </span><span style="color:#b48ead;">set</span><span style="color:#eff1f5;">; }
+</span><span style="color:#eff1f5;">    </span><span style="color:#b48ead;">public int? </span><span style="color:#bf616a;">TowingVehicleId </span><span style="color:#eff1f5;">{ </span><span style="color:#b48ead;">get</span><span style="color:#eff1f5;">; </span><span style="color:#b48ead;">set</span><span style="color:#eff1f5;">; }
+</span><span style="color:#eff1f5;">    </span><span style="color:#b48ead;">public </span><span style="color:#eff1f5;">List&lt;Passenger&gt; </span><span style="color:#bf616a;">Passengers </span><span style="color:#eff1f5;">{ </span><span style="color:#b48ead;">get</span><span style="color:#eff1f5;">; </span><span style="color:#b48ead;">set</span><span style="color:#eff1f5;">; } </span><span>= new </span><span style="color:#eff1f5;">List&lt;Passenger&gt;();
+</span><span style="color:#eff1f5;">    </span><span style="color:#b48ead;">public </span><span style="color:#eff1f5;">List&lt;Item&gt; </span><span style="color:#bf616a;">Items </span><span style="color:#eff1f5;">{ </span><span style="color:#b48ead;">get</span><span style="color:#eff1f5;">; </span><span style="color:#b48ead;">set</span><span style="color:#eff1f5;">; } </span><span>= new </span><span style="color:#eff1f5;">List&lt;Item&gt;();
+</span><span style="color:#eff1f5;">    </span><span style="color:#b48ead;">public </span><span style="color:#eff1f5;">Vehicle</span><span style="color:#b48ead;">? </span><span style="color:#bf616a;">TowedVehicle </span><span style="color:#eff1f5;">{ </span><span style="color:#b48ead;">get</span><span style="color:#eff1f5;">; </span><span style="color:#b48ead;">set</span><span style="color:#eff1f5;">; }
+</span><span style="color:#eff1f5;">}
+</span><span>
+</span><span style="color:#b48ead;">public class </span><span style="color:#ebcb8b;">Passenger </span><span style="color:#eff1f5;">{
+</span><span style="color:#eff1f5;">    </span><span style="color:#b48ead;">public int </span><span style="color:#bf616a;">Id </span><span style="color:#eff1f5;">{ </span><span style="color:#b48ead;">get</span><span style="color:#eff1f5;">; </span><span style="color:#b48ead;">set</span><span style="color:#eff1f5;">; }
+</span><span style="color:#eff1f5;">    </span><span style="color:#b48ead;">public string? </span><span style="color:#bf616a;">FirstName </span><span style="color:#eff1f5;">{ </span><span style="color:#b48ead;">get</span><span style="color:#eff1f5;">; </span><span style="color:#b48ead;">set</span><span style="color:#eff1f5;">; }
+</span><span style="color:#eff1f5;">    </span><span style="color:#b48ead;">public string? </span><span style="color:#bf616a;">LastName </span><span style="color:#eff1f5;">{ </span><span style="color:#b48ead;">get</span><span style="color:#eff1f5;">; </span><span style="color:#b48ead;">set</span><span style="color:#eff1f5;">; }
+</span><span style="color:#eff1f5;">    </span><span style="color:#b48ead;">public int? </span><span style="color:#bf616a;">VehicleId </span><span style="color:#eff1f5;">{ </span><span style="color:#b48ead;">get</span><span style="color:#eff1f5;">; </span><span style="color:#b48ead;">set</span><span style="color:#eff1f5;">; }
+</span><span style="color:#eff1f5;">    </span><span style="color:#b48ead;">public </span><span style="color:#eff1f5;">List&lt;Item&gt; </span><span style="color:#bf616a;">Items </span><span style="color:#eff1f5;">{ </span><span style="color:#b48ead;">get</span><span style="color:#eff1f5;">; </span><span style="color:#b48ead;">set</span><span style="color:#eff1f5;">; } </span><span>= new </span><span style="color:#eff1f5;">List&lt;Item&gt;();
+</span><span style="color:#eff1f5;">}
+</span><span>
+</span><span style="color:#b48ead;">public class </span><span style="color:#ebcb8b;">Item </span><span style="color:#eff1f5;">{
+</span><span style="color:#eff1f5;">    </span><span style="color:#b48ead;">public int </span><span style="color:#bf616a;">Id </span><span style="color:#eff1f5;">{ </span><span style="color:#b48ead;">get</span><span style="color:#eff1f5;">; </span><span style="color:#b48ead;">set</span><span style="color:#eff1f5;">; }
+</span><span style="color:#eff1f5;">    </span><span style="color:#b48ead;">public string? </span><span style="color:#bf616a;">Title </span><span style="color:#eff1f5;">{ </span><span style="color:#b48ead;">get</span><span style="color:#eff1f5;">; </span><span style="color:#b48ead;">set</span><span style="color:#eff1f5;">; }
+</span><span style="color:#eff1f5;">    </span><span style="color:#b48ead;">public string? </span><span style="color:#bf616a;">Description </span><span style="color:#eff1f5;">{ </span><span style="color:#b48ead;">get</span><span style="color:#eff1f5;">; </span><span style="color:#b48ead;">set</span><span style="color:#eff1f5;">; }
+</span><span style="color:#eff1f5;">    </span><span style="color:#b48ead;">public int? </span><span style="color:#bf616a;">PassengerId </span><span style="color:#eff1f5;">{ </span><span style="color:#b48ead;">get</span><span style="color:#eff1f5;">; </span><span style="color:#b48ead;">set</span><span style="color:#eff1f5;">;}
+</span><span style="color:#eff1f5;">    </span><span style="color:#b48ead;">public int? </span><span style="color:#bf616a;">VehicleId </span><span style="color:#eff1f5;">{ </span><span style="color:#b48ead;">get</span><span style="color:#eff1f5;">; </span><span style="color:#b48ead;">set</span><span style="color:#eff1f5;">;}
+</span><span style="color:#eff1f5;">}
+</span></code></pre>
+<p>After setting up a table for each of these classes, we need to populate the tables with some dummy data. For this, I will be using <a href="https://github.com/Kuree/Faker.Net">Faker.Net</a>.</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">dotnet</span><span> add package Faker.Net</span><span style="color:#bf616a;"> --version</span><span> 2.0.154
+</span></code></pre>
+<p>We can use Faker to generate random string data and we can use <code>System.Random</code> for generating IDs and other numerical data. So, we have everything ready to generate data, but we will need a method for inserting our mock data into the database. One possible method would be to build a bulk SQL insert statement ourselves. This approach would work and would be perfectly suitable for inserting smaller groups of data, but we will be inserting 10,000 or more rows into each of our tables. Because we are inserting so much data at once, I would be more comfortable with using a standardized solution. We are in luck, because <code>System.Data.SqlClient</code> provides a class for exactly this kind of problem. The <code>SqlBulkCopy</code> class will allow us to bulk insert our rows into a connected database as efficiently as possible. So, we have identified our solutions for generating data and inserting it, now we just need to put them in practice.</p>
+<pre data-lang="c#" style="background-color:#2b303b;color:#c0c5ce;" class="language-c# "><code class="language-c#" data-lang="c#"><span style="color:#65737e;">// DummyData.cs
+</span><span>
+</span><span style="color:#b48ead;">using </span><span>System.Data;
+</span><span style="color:#b48ead;">using </span><span>System.Data.SqlClient;
+</span><span>
+</span><span style="color:#b48ead;">public static class </span><span style="color:#ebcb8b;">TablePopulation </span><span style="color:#eff1f5;">{
+</span><span style="color:#eff1f5;">
+</span><span style="color:#eff1f5;">    </span><span style="color:#65737e;">// For ease of use, I am making this an extension method on SqlClient.
+</span><span style="color:#eff1f5;">    </span><span style="color:#b48ead;">public static void </span><span style="color:#8fa1b3;">PopulateTable</span><span style="color:#eff1f5;">(
+</span><span style="color:#eff1f5;">        </span><span style="color:#b48ead;">this </span><span style="color:#eff1f5;">SqlConnection </span><span style="color:#bf616a;">connection</span><span style="color:#eff1f5;">,
+</span><span style="color:#eff1f5;">        </span><span style="color:#b48ead;">string </span><span style="color:#bf616a;">tableName</span><span style="color:#eff1f5;">,
+</span><span style="color:#eff1f5;">        </span><span style="color:#b48ead;">int </span><span style="color:#bf616a;">numberOfRows</span><span style="color:#eff1f5;">,
+</span><span style="color:#eff1f5;">        </span><span style="color:#65737e;">// The Func&lt;string?&gt; value is our data generator method.
+</span><span style="color:#eff1f5;">        </span><span style="color:#b48ead;">params </span><span style="color:#eff1f5;">(</span><span style="color:#b48ead;">string</span><span style="color:#eff1f5;">, Func&lt;</span><span style="color:#b48ead;">string?</span><span style="color:#eff1f5;">&gt;)[] </span><span style="color:#bf616a;">columnList
+</span><span style="color:#eff1f5;">    ) {
+</span><span style="color:#eff1f5;">        </span><span style="color:#65737e;">// Create a local blank table to fill with data.
+</span><span style="color:#eff1f5;">        DataTable </span><span style="color:#bf616a;">table </span><span>= new </span><span style="color:#eff1f5;">DataTable();
+</span><span style="color:#eff1f5;">
+</span><span style="color:#eff1f5;">        </span><span style="color:#65737e;">// Initialize the bulk copy handler.
+</span><span style="color:#eff1f5;">        SqlBulkCopy </span><span style="color:#bf616a;">bulkCopy </span><span>= new </span><span style="color:#eff1f5;">SqlBulkCopy(
+</span><span style="color:#eff1f5;">            </span><span style="color:#bf616a;">connection</span><span style="color:#eff1f5;">,
+</span><span style="color:#eff1f5;">            </span><span style="color:#bf616a;">SqlBulkCopyOptions</span><span style="color:#eff1f5;">.</span><span style="color:#bf616a;">TableLock </span><span>|
+</span><span style="color:#eff1f5;">            </span><span style="color:#bf616a;">SqlBulkCopyOptions</span><span style="color:#eff1f5;">.</span><span style="color:#bf616a;">FireTriggers </span><span>|
+</span><span style="color:#eff1f5;">            </span><span style="color:#bf616a;">SqlBulkCopyOptions</span><span style="color:#eff1f5;">.</span><span style="color:#bf616a;">UseInternalTransaction</span><span style="color:#eff1f5;">,
+</span><span style="color:#eff1f5;">            </span><span style="color:#d08770;">null
+</span><span style="color:#eff1f5;">        );
+</span><span style="color:#eff1f5;">
+</span><span style="color:#eff1f5;">        </span><span style="color:#65737e;">// Set the target table name.
+</span><span style="color:#eff1f5;">        </span><span style="color:#bf616a;">bulkCopy</span><span style="color:#eff1f5;">.</span><span style="color:#bf616a;">DestinationTableName </span><span>= </span><span style="color:#bf616a;">tableName</span><span style="color:#eff1f5;">;
+</span><span style="color:#eff1f5;">
+</span><span style="color:#eff1f5;">        </span><span style="color:#b48ead;">foreach </span><span style="color:#eff1f5;">(</span><span style="color:#b48ead;">var </span><span style="color:#eff1f5;">(</span><span style="color:#bf616a;">columnName</span><span style="color:#eff1f5;">, </span><span style="color:#bf616a;">_generator</span><span style="color:#eff1f5;">) </span><span style="color:#b48ead;">in </span><span style="color:#bf616a;">columnList</span><span style="color:#eff1f5;">) {
+</span><span style="color:#eff1f5;">            </span><span style="color:#65737e;">// Add the column definition to our local table.
+</span><span style="color:#eff1f5;">            </span><span style="color:#bf616a;">table</span><span style="color:#eff1f5;">.</span><span style="color:#bf616a;">Columns</span><span style="color:#eff1f5;">.</span><span style="color:#bf616a;">Add</span><span style="color:#eff1f5;">(</span><span style="color:#bf616a;">columnName</span><span style="color:#eff1f5;">);
+</span><span style="color:#eff1f5;">
+</span><span style="color:#eff1f5;">            </span><span style="color:#65737e;">// Add a column mapping to our copier.
+</span><span style="color:#eff1f5;">            </span><span style="color:#65737e;">// If you don&#39;t add these mappings, the columns will be matched by index.
+</span><span style="color:#eff1f5;">            </span><span style="color:#bf616a;">bulkCopy</span><span style="color:#eff1f5;">.</span><span style="color:#bf616a;">ColumnMappings</span><span style="color:#eff1f5;">.</span><span style="color:#bf616a;">Add</span><span style="color:#eff1f5;">(</span><span style="color:#bf616a;">columnName</span><span style="color:#eff1f5;">, </span><span style="color:#bf616a;">columnName</span><span style="color:#eff1f5;">);
+</span><span style="color:#eff1f5;">        }
+</span><span style="color:#eff1f5;">
+</span><span style="color:#eff1f5;">        </span><span style="color:#65737e;">// Add the rows to the local table
+</span><span style="color:#eff1f5;">        </span><span style="color:#b48ead;">for </span><span style="color:#eff1f5;">(</span><span style="color:#b48ead;">int </span><span style="color:#bf616a;">i </span><span>= </span><span style="color:#d08770;">0</span><span style="color:#eff1f5;">; </span><span style="color:#bf616a;">i </span><span>&lt; </span><span style="color:#bf616a;">numberOfRows</span><span style="color:#eff1f5;">; </span><span style="color:#bf616a;">i</span><span>++</span><span style="color:#eff1f5;">) {
+</span><span style="color:#eff1f5;">            </span><span style="color:#b48ead;">object</span><span style="color:#eff1f5;">[] </span><span style="color:#bf616a;">rowValues </span><span>= </span><span style="color:#bf616a;">columnList
+</span><span style="color:#eff1f5;">                </span><span style="color:#65737e;">// Here is where we use the data generator functions.
+</span><span style="color:#eff1f5;">                </span><span style="color:#65737e;">// If the generator is null, then we just pass on the null.
+</span><span style="color:#eff1f5;">                .</span><span style="color:#bf616a;">Select</span><span style="color:#eff1f5;">(</span><span style="color:#bf616a;">col </span><span style="color:#b48ead;">=&gt; </span><span style="color:#bf616a;">col</span><span style="color:#eff1f5;">.</span><span style="color:#bf616a;">Item2 </span><span>is </span><span style="color:#eff1f5;">null </span><span style="color:#b48ead;">? </span><span style="color:#d08770;">null</span><span style="color:#eff1f5;"> : </span><span style="color:#bf616a;">col</span><span style="color:#eff1f5;">.</span><span style="color:#bf616a;">Item2</span><span style="color:#eff1f5;">())
+</span><span style="color:#eff1f5;">                .</span><span style="color:#bf616a;">Cast</span><span style="color:#eff1f5;">&lt;</span><span style="color:#b48ead;">object</span><span style="color:#eff1f5;">&gt;()
+</span><span style="color:#eff1f5;">                .</span><span style="color:#bf616a;">ToArray</span><span style="color:#eff1f5;">();
+</span><span style="color:#eff1f5;">
+</span><span style="color:#eff1f5;">            </span><span style="color:#65737e;">// You could try to build a DataRow manually and insert it here,
+</span><span style="color:#eff1f5;">            </span><span style="color:#65737e;">// but Rows.Add() is perfectly happy accepting an object array instead.
+</span><span style="color:#eff1f5;">            </span><span style="color:#bf616a;">table</span><span style="color:#eff1f5;">.</span><span style="color:#bf616a;">Rows</span><span style="color:#eff1f5;">.</span><span style="color:#bf616a;">Add</span><span style="color:#eff1f5;">(</span><span style="color:#bf616a;">rowValues</span><span style="color:#eff1f5;">);
+</span><span style="color:#eff1f5;">        }
+</span><span style="color:#eff1f5;">
+</span><span style="color:#eff1f5;">        </span><span style="color:#bf616a;">connection</span><span style="color:#eff1f5;">.</span><span style="color:#bf616a;">Open</span><span style="color:#eff1f5;">();
+</span><span style="color:#eff1f5;">
+</span><span style="color:#eff1f5;">        </span><span style="color:#bf616a;">bulkCopy</span><span style="color:#eff1f5;">.</span><span style="color:#bf616a;">WriteToServer</span><span style="color:#eff1f5;">(</span><span style="color:#bf616a;">table</span><span style="color:#eff1f5;">);
+</span><span style="color:#eff1f5;">
+</span><span style="color:#eff1f5;">        </span><span style="color:#bf616a;">connection</span><span style="color:#eff1f5;">.</span><span style="color:#bf616a;">Close</span><span style="color:#eff1f5;">();
+</span><span style="color:#eff1f5;">    }
+</span><span style="color:#eff1f5;">}
+</span></code></pre>
+<p>Going back to our model, I marked some of the foreign ID properties as nullable because I wanted those relations to be optional. This means that when we generate integers for those IDs, we will want some of the integers to be null. To make this easier, I wrote a quick extension method for <code>System.Random</code></p>
+<pre data-lang="c#" style="background-color:#2b303b;color:#c0c5ce;" class="language-c# "><code class="language-c#" data-lang="c#"><span style="color:#65737e;">// Utilities.cs
+</span><span>
+</span><span style="color:#b48ead;">public static class </span><span style="color:#ebcb8b;">Utilities </span><span style="color:#eff1f5;">{
+</span><span style="color:#eff1f5;">    </span><span style="color:#b48ead;">public static bool </span><span style="color:#8fa1b3;">NextBool</span><span style="color:#eff1f5;">(</span><span style="color:#b48ead;">this </span><span style="color:#eff1f5;">Random </span><span style="color:#bf616a;">rnd</span><span style="color:#eff1f5;">, </span><span style="color:#b48ead;">int </span><span style="color:#bf616a;">truePercentChance </span><span>= </span><span style="color:#d08770;">50</span><span style="color:#eff1f5;">) </span><span style="color:#b48ead;">=&gt;
+</span><span style="color:#eff1f5;">        </span><span style="color:#bf616a;">rnd</span><span style="color:#eff1f5;">.</span><span style="color:#bf616a;">Next</span><span style="color:#eff1f5;">(</span><span style="color:#d08770;">100</span><span style="color:#eff1f5;">) </span><span>&lt;= </span><span style="color:#bf616a;">truePercentChance</span><span style="color:#eff1f5;">;
+</span><span style="color:#eff1f5;">}
+</span></code></pre>
+<p>We now have everything in place to finally generate some mock data.</p>
+<pre data-lang="c#" style="background-color:#2b303b;color:#c0c5ce;" class="language-c# "><code class="language-c#" data-lang="c#"><span style="color:#65737e;">// Program.cs
+</span><span>
+</span><span style="color:#b48ead;">using </span><span>System.Data.SqlClient;
+</span><span>
+</span><span style="color:#b48ead;">var </span><span style="color:#bf616a;">rnd </span><span>= new Random();
+</span><span>
+</span><span style="color:#b48ead;">using </span><span>(</span><span style="color:#b48ead;">var </span><span style="color:#bf616a;">connection </span><span>= new SqlConnection(</span><span style="color:#65737e;">/* Connection string here */</span><span>)) {
+</span><span>    </span><span style="color:#bf616a;">connection</span><span>.</span><span style="color:#bf616a;">PopulateTable</span><span>(
+</span><span>        &quot;</span><span style="color:#a3be8c;">Vehicles</span><span>&quot;,
+</span><span>        </span><span style="color:#d08770;">10_000</span><span>,
+</span><span>        (&quot;</span><span style="color:#a3be8c;">Make</span><span>&quot;, </span><span style="color:#bf616a;">Faker</span><span>.</span><span style="color:#bf616a;">Name</span><span>.</span><span style="color:#bf616a;">Middle</span><span>),
+</span><span>        (&quot;</span><span style="color:#a3be8c;">Model</span><span>&quot;, </span><span style="color:#bf616a;">Faker</span><span>.</span><span style="color:#bf616a;">Name</span><span>.</span><span style="color:#bf616a;">Middle</span><span>),
+</span><span>        (&quot;</span><span style="color:#a3be8c;">Year</span><span>&quot;, () </span><span style="color:#b48ead;">=&gt; </span><span style="color:#bf616a;">rnd</span><span>.</span><span style="color:#bf616a;">Next</span><span>(</span><span style="color:#d08770;">1776</span><span>, </span><span style="color:#d08770;">3000</span><span>).</span><span style="color:#bf616a;">ToString</span><span>()),
+</span><span>        (
+</span><span>            &quot;</span><span style="color:#a3be8c;">TowingVehicleId</span><span>&quot;, 
+</span><span>            () </span><span style="color:#b48ead;">=&gt; </span><span style="color:#bf616a;">rnd</span><span>.</span><span style="color:#bf616a;">NextBool</span><span>() ? </span><span style="color:#bf616a;">rnd</span><span>.</span><span style="color:#bf616a;">Next</span><span>(</span><span style="color:#d08770;">1</span><span>, </span><span style="color:#d08770;">10_000</span><span>).</span><span style="color:#bf616a;">ToString</span><span>() : </span><span style="color:#d08770;">null
+</span><span>        )
+</span><span>    );
+</span><span>
+</span><span>    </span><span style="color:#bf616a;">connection</span><span>.</span><span style="color:#bf616a;">PopulateTable</span><span>(
+</span><span>        &quot;</span><span style="color:#a3be8c;">Passengers</span><span>&quot;,
+</span><span>        </span><span style="color:#d08770;">20_000</span><span>,
+</span><span>        (&quot;</span><span style="color:#a3be8c;">FirstName</span><span>&quot;, </span><span style="color:#bf616a;">Faker</span><span>.</span><span style="color:#bf616a;">Name</span><span>.</span><span style="color:#bf616a;">First</span><span>),
+</span><span>        (&quot;</span><span style="color:#a3be8c;">LastName</span><span>&quot;, </span><span style="color:#bf616a;">Faker</span><span>.</span><span style="color:#bf616a;">Name</span><span>.</span><span style="color:#bf616a;">Last</span><span>),
+</span><span>        (
+</span><span>            &quot;</span><span style="color:#a3be8c;">VehicleId</span><span>&quot;, 
+</span><span>            () </span><span style="color:#b48ead;">=&gt; </span><span style="color:#bf616a;">rnd</span><span>.</span><span style="color:#bf616a;">NextBool</span><span>(</span><span style="color:#d08770;">90</span><span>) ? </span><span style="color:#bf616a;">rnd</span><span>.</span><span style="color:#bf616a;">Next</span><span>(</span><span style="color:#d08770;">1</span><span>, </span><span style="color:#d08770;">10_000</span><span>).</span><span style="color:#bf616a;">ToString</span><span>() : </span><span style="color:#d08770;">null
+</span><span>        )
+</span><span>    );
+</span><span>
+</span><span>    </span><span style="color:#bf616a;">connection</span><span>.</span><span style="color:#bf616a;">PopulateTable</span><span>(
+</span><span>        &quot;</span><span style="color:#a3be8c;">Items</span><span>&quot;,
+</span><span>        </span><span style="color:#d08770;">50_000</span><span>,
+</span><span>        (&quot;</span><span style="color:#a3be8c;">Title</span><span>&quot;, </span><span style="color:#bf616a;">Faker</span><span>.</span><span style="color:#bf616a;">Company</span><span>.</span><span style="color:#bf616a;">Name</span><span>),
+</span><span>        (&quot;</span><span style="color:#a3be8c;">Description</span><span>&quot;, </span><span style="color:#bf616a;">Faker</span><span>.</span><span style="color:#bf616a;">Company</span><span>.</span><span style="color:#bf616a;">CatchPhrase</span><span>),
+</span><span>        (
+</span><span>            &quot;</span><span style="color:#a3be8c;">PassengerId</span><span>&quot;,
+</span><span>            () </span><span style="color:#b48ead;">=&gt; </span><span style="color:#bf616a;">rnd</span><span>.</span><span style="color:#bf616a;">NextBool</span><span>() ? </span><span style="color:#bf616a;">rnd</span><span>.</span><span style="color:#bf616a;">Next</span><span>(</span><span style="color:#d08770;">1</span><span>, </span><span style="color:#d08770;">20_000</span><span>).</span><span style="color:#bf616a;">ToString</span><span>() : </span><span style="color:#d08770;">null
+</span><span>        ),
+</span><span>        (
+</span><span>            &quot;</span><span style="color:#a3be8c;">VehicleId</span><span>&quot;,
+</span><span>            () </span><span style="color:#b48ead;">=&gt; </span><span style="color:#bf616a;">rnd</span><span>.</span><span style="color:#bf616a;">NextBool</span><span>(</span><span style="color:#d08770;">10</span><span>) ? </span><span style="color:#bf616a;">rnd</span><span>.</span><span style="color:#bf616a;">Next</span><span>(</span><span style="color:#d08770;">1</span><span>, </span><span style="color:#d08770;">10_000</span><span>).</span><span style="color:#bf616a;">ToString</span><span>() : </span><span style="color:#d08770;">null
+</span><span>        )
+</span><span>    );
+</span><span>}
+</span></code></pre>
+<p>Using the <code>params</code> keyword on <code>PopulateTable()</code> allows us to pass in any number of table definitions when we call it. The usage of <code>Func&lt;string?&gt;</code> for the generators also allows for maximum flexibility. You can see how we are able to pass in the Faker methods directly and how we can define our own lambdas for generating random numbers.</p>
+<p>We are generating and inserting 80,000 rows in this code snippet, so it will take a couple of seconds to run at a minimum. I haven't tried to benchmark or optimize any of this code, but I am guessing our generator functions will be the biggest slow-down. If you are wanting to insert millions of rows or more, I would recommend looking into optimizing the data generation, or just inserting static data instead.</p>
+<p>We are well into this tutorial about writing SQL queries, but we still haven't written any ourselves. Let's fix that and start querying our tables.</p>
+<pre data-lang="c#" style="background-color:#2b303b;color:#c0c5ce;" class="language-c# "><code class="language-c#" data-lang="c#"><span style="color:#65737e;">// Program.cs
+</span><span>
+</span><span style="color:#b48ead;">using </span><span>System.Data.SqlClient;
+</span><span style="color:#b48ead;">using </span><span>Dapper;
+</span><span>
+</span><span style="color:#b48ead;">using </span><span>(</span><span style="color:#b48ead;">var </span><span style="color:#bf616a;">connection </span><span>= new SqlConnection(</span><span style="color:#65737e;">/* Connection string here */</span><span>)) {
+</span><span>    List&lt;Vehicle&gt; </span><span style="color:#bf616a;">vehicles </span><span>= </span><span style="color:#bf616a;">connection
+</span><span>        .</span><span style="color:#bf616a;">Query</span><span>&lt;Vehicle&gt;(&quot;</span><span style="color:#a3be8c;">SELECT * FROM Vehicles</span><span>&quot;)
+</span><span>        .</span><span style="color:#bf616a;">AsList</span><span>();
+</span><span>
+</span><span>    </span><span style="color:#bf616a;">Console</span><span>.</span><span style="color:#bf616a;">WriteLine</span><span>(</span><span style="color:#bf616a;">vehicles</span><span>.</span><span style="color:#bf616a;">Count</span><span>);
+</span><span>    </span><span style="color:#65737e;">// Result should be: 10000
+</span><span>}
+</span></code></pre>
+<p>If you aren't familiar with using Dapper, it just adds <code>Query()</code> and various other extension methods designed to simplify database connection code. We just tell Dapper what we are expecting to query and it will do all the hard work of retrieving and mapping the rows.</p>
+<p>Getting a list of vehicles is nice, but what if we want more information? Next, let's try to get a list of vehicles, along with a list of passengers for each vehicle. To do this, our query will need to return multiple result sets.</p>
+<pre data-lang="c#" style="background-color:#2b303b;color:#c0c5ce;" class="language-c# "><code class="language-c#" data-lang="c#"><span style="color:#b48ead;">string </span><span style="color:#bf616a;">sql </span><span>= @&quot;
+</span><span style="color:#a3be8c;">    SELECT * FROM Vehicles
+</span><span style="color:#a3be8c;">
+</span><span style="color:#a3be8c;">    SELECT * FROM Passengers 
+</span><span style="color:#a3be8c;">    WHERE Passengers.VehicleId IN (SELECT Id FROM Vehicles)
+</span><span>&quot;;
+</span><span>
+</span><span style="color:#65737e;">// Load multiple result sets 
+</span><span style="color:#b48ead;">var </span><span style="color:#bf616a;">data </span><span>= </span><span style="color:#bf616a;">connection</span><span>.</span><span style="color:#bf616a;">QueryMultiple</span><span>(</span><span style="color:#bf616a;">sql</span><span>);
+</span><span>
+</span><span style="color:#65737e;">// Read the first result set of vehicles
+</span><span>List&lt;Vehicle&gt; </span><span style="color:#bf616a;">vehicles </span><span>= </span><span style="color:#bf616a;">data</span><span>.</span><span style="color:#bf616a;">Read</span><span>&lt;Vehicle&gt;().</span><span style="color:#bf616a;">AsList</span><span>();
+</span><span>
+</span><span style="color:#65737e;">// Read the second result set of passengers
+</span><span>List&lt;Passenger&gt; </span><span style="color:#bf616a;">passengers </span><span>= </span><span style="color:#bf616a;">data</span><span>.</span><span style="color:#bf616a;">Read</span><span>&lt;Passenger&gt;().</span><span style="color:#bf616a;">AsList</span><span>();
+</span><span>
+</span><span style="color:#65737e;">// Find the list of passengers that are in each vehicle
+</span><span style="color:#b48ead;">foreach </span><span>(</span><span style="color:#b48ead;">var </span><span style="color:#bf616a;">vehicle </span><span style="color:#b48ead;">in </span><span style="color:#bf616a;">vehicles</span><span>) {
+</span><span>    </span><span style="color:#bf616a;">vehicle</span><span>.</span><span style="color:#bf616a;">Passengers </span><span>= </span><span style="color:#bf616a;">passengers
+</span><span>        .</span><span style="color:#bf616a;">Where</span><span>(</span><span style="color:#bf616a;">p </span><span style="color:#b48ead;">=&gt; </span><span style="color:#bf616a;">p</span><span>.</span><span style="color:#bf616a;">VehicleId </span><span>== </span><span style="color:#bf616a;">vehicle</span><span>.</span><span style="color:#bf616a;">Id</span><span>)
+</span><span>        .</span><span style="color:#bf616a;">ToList</span><span>();
+</span><span>}
+</span></code></pre>
+<p>To read multiple result sets, we can use <code>QueryMultiple()</code> to load all results into one object. From there, you just need to read the result sets out of the data object in the right order. After we read our list of vehicles and passengers, we can iterate through the vehicles and assign each vehicle its list of passengers. Understanding how to use results sets is fantastic because it allows you to combine multiple related queries into one. Reducing the number of database calls is good for reducing DB load, but it can also speed things up on the application side.</p>
+<p>Now, let's say that we want to find all passengers with a specific first name. For that, we can use some SQL like this:</p>
+<pre data-lang="sql" style="background-color:#2b303b;color:#c0c5ce;" class="language-sql "><code class="language-sql" data-lang="sql"><span style="color:#b48ead;">SELECT </span><span style="color:#bf616a;">* </span><span style="color:#b48ead;">FROM</span><span> Passengers 
+</span><span style="color:#b48ead;">WHERE</span><span> FirstName = &#39;</span><span style="color:#a3be8c;">Glenda</span><span>&#39;
+</span></code></pre>
+<p>Now what if we want more information about these passengers named Glenda? What if we want a list of vehicles they are in?</p>
+<pre data-lang="sql" style="background-color:#2b303b;color:#c0c5ce;" class="language-sql "><code class="language-sql" data-lang="sql"><span style="color:#b48ead;">SELECT </span><span style="color:#bf616a;">* </span><span style="color:#b48ead;">FROM</span><span> Passengers 
+</span><span style="color:#b48ead;">WHERE</span><span> FirstName = &#39;</span><span style="color:#a3be8c;">Glenda</span><span>&#39;
+</span><span>
+</span><span style="color:#b48ead;">SELECT </span><span style="color:#bf616a;">* </span><span style="color:#b48ead;">FROM</span><span> Vehicles
+</span><span style="color:#b48ead;">WHERE</span><span> Id in (</span><span style="color:#b48ead;">SELECT</span><span> VehicleId </span><span style="color:#b48ead;">FROM</span><span> Passengers 
+</span><span>	</span><span style="color:#b48ead;">WHERE</span><span> FirstName = &#39;</span><span style="color:#a3be8c;">Glenda</span><span>&#39;)
+</span></code></pre>
+<p>This works and seems fairly performant, but it doesn't look the greatest. Duplicating code is generally a no-no and I can't help but feel that SQL queries should be no exception to that rule. This query will start looking even worse when we need to get a list of items that all our Glenda's are holding.</p>
+<pre data-lang="sql" style="background-color:#2b303b;color:#c0c5ce;" class="language-sql "><code class="language-sql" data-lang="sql"><span style="color:#b48ead;">SELECT </span><span style="color:#bf616a;">* </span><span style="color:#b48ead;">FROM</span><span> Passengers 
+</span><span style="color:#b48ead;">WHERE</span><span> FirstName = &#39;</span><span style="color:#a3be8c;">Glenda</span><span>&#39;
+</span><span>
+</span><span style="color:#b48ead;">SELECT </span><span style="color:#bf616a;">* </span><span style="color:#b48ead;">FROM</span><span> Vehicles
+</span><span style="color:#b48ead;">WHERE</span><span> Id in (</span><span style="color:#b48ead;">SELECT</span><span> VehicleId </span><span style="color:#b48ead;">FROM</span><span> Passengers 
+</span><span>	</span><span style="color:#b48ead;">WHERE</span><span> FirstName = &#39;</span><span style="color:#a3be8c;">Glenda</span><span>&#39;)
+</span><span>
+</span><span style="color:#b48ead;">SELECT </span><span style="color:#bf616a;">* </span><span style="color:#b48ead;">FROM</span><span> Items
+</span><span style="color:#b48ead;">WHERE</span><span> PassengerId IN (</span><span style="color:#b48ead;">SELECT</span><span> Id </span><span style="color:#b48ead;">FROM</span><span> Passengers 
+</span><span>	</span><span style="color:#b48ead;">WHERE</span><span> FirstName = &#39;</span><span style="color:#a3be8c;">Glenda</span><span>&#39;)
+</span></code></pre>
+<p>Again, this SQL does the job and is not difficult to write, but it can be difficult to read it due to all the nested queries. I'll make it even worse by also querying any items that are in the vehicles that have a passenger named Glenda.</p>
+<pre data-lang="sql" style="background-color:#2b303b;color:#c0c5ce;" class="language-sql "><code class="language-sql" data-lang="sql"><span style="color:#b48ead;">SELECT </span><span style="color:#bf616a;">* </span><span style="color:#b48ead;">FROM</span><span> Passengers 
+</span><span style="color:#b48ead;">WHERE</span><span> FirstName = &#39;</span><span style="color:#a3be8c;">Glenda</span><span>&#39;
+</span><span>
+</span><span style="color:#b48ead;">SELECT </span><span style="color:#bf616a;">* </span><span style="color:#b48ead;">FROM</span><span> Vehicles
+</span><span style="color:#b48ead;">WHERE</span><span> Id in (</span><span style="color:#b48ead;">SELECT</span><span> VehicleId </span><span style="color:#b48ead;">FROM</span><span> Passengers 
+</span><span>	</span><span style="color:#b48ead;">WHERE</span><span> FirstName = &#39;</span><span style="color:#a3be8c;">Glenda</span><span>&#39;)
+</span><span>
+</span><span style="color:#b48ead;">SELECT </span><span style="color:#bf616a;">* </span><span style="color:#b48ead;">FROM</span><span> Items
+</span><span style="color:#b48ead;">WHERE</span><span> PassengerId IN (</span><span style="color:#b48ead;">SELECT</span><span> Id </span><span style="color:#b48ead;">FROM</span><span> Passengers 
+</span><span>	</span><span style="color:#b48ead;">WHERE</span><span> FirstName = &#39;</span><span style="color:#a3be8c;">Glenda</span><span>&#39;)
+</span><span>	OR
+</span><span>	VehicleId IN (</span><span style="color:#b48ead;">SELECT</span><span> Id </span><span style="color:#b48ead;">FROM</span><span> Vehicles 
+</span><span>		</span><span style="color:#b48ead;">WHERE</span><span> Id IN (</span><span style="color:#b48ead;">SELECT</span><span> VehicleId </span><span style="color:#b48ead;">FROM</span><span> Passengers
+</span><span>			</span><span style="color:#b48ead;">WHERE</span><span> FirstName = &#39;</span><span style="color:#a3be8c;">Glenda</span><span>&#39;))
+</span></code></pre>
+<p>It is possible to read and comprehend this query, but it's starting to lose maintainability in my opinion. Imagine maintaining a legacy app that was filled with queries like this. I certainly would not enjoy maintaining this query, and I don't think many other developers would either. This kind of query makes me sad because SQL is a very cool (and very legal) language. It shouldn't have to be like this.</p>
+<p>Let's make me happy again by fixing this query. We'll make it more readable by using my new favorite SQL feature: temp tables.</p>
+<p>Temp tables are exactly what they sound like. They are just temporary tables. They allow us to stash the results of a query into a temporary variable for use later on. As far as I know, temp tables are saved per connection, which means you don't have to worry about temp table name collisions. It is possible to create a temp table in one query and access it from another query, but we will not be doing that here. Instead, we will drop all our temp tables at the end of our query. We are not trying to persist temp data long-term, we only want to avoid repetition in our sub-queries.</p>
+<pre data-lang="sql" style="background-color:#2b303b;color:#c0c5ce;" class="language-sql "><code class="language-sql" data-lang="sql"><span style="color:#b48ead;">SELECT </span><span style="color:#bf616a;">*</span><span> INTO </span><span style="color:#65737e;">#tempPassengers
+</span><span style="color:#b48ead;">FROM</span><span> Passengers 
+</span><span style="color:#b48ead;">WHERE</span><span> FirstName = &#39;</span><span style="color:#a3be8c;">Glenda</span><span>&#39;
+</span><span>
+</span><span style="color:#b48ead;">SELECT </span><span style="color:#bf616a;">*</span><span> INTO </span><span style="color:#65737e;">#tempVehicles
+</span><span style="color:#b48ead;">FROM</span><span> Vehicles
+</span><span style="color:#b48ead;">WHERE</span><span> Id in (</span><span style="color:#b48ead;">SELECT</span><span> VehicleId </span><span style="color:#b48ead;">FROM </span><span style="color:#65737e;">#tempPassengers)
+</span><span>
+</span><span style="color:#b48ead;">SELECT </span><span style="color:#bf616a;">* </span><span style="color:#b48ead;">FROM </span><span style="color:#65737e;">#tempPassengers
+</span><span>
+</span><span style="color:#b48ead;">SELECT </span><span style="color:#bf616a;">* </span><span style="color:#b48ead;">FROM </span><span style="color:#65737e;">#tempVehicles
+</span><span>
+</span><span style="color:#b48ead;">SELECT </span><span style="color:#bf616a;">* </span><span style="color:#b48ead;">FROM</span><span> Items
+</span><span style="color:#b48ead;">WHERE 
+</span><span>    PassengerId IN (</span><span style="color:#b48ead;">SELECT</span><span> Id </span><span style="color:#b48ead;">FROM </span><span style="color:#65737e;">#tempPassengers)
+</span><span>    OR
+</span><span>    VehicleId IN (</span><span style="color:#b48ead;">SELECT</span><span> Id </span><span style="color:#b48ead;">FROM </span><span style="color:#65737e;">#tempVehicles)
+</span><span>
+</span><span style="color:#b48ead;">DROP TABLE </span><span style="color:#65737e;">#tempPassengers
+</span><span style="color:#b48ead;">DROP TABLE </span><span style="color:#65737e;">#tempVehicles
+</span></code></pre>
+<p>This new query is not perfect, but I think it is easier to read and maintain than the previous version. Notice that we still need to query the temp tables to return their results. Selecting into a temp table will not return it by default. You have to use a separate <code>SELECT</code> to return all columns for that temp table.</p>
+<p>I hope you enjoyed reading this post. To recap, we learned how to mock and insert bulk amounts of data, how to use Dapper, and how to use SQL result sets and temp tables. Please, <a href="https://github.com/EliasPrescott/eliasprescott.github.io/issues/new">make an issue</a> if you think I missed anything. I learned all these SQL features very recently, so I am still learning how to use them myself. I think a good understanding of result sets and temp tables is essential for any developer that works with SQL. I have only been using them for a few weeks, but these features have already made my job much easier.</p>
+
+</div>
+
+            </div>
+        </section>
+    </body>
+</html>
