@@ -22,6 +22,10 @@ article > h4:first-child {
         display: inline-block;
     }
 
+    .online-only {
+        display: none;
+    }
+
     nav > a {
         min-height: 40px;
     }
