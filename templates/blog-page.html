@@ -13,22 +13,22 @@
         Written by 
         {% for author in page.taxonomies.authors %}
             {% if loop.index == author_count %}
-                and <a href="/authors/{{ author | slugify }}">{{ author }}</a>
+                and <a href="/authors/{{ author | slugify }}" hx-boost="true">{{ author }}</a>
             {% else %}
-                <a href="/authors/{{ author | slugify }}">{{ author }}</a>,
+                <a href="/authors/{{ author | slugify }}" hx-boost="true">{{ author }}</a>,
             {% endif %}
         {% endfor %}
     </strong>
     {% elif author_count == 2 %}
     <strong>
         Written by 
-        <a href="/authors/{{ page.taxonomies.authors.0 | slugify }}">{{ page.taxonomies.authors.0 }}</a> 
+        <a href="/authors/{{ page.taxonomies.authors.0 | slugify }}" hx-boost="true">{{ page.taxonomies.authors.0 }}</a> 
         and 
-        <a href="/authors/{{ page.taxonomies.authors.1 | slugify }}">{{ page.taxonomies.authors.1 }}</a>
+        <a href="/authors/{{ page.taxonomies.authors.1 | slugify }}" hx-boost="true">{{ page.taxonomies.authors.1 }}</a>
     </strong>
     {% elif author_count == 1 %}
     <strong>
-        Written by <a href="/authors/{{ page.taxonomies.authors.0 | slugify }}">{{ page.taxonomies.authors.0 }}</a>
+        Written by <a href="/authors/{{ page.taxonomies.authors.0 | slugify }}" hx-boost="true">{{ page.taxonomies.authors.0 }}</a>
     </strong>
     {% endif %}
 </p>
@@ -41,9 +41,9 @@
         Tags:
         {% for tag in page.taxonomies.tags %}
             {% if loop.index == tag_count %}
-                <a href="/tags/{{ tag | slugify }}">{{ tag }}</a>
+                <a href="/tags/{{ tag | slugify }}" hx-boost="true">{{ tag }}</a>
             {% else %}
-                <a href="/tags/{{ tag | slugify }}">{{ tag }}</a>,
+                <a href="/tags/{{ tag | slugify }}" hx-boost="true">{{ tag }}</a>,
             {% endif %}
         {% endfor %}
     </strong>
