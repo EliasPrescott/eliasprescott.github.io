@@ -122,3 +122,14 @@ ul.blog-post-list {
         overflow-x: auto;
     }
 }
+
+@media (max-width: 800px) {
+    header h1 {
+        font-size: 20px;
+    }
+
+    nav a {
+        padding: 0 12px;
+        font-size: 14px;
+    }
+}
