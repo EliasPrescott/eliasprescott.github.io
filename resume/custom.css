@@ -1,0 +1,32 @@
+article > h4:first-child {
+    margin: 0;
+}
+
+.article-container > * {
+    margin-top: 1em;
+}
+
+.print-only {
+    display: none;
+}
+
+@page { 
+    margin-left: 0.75cm;
+    margin-top: 0.25cm;
+    margin-bottom: 0.25cm;
+    margin-right: 0.75cm;
+}
+
+@media print {
+    .print-only {
+        display: inline-block;
+    }
+
+    .online-only {
+        display: none;
+    }
+
+    nav > a {
+        min-height: 40px;
+    }
+}

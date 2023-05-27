@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Unwrapping Code Patterns 🔍</title>
+        <link rel="stylesheet" href="https://eliasprescott.github.io/style.css">
+    </head>
+
+    <body>
+        <div>
+            <header>
+                <a href="/" hx-boost="true">
+                    <h1>Unwrapping Code Patterns 🔍</h1>
+                </a>
+            </header>
+
+            <nav>
+                <a href="/" hx-boost="true">Home</a>
+                <a href="/blog" hx-boost="true">Blog</a>
+                <a href="/resume">Resume</a>
+                <a href="https://github.com/eliasprescott/">GitHub</a>
+                <a href="https://www.linkedin.com/in/elias-prescott/">LinkedIn</a>
+            </nav>
+        </div>
+
+        <section class="section">
+            <div class="container">
+            
+<h1 class="title">
+    Iterating over Elements with Playwright
+</h1>
+
+
+
+<p>
+    
+    <strong>
+        Written by <a href="/authors/elias-prescott" hx-boost="true">Elias Prescott</a>
+    </strong>
+    
+</p>
+
+
+
+
+<p>
+    <strong>
+        Tags:
+        
+            
+                <a href="/tags/playwright" hx-boost="true">Playwright</a>,
+            
+        
+            
+                <a href="/tags/typescript" hx-boost="true">TypeScript</a>,
+            
+        
+            
+                <a href="/tags/functional-testing" hx-boost="true">Functional Testing</a>
+            
+        
+    </strong>
+</p>
+
+
+<p class="subtitle">
+    <strong>Date Created: 2022-09-30</strong>
+</p>
+
+<p class="subtitle">
+    <strong>6 minute read</strong>
+</p>
+
+<div class="content blog-page-content">
+    <p><a href="https://playwright.dev/">Playwright</a> is a Microsoft library for automated web testing.
+Playwright is designed to handle reactive web pages, which makes it ideal for testing modern web applications. I have worked with Playwright quite a bit recently, so I have found myself writing a lot of helper functions for it. The one helper function I always find myself needing is a way to iterate over elements.</p>
+<h4 id="selecting-elements">Selecting Elements</h4>
+<p>If you are not familiar with writing Playwright scripts, it typically involves code like this:</p>
+<pre data-lang="javascript" style="background-color:#2b303b;color:#c0c5ce;" class="language-javascript "><code class="language-javascript" data-lang="javascript"><span style="color:#b48ead;">await </span><span style="color:#bf616a;">page</span><span>.</span><span style="color:#96b5b4;">click</span><span>(&#39;</span><span style="color:#a3be8c;">#popupModal .closeBtn</span><span>&#39;);
+</span><span>
+</span><span style="color:#b48ead;">await </span><span style="color:#bf616a;">page</span><span>.</span><span style="color:#8fa1b3;">fill</span><span>(&#39;</span><span style="color:#a3be8c;">.someTextBox</span><span>&#39;, &#39;</span><span style="color:#a3be8c;">Example value</span><span>&#39;);
+</span></code></pre>
+<p>From this brief sample, you can see the basics of Playwright's API design. You call functions on a page object, allowing you to perform actions. To perform these actions, Playwright needs to know what element it should perform each action on. For this, the functions often take in a selector string as their first argument.</p>
+<p>In the above example, both actions take in plain CSS selectors, which allow you to identify elements based on their tag name, ID, class, and other attributes. Playwright supports other selector formats, but CSS selectors are often the simplest and best way to locate elements.</p>
+<p>Locating elements is so important to Playwright, there is even a method for saving a selector as an object. This is the <a href="https://playwright.dev/docs/api/class-page#page-locator"><code>page.locator()</code></a> method, which returns a <a href="https://playwright.dev/docs/api/class-locator">Locator</a> object. After saving a Locator, you can perform many of the same actions on it as you could on the page object. Here is a basic example:</p>
+<pre data-lang="javascript" style="background-color:#2b303b;color:#c0c5ce;" class="language-javascript "><code class="language-javascript" data-lang="javascript"><span style="color:#b48ead;">let </span><span style="color:#bf616a;">importantBtn </span><span>= </span><span style="color:#bf616a;">page</span><span>.</span><span style="color:#8fa1b3;">locator</span><span>(&#39;</span><span style="color:#a3be8c;">#importantBtn</span><span>&#39;);
+</span><span>
+</span><span style="color:#b48ead;">await </span><span style="color:#bf616a;">importantBtn</span><span>.</span><span style="color:#96b5b4;">focus</span><span>();
+</span><span>
+</span><span style="color:#b48ead;">await </span><span style="color:#bf616a;">importantBtn</span><span>.</span><span style="color:#96b5b4;">click</span><span>();
+</span></code></pre>
+<p>The reason I bring all this up is because Locator objects are going to be very important to our topic.</p>
+<h4 id="why-do-we-want-to-select-multiple-elements">Why do we want to Select Multiple Elements?</h4>
+<p>Repetition of elements is extremely common on web pages. Most web frameworks make it very easy to repeat an element any number of times. This is great for writing web sites, but it can make the sites more difficult to test.</p>
+<p>Whenever an element is repeated, all its attributes will also be repeated. This means that all its identifying information will be shared between every instance of the element. So, if I call <code>page.click('button.actionBtn')</code>, and there are five elements that match that selector, which element should Playwright click? Playwright will try to click on the first match by default, but relying on this behavior can be dangerous. Whenever an element is repeated on a page, the number of repetitions is often variable. I may visit a page and see five action buttons, but someone else could visit the same page and see zero buttons. All manner of variables can affect how many elements will show on a web page, so it is vital to write Playwright tests that can handle that.</p>
+<h4 id="handling-repetition">Handling Repetition</h4>
+<p>Let's get back on track and dive into more code. When asked to perform a single action on a locator that resolves to multiple elements, Playwright will choose the first element by default. If you want to click on an element other than the first match, there is a useful method on the Locator object for that:</p>
+<pre data-lang="javascript" style="background-color:#2b303b;color:#c0c5ce;" class="language-javascript "><code class="language-javascript" data-lang="javascript"><span style="color:#b48ead;">let </span><span style="color:#bf616a;">btnLocator </span><span>= </span><span style="color:#bf616a;">page</span><span>.</span><span style="color:#8fa1b3;">locator</span><span>(&#39;</span><span style="color:#a3be8c;">button.actionBtn</span><span>&#39;);
+</span><span>
+</span><span style="color:#65737e;">// nth() uses a zero-based index
+</span><span style="color:#b48ead;">let </span><span style="color:#bf616a;">secondButton </span><span>= </span><span style="color:#bf616a;">btnLocator</span><span>.</span><span style="color:#8fa1b3;">nth</span><span>(</span><span style="color:#d08770;">1</span><span>);
+</span></code></pre>
+<p>The <code>locator.nth()</code> function is useful for selecting individual elements, but it is extremely useful for iterating over elements. Whenever we combine it with <code>locator.count()</code>, we can do things like this:</p>
+<pre data-lang="javascript" style="background-color:#2b303b;color:#c0c5ce;" class="language-javascript "><code class="language-javascript" data-lang="javascript"><span style="color:#65737e;">// Go to our example site
+</span><span style="color:#b48ead;">await </span><span style="color:#bf616a;">page</span><span>.</span><span style="color:#8fa1b3;">goto</span><span>(&#39;</span><span style="color:#a3be8c;">https://www.wikipedia.org/</span><span>&#39;);
+</span><span>
+</span><span style="color:#65737e;">// Create a locator that resolves to multiple elements
+</span><span style="color:#b48ead;">let </span><span style="color:#bf616a;">languageLinkLocator </span><span>= </span><span style="color:#bf616a;">page</span><span>.</span><span style="color:#8fa1b3;">locator</span><span>(&#39;</span><span style="color:#a3be8c;">.central-featured div a</span><span>&#39;);
+</span><span>
+</span><span style="color:#65737e;">// Get the count of all the elements
+</span><span style="color:#b48ead;">let </span><span style="color:#bf616a;">languageLinkCount </span><span>= </span><span style="color:#b48ead;">await </span><span style="color:#bf616a;">languageLinkLocator</span><span>.</span><span style="color:#8fa1b3;">count</span><span>();
+</span><span>
+</span><span style="color:#65737e;">// Iterate through the elements
+</span><span style="color:#b48ead;">for </span><span>(</span><span style="color:#b48ead;">let </span><span style="color:#bf616a;">i </span><span>= </span><span style="color:#d08770;">0</span><span>; </span><span style="color:#bf616a;">i </span><span>&lt; </span><span style="color:#bf616a;">languageLinkCount</span><span>; </span><span style="color:#bf616a;">i</span><span>++) {
+</span><span>    
+</span><span>    </span><span style="color:#65737e;">// Get the current element using our index
+</span><span>    </span><span style="color:#b48ead;">let </span><span style="color:#bf616a;">currentLanguageLink </span><span>= </span><span style="color:#bf616a;">languageLinkLocator</span><span>.</span><span style="color:#8fa1b3;">nth</span><span>(</span><span style="color:#bf616a;">i</span><span>);
+</span><span>
+</span><span>    </span><span style="color:#65737e;">// Get the current href from the element
+</span><span>    </span><span style="color:#b48ead;">let </span><span style="color:#bf616a;">languageHref </span><span>= </span><span style="color:#b48ead;">await </span><span style="color:#bf616a;">currentLanguageLink</span><span>.</span><span style="color:#96b5b4;">getAttribute</span><span>(&#39;</span><span style="color:#a3be8c;">href</span><span>&#39;);
+</span><span>
+</span><span>    </span><span style="color:#65737e;">// Select the strong element within our current element, and get its inner text
+</span><span>    </span><span style="color:#b48ead;">let </span><span style="color:#bf616a;">languageName </span><span>= </span><span style="color:#b48ead;">await </span><span style="color:#bf616a;">currentLanguageLink</span><span>.</span><span style="color:#8fa1b3;">locator</span><span>(&#39;</span><span style="color:#a3be8c;">strong</span><span>&#39;).</span><span style="color:#8fa1b3;">innerText</span><span>();
+</span><span>
+</span><span>    </span><span style="color:#65737e;">// Log the href and the language name we scraped
+</span><span>    </span><span style="color:#ebcb8b;">console</span><span>.</span><span style="color:#96b5b4;">log</span><span>(</span><span style="color:#bf616a;">languageHref</span><span>, </span><span style="color:#bf616a;">languageName</span><span>);
+</span><span>}
+</span></code></pre>
+<p>This is the result I got from running this script:</p>
+<pre style="background-color:#2b303b;color:#c0c5ce;"><code><span>//en.wikipedia.org/ English
+</span><span>//ja.wikipedia.org/ 日本語
+</span><span>//es.wikipedia.org/ Español
+</span><span>//ru.wikipedia.org/ Русский
+</span><span>//fr.wikipedia.org/ Français
+</span><span>//de.wikipedia.org/ Deutsch
+</span><span>//it.wikipedia.org/ Italiano
+</span><span>//zh.wikipedia.org/ 中文
+</span><span>//pt.wikipedia.org/ Português
+</span><span>//ar.wikipedia.org/ العربية
+</span></code></pre>
+<p>At the start of this, I said that I often wrote helper functions that do this, so let's do that now:</p>
+<pre data-lang="javascript" style="background-color:#2b303b;color:#c0c5ce;" class="language-javascript "><code class="language-javascript" data-lang="javascript"><span style="color:#b48ead;">async function </span><span style="color:#8fa1b3;">forEachMatch</span><span>&lt;T&gt;(</span><span style="color:#bf616a;">locator</span><span>: Locator, </span><span style="color:#8fa1b3;">action</span><span>: (</span><span style="color:#bf616a;">currentLocator</span><span>: Locator) </span><span style="color:#b48ead;">=&gt; </span><span>Promise&lt;T&gt;): Promise&lt;T[]&gt; {
+</span><span>    </span><span style="color:#65737e;">// Get the count of all the elements
+</span><span>    </span><span style="color:#b48ead;">let </span><span style="color:#bf616a;">locatorCount </span><span>= </span><span style="color:#b48ead;">await </span><span style="color:#bf616a;">locator</span><span>.</span><span style="color:#8fa1b3;">count</span><span>();
+</span><span>
+</span><span>    </span><span style="color:#65737e;">// Prepare our list of return results
+</span><span>    </span><span style="color:#b48ead;">let </span><span style="color:#bf616a;">results</span><span>: T[] = [];
+</span><span>
+</span><span>    </span><span style="color:#65737e;">// Iterate through the elements
+</span><span>    </span><span style="color:#b48ead;">for </span><span>(</span><span style="color:#b48ead;">let </span><span style="color:#bf616a;">i </span><span>= </span><span style="color:#d08770;">0</span><span>; </span><span style="color:#bf616a;">i </span><span>&lt; </span><span style="color:#bf616a;">locatorCount</span><span>; </span><span style="color:#bf616a;">i</span><span>++) {
+</span><span>        
+</span><span>        </span><span style="color:#65737e;">// Get the current element using our index
+</span><span>        </span><span style="color:#b48ead;">let </span><span style="color:#bf616a;">currentLocator </span><span>= </span><span style="color:#bf616a;">locator</span><span>.</span><span style="color:#8fa1b3;">nth</span><span>(</span><span style="color:#bf616a;">i</span><span>);
+</span><span>
+</span><span>        </span><span style="color:#65737e;">// Run the user-given action for the current element
+</span><span>        </span><span style="color:#b48ead;">let </span><span style="color:#bf616a;">result </span><span>= </span><span style="color:#b48ead;">await </span><span style="color:#8fa1b3;">action</span><span>(</span><span style="color:#bf616a;">currentLocator</span><span>);
+</span><span>
+</span><span>        </span><span style="color:#65737e;">// Store the result
+</span><span>        </span><span style="color:#bf616a;">results</span><span>.</span><span style="color:#96b5b4;">push</span><span>(</span><span style="color:#bf616a;">result</span><span>);
+</span><span>    }
+</span><span>
+</span><span>    </span><span style="color:#b48ead;">return </span><span style="color:#bf616a;">results</span><span>;
+</span><span>}
+</span></code></pre>
+<p>The function signature is a little long, but this function is ideal for quickly scraping data from lists of elements. If you do not want to return anything from the action you call on each element, you could remove the function's return type and change the <code>action</code> parameter to return void. </p>
+<p>Here is an example usage of our function:</p>
+<pre data-lang="javascript" style="background-color:#2b303b;color:#c0c5ce;" class="language-javascript "><code class="language-javascript" data-lang="javascript"><span style="color:#8fa1b3;">test</span><span>(&#39;</span><span style="color:#a3be8c;">Scraping Multiple Elements</span><span>&#39;, </span><span style="color:#b48ead;">async </span><span>({ </span><span style="color:#bf616a;">page </span><span>}) </span><span style="color:#b48ead;">=&gt; </span><span>{
+</span><span>
+</span><span>    </span><span style="color:#65737e;">// Go to our example site
+</span><span>    </span><span style="color:#b48ead;">await </span><span style="color:#bf616a;">page</span><span>.</span><span style="color:#8fa1b3;">goto</span><span>(&#39;</span><span style="color:#a3be8c;">https://www.wikipedia.org/</span><span>&#39;);
+</span><span>
+</span><span>    </span><span style="color:#65737e;">// Create a locator that resolves to multiple elements
+</span><span>    </span><span style="color:#b48ead;">let </span><span style="color:#bf616a;">languageLinkLocator </span><span>= </span><span style="color:#bf616a;">page</span><span>.</span><span style="color:#8fa1b3;">locator</span><span>(&#39;</span><span style="color:#a3be8c;">.central-featured div a</span><span>&#39;);
+</span><span>
+</span><span>    </span><span style="color:#65737e;">// Pass in our Locator object along with a function for converting each iterated object into a value
+</span><span>    </span><span style="color:#b48ead;">let </span><span style="color:#bf616a;">languageInformation </span><span>= </span><span style="color:#b48ead;">await </span><span style="color:#8fa1b3;">forEachMatch</span><span>(</span><span style="color:#bf616a;">languageLinkLocator</span><span>, </span><span style="color:#b48ead;">async </span><span style="color:#bf616a;">languageLink </span><span style="color:#b48ead;">=&gt; </span><span>{
+</span><span>        
+</span><span>        </span><span style="color:#65737e;">// Inside this action function, we can focus solely on using the languageLink Locator object to scrape data or perform actions
+</span><span>        
+</span><span>        </span><span style="color:#b48ead;">let </span><span style="color:#bf616a;">href </span><span>= </span><span style="color:#b48ead;">await </span><span style="color:#bf616a;">languageLink</span><span>.</span><span style="color:#96b5b4;">getAttribute</span><span>(&#39;</span><span style="color:#a3be8c;">href</span><span>&#39;);
+</span><span>
+</span><span>        </span><span style="color:#b48ead;">let </span><span style="color:#bf616a;">name </span><span>= </span><span style="color:#b48ead;">await </span><span style="color:#bf616a;">languageLink</span><span>.</span><span style="color:#8fa1b3;">locator</span><span>(&#39;</span><span style="color:#a3be8c;">strong</span><span>&#39;).</span><span style="color:#8fa1b3;">innerText</span><span>();
+</span><span>
+</span><span>        </span><span style="color:#b48ead;">return </span><span>[</span><span style="color:#bf616a;">href</span><span>, </span><span style="color:#bf616a;">name</span><span>];
+</span><span>    });
+</span><span>
+</span><span>    </span><span style="color:#ebcb8b;">console</span><span>.</span><span style="color:#96b5b4;">log</span><span>(</span><span style="color:#bf616a;">languageInformation</span><span>);
+</span><span>});
+</span></code></pre>
+<p>Here is the output:</p>
+<pre data-lang="json" style="background-color:#2b303b;color:#c0c5ce;" class="language-json "><code class="language-json" data-lang="json"><span>[
+</span><span>  [ &quot;</span><span style="color:#a3be8c;">//en.wikipedia.org/</span><span>&quot;, &quot;</span><span style="color:#a3be8c;">English</span><span>&quot; ],
+</span><span>  [ &quot;</span><span style="color:#a3be8c;">//ja.wikipedia.org/</span><span>&quot;, &quot;</span><span style="color:#a3be8c;">日本語</span><span>&quot; ],
+</span><span>  [ &quot;</span><span style="color:#a3be8c;">//es.wikipedia.org/</span><span>&quot;, &quot;</span><span style="color:#a3be8c;">Español</span><span>&quot; ],
+</span><span>  [ &quot;</span><span style="color:#a3be8c;">//ru.wikipedia.org/</span><span>&quot;, &quot;</span><span style="color:#a3be8c;">Русский</span><span>&quot; ],
+</span><span>  [ &quot;</span><span style="color:#a3be8c;">//fr.wikipedia.org/</span><span>&quot;, &quot;</span><span style="color:#a3be8c;">Français</span><span>&quot; ],
+</span><span>  [ &quot;</span><span style="color:#a3be8c;">//de.wikipedia.org/</span><span>&quot;, &quot;</span><span style="color:#a3be8c;">Deutsch</span><span>&quot; ],
+</span><span>  [ &quot;</span><span style="color:#a3be8c;">//it.wikipedia.org/</span><span>&quot;, &quot;</span><span style="color:#a3be8c;">Italiano</span><span>&quot; ],
+</span><span>  [ &quot;</span><span style="color:#a3be8c;">//zh.wikipedia.org/</span><span>&quot;, &quot;</span><span style="color:#a3be8c;">中文</span><span>&quot; ],
+</span><span>  [ &quot;</span><span style="color:#a3be8c;">//pt.wikipedia.org/</span><span>&quot;, &quot;</span><span style="color:#a3be8c;">Português</span><span>&quot; ],
+</span><span>  [ &quot;</span><span style="color:#a3be8c;">//ar.wikipedia.org/</span><span>&quot;, &quot;</span><span style="color:#a3be8c;">العربية</span><span>&quot; ]
+</span><span>]
+</span></code></pre>
+<p>Hopefully you can see the power of using Playwright to iterate through lists of elements. This is an extremely useful technique when using Playwright for web scraping, but it is also useful for writing more reliable front-end test scripts. Playwright includes all the necessary tools to deal with repeated elements, it just requires a little bit of knowledge and code to put it all together.</p>
+
+</div>
+
+            </div>
+        </section>
+    </body>
+
+    <script src="/htmx.min.js"></script>
+</html>
