@@ -27,7 +27,7 @@
   <!-- If you are using pagination, section.pages will be empty. You need to use the paginator object -->  
     {% for page in blog_section.pages | slice(end=5) %}
     <li>
-        <a href="{{ page.permalink | safe }}">{{ page.title }}</a>
+        <a href="{{ page.permalink | safe }}" hx-boost="true">{{ page.title }}</a>
     </li>
     {% endfor %}
 </ul>

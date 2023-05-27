@@ -8,7 +8,7 @@
   <!-- If you are using pagination, section.pages will be empty. You need to use the paginator object -->  
     {% for term in terms %}
     <li>
-        <a href="{{ term.permalink | safe }}">{{ term.name }}</a>
+        <a href="{{ term.permalink | safe }}" hx-boost="true">{{ term.name }}</a>
     </li>
     {% endfor %}
 </ul>
