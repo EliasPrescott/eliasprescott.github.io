@@ -1,0 +1,40 @@
+body {
+  font-size: 1.5em;
+  font-family: "Atkinson Hyperlegible", sans-serif;
+}
+
+div.callout {
+  display: flex;
+  justify-content: center;
+  div.body {
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid black;
+
+    & > span.label {
+      display: block;
+      font-weight: bold;
+      padding-bottom: 1ch;
+    }
+  }
+}
+
+pre {
+  padding: 8px;
+  border-radius: 4px;
+  font-family: "Atkinson Hyperlegible Mono", sans-serif;
+  overflow-x: scroll;
+}
+
+code {
+  font-style: italic;
+}
+
+section.section {
+  padding: 24px;
+}
+
+footer {
+  background-color: black;
+  color: white;
+}
