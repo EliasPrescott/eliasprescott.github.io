@@ -3,6 +3,31 @@ body {
   font-family: "Atkinson Hyperlegible", sans-serif;
 }
 
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  a:has(> h1) {
+    color: unset;
+    padding: 0 24px;
+  }
+}
+
+div.taglist {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+span.tag {
+  font-family: "Atkinson Hyperlegible Mono", sans-serif;
+  font-size: 0.75em;
+  background-color: #dce8fc;
+  border-radius: 4px;
+  padding: 2px 6px;
+}
+
 div.callout {
   display: flex;
   justify-content: center;

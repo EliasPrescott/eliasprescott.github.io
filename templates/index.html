@@ -1,7 +1,37 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1 class="title">
-  Software Musings
-</h1>
+<p>
+  Hi! My name is Elias Prescott. I am software engineer with a passion for learning, and this is my blog where I talk about programming.
+</p>
+
+<p>
+  My main goal in writing is to enhance my own understanding and record what I learn in case I forget later.
+</p>
+
+<p>
+You can find me on <a href="https://github.com/EliasPrescott">GitHub</a>, <a href="https://www.linkedin.com/in/elias-prescott">LinkedIn</a>, or in real life.
+</p>
+
+<h3>Latest Posts</h3>
+<ul>
+  <!-- If you are using pagination, section.pages will be empty.
+       You need to use the paginator object -->  
+  {% set section = get_section(path="blog/_index.md") %}
+  {% for page in section.pages %}
+  <li>
+    <a href="{{ page.permalink | safe }}">{{ page.title }}</a>
+    {% set page_tags = page.taxonomies.tags %}
+    <div class="taglist">
+    {% for tag_name in page_tags %}
+      {% set url = get_taxonomy_url(kind="tags", name=tag_name) %}
+      <span class="tag">
+        <a href="{{ url | safe }}">{{ tag_name }}</a>
+      </span>
+    {% endfor %}
+    </div>
+  </li>
+  {% endfor %}
+</ul>
+
 {% endblock content %}

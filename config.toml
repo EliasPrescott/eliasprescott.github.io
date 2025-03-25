@@ -1,6 +1,8 @@
 # The URL the site will be built for
 base_url = "https://eliasprescott.github.io"
 
+author = "Elias Prescott"
+
 # Whether to automatically compile all Sass files in the sass directory
 compile_sass = false
 
@@ -8,6 +10,11 @@ compile_sass = false
 build_search_index = true
 
 generate_feeds = true
+
+taxonomies = [
+    {name = "tags", paginate_by = 5, feed=true},
+    {name = "series", paginate_by = 5, feed=true},
+]
 
 [markdown]
 # Whether to do syntax highlighting

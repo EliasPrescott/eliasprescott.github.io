@@ -1,6 +1,8 @@
 +++
 title = "Making a Database with OCaml"
 date = 2025-03-24
+[taxonomies]
+tags=["Programming", "OCaml", "Databases"]
 +++
 
 I've been playing around with OCaml recently and really enjoying it.

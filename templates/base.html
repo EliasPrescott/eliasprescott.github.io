@@ -11,14 +11,24 @@
 </head>
 
 <body>
+  <header>
+    <a href="/">
+      <h1 class="title">
+        Software Musings
+      </h1>
+    </a>
+
+    <nav>
+      {% set url = get_taxonomy_url(kind="tags", name="Programming") %}
+      <a href="{{ url | safe }}">Programming</a>
+    </nav>
+
+    <div />
+  </header>
   <section class="section">
     <div class="container">
       {% block content %} {% endblock %}
     </div>
   </section>
-
-  <footer>
-    Good CSS will come later when morale improves.
-  </footer>
 </body>
 </html>
