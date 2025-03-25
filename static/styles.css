@@ -49,6 +49,7 @@ pre {
   border-radius: 4px;
   font-family: "Atkinson Hyperlegible Mono", sans-serif;
   overflow-x: scroll;
+  font-size: 1.1em;
 }
 
 code {
