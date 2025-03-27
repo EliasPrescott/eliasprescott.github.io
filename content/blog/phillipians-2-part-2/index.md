@@ -85,7 +85,8 @@ If something good happens, even if I worked hard for it, I should give the credi
 
 I also love the idea that we can boast because we didn't run or labor for nothing.
 Because I don't know about you, but I would be a miserable atheist. 
-I mean it, if I were an atheist, what would be the point of my life?
+I mean it.
+If I were an atheist, what would be the point of my life?
 If I believed that there was no God or purpose to life, that we were just random flukes drifting in a cold cosmos, then there would be no meaning to my life.
 Without God, good and bad and morality lose all meaning.
 Without a God, my life would have no purpose.
