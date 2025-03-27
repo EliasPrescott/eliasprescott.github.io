@@ -22,7 +22,7 @@ header {
 div.taglist {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 12px;
 }
 
 span.tag {
@@ -57,6 +57,10 @@ aside.callout {
 
 li:not(:first-of-type) {
   margin-top: 8px;
+}
+
+img {
+  max-width: 100%;
 }
 
 pre {
