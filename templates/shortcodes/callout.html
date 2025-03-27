@@ -1,6 +1,7 @@
-<div class="callout">
+<aside class="callout">
   <div class="body">
-    <span class="label">{{ label }}</span>
+    <h5 class="label">{{ label }}</h5>
+
     {{ body | markdown(inline = true) | safe }}
   </div>
-</div>
+</aside>

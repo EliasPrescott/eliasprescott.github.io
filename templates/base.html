@@ -8,6 +8,13 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Mono:ital,wght@0,200..800;1,200..800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
   <link href="/styles.css" rel="stylesheet">
+  <link rel="alternate" type="application/atom+xml" title="All Posts Feed" href="{{ get_url(path = "atom.xml") }}">
+  {% set tags_taxonomy = get_taxonomy(kind="tags") %}
+  {% for term in tags_taxonomy.items %}
+    {% set feed_path = "tags/" ~ term.name ~ "/atom.xml" %}
+    {% set feed_path = feed_path | lower | replace(from=" ", to="-") %}
+    <link rel="alternate" type="application/atom+xml" title="All Posts about {{ term.name }}" href="{{ get_url(path = feed_path) }}">
+  {% endfor %}
 </head>
 
 <body>

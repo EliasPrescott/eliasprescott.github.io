@@ -12,6 +12,11 @@ header {
     color: unset;
     padding: 0 24px;
   }
+
+  nav {
+    display: flex;
+    gap: 24px;
+  }
 }
 
 div.taglist {
@@ -28,20 +33,30 @@ span.tag {
   padding: 2px 6px;
 }
 
-div.callout {
+aside.callout {
   display: flex;
   justify-content: center;
-  div.body {
-    padding: 8px;
-    border-radius: 4px;
-    border: 1px solid black;
 
-    & > span.label {
+  div.body {
+    & > h5.label {
+      margin: 0;
       display: block;
       font-weight: bold;
       padding-bottom: 1ch;
     }
+
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid black;
+
+    p:last-child {
+      margin-bottom: 0;
+    }
   }
+}
+
+li:not(:first-of-type) {
+  margin-top: 8px;
 }
 
 pre {
@@ -58,6 +73,10 @@ code {
 
 section.section {
   padding: 24px;
+
+  hr {
+    margin-bottom: 48px;
+  }
 }
 
 footer {
