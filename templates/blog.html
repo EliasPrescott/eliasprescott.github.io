@@ -10,7 +10,18 @@
   <!-- If you are using pagination, section.pages will be empty.
        You need to use the paginator object -->  
   {% for page in section.pages %}
-  <li><a href="{{ page.permalink | safe }}">{{ page.title }}</a></li>
+  <li>
+    <a href="{{ page.permalink | safe }}">{{ page.title }}</a>
+    {% set page_tags = page.taxonomies.tags %}
+    <div class="taglist">
+    {% for tag_name in page_tags %}
+      {% set url = get_taxonomy_url(kind="tags", name=tag_name) %}
+      <span class="tag">
+        <a href="{{ url | safe }}">{{ tag_name }}</a>
+      </span>
+    {% endfor %}
+    </div>
+  </li>
   {% endfor %}
 </ul>
 {% endblock content %}
