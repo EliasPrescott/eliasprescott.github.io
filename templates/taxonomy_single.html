@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 
+{% block title %}{{ term.name }}{% endblock %}
+
 {% block content %}
 <h1 class="title">
   Posts about {{ term.name }}
