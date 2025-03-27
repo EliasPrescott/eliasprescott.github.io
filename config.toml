@@ -13,7 +13,6 @@ generate_feeds = true
 
 taxonomies = [
     {name = "tags", paginate_by = 5, feed=true},
-    {name = "series", paginate_by = 5, feed=true},
 ]
 
 [markdown]
