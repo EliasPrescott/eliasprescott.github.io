@@ -52,7 +52,7 @@ So it's God who is working in us.
 All we can do is to accept God and his work in us, which results in our salvation.
 Working out our salvation is the process of accepting God's guidance and will for our lives.
 
-{% callout(label = "Philippians 2:13 CSB") %}
+{% callout(label = "Philippians 2:14-16 CSB") %}
 <sup>14</sup> Do everything without grumbling and arguing,
 <sup>15</sup> so that you may be blameless and pure, children of God who are faultless in a crooked and perverted generation,
 among whom you shine like stars in the world,
