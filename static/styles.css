@@ -1,6 +1,15 @@
+:root {
+}
+
 body {
   font-size: 1.5em;
   font-family: "Atkinson Hyperlegible", sans-serif;
+}
+
+a {
+  font-weight: bold;
+  color: blue;
+  text-decoration: none;
 }
 
 header {
@@ -14,8 +23,20 @@ header {
   }
 
   nav {
+    border-radius: 4px;
+    background-color: white;
+    border: 4px solid blue;
+    box-shadow: 4px 4px salmon;
     display: flex;
-    gap: 24px;
+
+    a {
+      padding: 12px;
+    }
+
+    a:hover {
+      background-color: blue;
+      color: white;
+    }
   }
 }
 
@@ -27,10 +48,20 @@ div.taglist {
 
 span.tag {
   font-family: "Atkinson Hyperlegible Mono", sans-serif;
+  font-weight: bold;
   font-size: 0.95em;
-  background-color: #dce8fc;
+  background-color: blue;
   border-radius: 4px;
   padding: 2px 6px;
+
+  &:hover {
+    box-shadow: 4px 4px salmon;
+  }
+
+  a {
+    color: white;
+    text-decoration: none;
+  }
 }
 
 aside.callout {
