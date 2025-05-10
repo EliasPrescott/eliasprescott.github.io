@@ -1,0 +1,504 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+    <title> - Databases</title>
+    <link rel="self" type="application/atom+xml" href="https://eliasprescott.github.io/tags/databases/atom.xml"/>
+    <link rel="alternate" type="text/html" href="https://eliasprescott.github.io"/>
+    <generator uri="https://www.getzola.org/">Zola</generator>
+    <updated>2025-03-24T00:00:00+00:00</updated>
+    <id>https://eliasprescott.github.io/tags/databases/atom.xml</id>
+    <entry xml:lang="en">
+        <title>Making a Database with OCaml</title>
+        <published>2025-03-24T00:00:00+00:00</published>
+        <updated>2025-03-24T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Elias Prescott
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://eliasprescott.github.io/blog/making-a-db-with-ocaml/"/>
+        <id>https://eliasprescott.github.io/blog/making-a-db-with-ocaml/</id>
+        
+        <content type="html" xml:base="https://eliasprescott.github.io/blog/making-a-db-with-ocaml/">&lt;p&gt;I&#x27;ve been playing around with OCaml recently and really enjoying it.
+I love functional programming and have also enjoyed playing around with F#, Elixir, and Haskell in the past, but I&#x27;ve never gotten super far with any of those languages for various reasons.
+So, I wanted to take on a more serious project to really kick the tires on the language and start building some deeper knowledge.
+In the past, I read a book about the pure relational algebra that inspires modern relational databases (&lt;a href=&quot;https:&#x2F;&#x2F;a.co&#x2F;d&#x2F;jartLNm&quot;&gt;Amazon book link&lt;&#x2F;a&gt;).
+Taking what I learned from the book, I wrote a small Rust library that would parse a query language and use it to run queries against CSV files.
+That project never turned into a full-on database engine, but I enjoyed the project a lot and thought it would be a good project to recreate in OCaml for a few reasons.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;getting-started&quot;&gt;Getting Started&lt;&#x2F;h2&gt;
+&lt;p&gt;If you want to follow along, you&#x27;ll need &lt;a href=&quot;https:&#x2F;&#x2F;opam.ocaml.org&#x2F;&quot;&gt;&lt;code&gt;opam&lt;&#x2F;code&gt;&lt;&#x2F;a&gt; and &lt;a href=&quot;https:&#x2F;&#x2F;dune.build&#x2F;&quot;&gt;&lt;code&gt;dune&lt;&#x2F;code&gt;&lt;&#x2F;a&gt; installed.&lt;&#x2F;p&gt;
+&lt;p&gt;We can use &lt;code&gt;dune&lt;&#x2F;code&gt; to quickly initialize the new project:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;development&lt;&#x2F;span&gt;&lt;span&gt; $ dune init project camalbrarian
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;Success:&lt;&#x2F;span&gt;&lt;span&gt; initialized project component named camalbrarian
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;aside class=&quot;callout&quot;&gt;
+  &lt;div class=&quot;body&quot;&gt;
+    &lt;h5 class=&quot;label&quot;&gt;Note&lt;&#x2F;h5&gt;
+
+    Yes, camalbrarian stands for Camel Librarian, because we&#x27;ll be starting with the query engine, and a query engine is basically a specialized librarian.
+And no, the typo in &quot;camal&quot; was not intentional, but let&#x27;s just roll with it.
+  &lt;&#x2F;div&gt;
+&lt;&#x2F;aside&gt;
+&lt;p&gt;We can &lt;code&gt;cd&lt;&#x2F;code&gt; into the new folder and create an Opam switch.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;development&lt;&#x2F;span&gt;&lt;span&gt; $ cd camalbrarian
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;camalbrarian&lt;&#x2F;span&gt;&lt;span&gt; $ opam switch create . 5.3.0
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;If you haven&#x27;t used OCaml before, you&#x27;re probably already confused why I created a &quot;switch.&quot;
+Essentially, &lt;code&gt;opam&lt;&#x2F;code&gt; switches are &quot;isolated OCaml environments&quot; (&lt;a href=&quot;https:&#x2F;&#x2F;ocaml.org&#x2F;docs&#x2F;opam-switch-introduction&quot;&gt;source&lt;&#x2F;a&gt;).
+Switches allow you to have different versions of OCaml installed at the same time, so you can &quot;switch&quot; between them.
+Where I found switches confusing at first is that they also manage all packages that you install.
+I&#x27;m used to the C# or Rust model where installed packages are stored&#x2F;managed within the project directory (e.g. &lt;code&gt;dotnet add package ...&lt;&#x2F;code&gt; or &lt;code&gt;cargo add ...&lt;&#x2F;code&gt;) and language versions are managed separately.
+But &lt;code&gt;opam&lt;&#x2F;code&gt; switches manage the language, tooling, and packages all at the same time.&lt;&#x2F;p&gt;
+&lt;p&gt;This means that you could create a single switch, maybe for a specific version of OCaml like 5.3.0, and then you could use that switch for all your projects.
+Sharing a switch between multiple projects would be faster, but it also means that all projects would be sharing versions of everything by default.
+This might be fine at first, but eventually you would want to use a different version of the language or a particular package, and then you would want another switch.
+Thankfully, &lt;code&gt;opam&lt;&#x2F;code&gt; has an easy solution for creating project-specific switches. &lt;code&gt;opam&lt;&#x2F;code&gt; calls these &quot;local switches&quot;, while shared switches are called &quot;global switches.&quot;&lt;&#x2F;p&gt;
+&lt;p&gt;To understand the difference better, we can peruse the &lt;code&gt;opam switch&lt;&#x2F;code&gt; man page by running &lt;code&gt;opam switch --help&lt;&#x2F;code&gt; or &lt;code&gt;man opam-switch&lt;&#x2F;code&gt;.
+If you run that and search for the &lt;code&gt;create&lt;&#x2F;code&gt; subcommand, you&#x27;ll find this blurb:&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;create SWITCH [COMPILER]&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;blockquote&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Create a new switch, and install the given compiler there. SWITCH can be a plain name, or a directory, absolute or relative, in which case a local switch is created below the given directory. COMPILER, if omitted, defaults to SWITCH if it is a plain name, unless --packages, --formula or --empty is specified. When creating a local switch, and none of these options are present, the compiler is chosen according to the configuration default (see opam-init(1)). If the chosen directory contains package definitions, a compatible compiler is searched within the default selection, and the packages will automatically get installed.&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;If you are allergic to man pages (Windows user! 🫵) or if you want more info, you can read through &lt;a href=&quot;https:&#x2F;&#x2F;ocaml.org&#x2F;docs&#x2F;opam-switch-introduction#types-of-switches&quot;&gt;Introduction to opam Switches&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;My takeaway is that you should almost always want to create a local switch by running something like &lt;code&gt;opam switch create .&lt;&#x2F;code&gt; in your project directory.
+This will most closely mimic how other language package managers work and should provide the level of project isolation that you are used to.&lt;&#x2F;p&gt;
+&lt;p&gt;After my create switch command finished installing everything, it recommened that I run &lt;code&gt;eval $(opam env)&lt;&#x2F;code&gt; to update my current shell environment.
+After we run that, we can poke around a little bit to understand what &lt;code&gt;opam&lt;&#x2F;code&gt; did for us.&lt;&#x2F;p&gt;
+&lt;p&gt;I&#x27;ll start by trying to source our &lt;code&gt;ocaml&lt;&#x2F;code&gt; binary with the &lt;code&gt;which&lt;&#x2F;code&gt; command:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;camalbrarian&lt;&#x2F;span&gt;&lt;span&gt; $ which ocaml
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;~&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;&#x2F;development&#x2F;camalbrarian&#x2F;_opam&#x2F;bin&#x2F;ocaml
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Okay so &lt;code&gt;opam&lt;&#x2F;code&gt; made a little &lt;code&gt;bin&#x2F;&lt;&#x2F;code&gt; folder local to our project. Let&#x27;s investigate that a little bit:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;camalbrarian&lt;&#x2F;span&gt;&lt;span&gt; $ ls _opam&#x2F;bin&#x2F;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;ocaml&lt;&#x2F;span&gt;&lt;span&gt;                   ocamlcp                 ocamldoc                ocamlmklib              ocamlopt                ocamlrun
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;ocamlc&lt;&#x2F;span&gt;&lt;span&gt;                  ocamldebug              ocamldoc.opt            ocamlmktop              ocamlopt.byte           ocamlrund
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;ocamlc.byte&lt;&#x2F;span&gt;&lt;span&gt;             ocamldep                ocamllex                ocamlobjinfo            ocamlopt.opt            ocamlruni
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;ocamlc.opt&lt;&#x2F;span&gt;&lt;span&gt;              ocamldep.byte           ocamllex.byte           ocamlobjinfo.byte       ocamloptp               ocamlyacc
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;ocamlcmt&lt;&#x2F;span&gt;&lt;span&gt;                ocamldep.opt            ocamllex.opt            ocamlobjinfo.opt        ocamlprof
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Looks good to me 👍&lt;&#x2F;p&gt;
+&lt;p&gt;I still haven&#x27;t used OCaml enough to know what all of these are for, but you can chase down their man pages if you really care.
+The names indicate that they are all different tools that are useful for the compilation process.&lt;&#x2F;p&gt;
+&lt;p&gt;If we want to see what switch we are currently on, you can use &lt;code&gt;switch list&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;camalbrarian&lt;&#x2F;span&gt;&lt;span&gt; $ opam switch list
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6272a4;&quot;&gt;#  switch                      compiler                                           description
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;→  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;~&lt;&#x2F;span&gt;&lt;span&gt;&#x2F;development&#x2F;camalbrarian  ocaml-base-compiler.5.3.0,ocaml-options-vanilla.1  ocaml-base-compiler = 5.3.0 &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;| &lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;ocaml-system&lt;&#x2F;span&gt;&lt;span&gt; = 5.3.0
+&lt;&#x2F;span&gt;&lt;span&gt;   &lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;5.3.0&lt;&#x2F;span&gt;&lt;span&gt;                       ocaml-base-compiler.5.3.0,ocaml-options-vanilla.1  ocaml-base-compiler = 5.3.0 &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;| &lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;ocaml-system&lt;&#x2F;span&gt;&lt;span&gt; = 5.3.0
+&lt;&#x2F;span&gt;&lt;span&gt;   &lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;default&lt;&#x2F;span&gt;&lt;span&gt;                     ocaml.5.2.0                                        default
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;[NOTE]&lt;&#x2F;span&gt;&lt;span&gt; Current switch has been selected based on the current directory.
+&lt;&#x2F;span&gt;&lt;span&gt;       &lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;The&lt;&#x2F;span&gt;&lt;span&gt; current global system switch is 5.3.0.
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;If you are a mega-nerd (which is likely if you are still reading) then you might be wondering what that &lt;code&gt;eval $(opam env)&lt;&#x2F;code&gt; command did earlier.&lt;&#x2F;p&gt;
+&lt;p&gt;Well let&#x27;s see:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;camalbrarian&lt;&#x2F;span&gt;&lt;span&gt; $ opam env
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;OPAM_LAST_ENV&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39;~&#x2F;.opam&#x2F;.last-env&#x2F;env-21ef9d7979f317c6a64e8577a7d09daf-0&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;; export &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;OPAM_LAST_ENV&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;OPAM_SWITCH_PREFIX&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39;~&#x2F;development&#x2F;camalbrarian&#x2F;_opam&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;; export &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;OPAM_SWITCH_PREFIX&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;OCAMLTOP_INCLUDE_PATH&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39;~&#x2F;development&#x2F;camalbrarian&#x2F;_opam&#x2F;lib&#x2F;toplevel&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;; export &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;OCAMLTOP_INCLUDE_PATH&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;CAML_LD_LIBRARY_PATH&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39;~&#x2F;development&#x2F;camalbrarian&#x2F;_opam&#x2F;lib&#x2F;stublibs:~&#x2F;development&#x2F;camalbrarian&#x2F;_opam&#x2F;lib&#x2F;ocaml&#x2F;stublibs:~&#x2F;development&#x2F;camalbrarian&#x2F;_opam&#x2F;lib&#x2F;ocaml&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;; export &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;CAML_LD_LIBRARY_PATH&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;OCAML_TOPLEVEL_PATH&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39;~&#x2F;development&#x2F;camalbrarian&#x2F;_opam&#x2F;lib&#x2F;toplevel&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;; export &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;OCAML_TOPLEVEL_PATH&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;PATH&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39;~&#x2F;development&#x2F;camalbrarian&#x2F;_opam&#x2F;bin:{rest of PATH omitted for privacy}&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;; export &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;PATH&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;I was worried that &lt;code&gt;opam env&lt;&#x2F;code&gt; would be some crazy complicated shell script, but it&#x27;s refreshingly simple.
+It just sets up some environment variables to keep track of a few paths, and then it adds the local switch &lt;code&gt;bin&#x2F;&lt;&#x2F;code&gt; folder to my &lt;code&gt;PATH&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;Before we write any OCaml code (one day we will, I promise), I would like to at least set up an &lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;Language_Server_Protocol&quot;&gt;LSP&lt;&#x2F;a&gt;.
+The primary LSP for OCaml is &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;ocaml&#x2F;ocaml-lsp&quot;&gt;ocaml-lsp&lt;&#x2F;a&gt; and it has some simple install instructions if you are using &lt;code&gt;opam&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;camalbrarian&lt;&#x2F;span&gt;&lt;span&gt; $ opam install ocaml-lsp-server
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;aside class=&quot;callout&quot;&gt;
+  &lt;div class=&quot;body&quot;&gt;
+    &lt;h5 class=&quot;label&quot;&gt;Note&lt;&#x2F;h5&gt;
+
+    The README for &lt;code&gt;ocaml-lsp&lt;&#x2F;code&gt; has this note:&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;you will need to install ocaml-lsp-server in every switch where you would like to use it.&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;I think it&#x27;s a little unfortunate that you have to reinstall your tooling on every new switch, because that can feel like a drag if you are just starting to learn the language and starting lots of new projects.
+But it might be unavoidable.
+Part of me wonders if you could have a local and global switch registered at the same time.
+So, new library packages would be installed in the local switch, but you could also specify that tooling packages should be installed in your global switch.
+Then, both switches would be registered on your &lt;code&gt;PATH&lt;&#x2F;code&gt; when you run &lt;code&gt;eval $(opam env)&lt;&#x2F;code&gt;, with the local switch first so it takes precedence.
+Maybe that&#x27;s a bad idea or maybe that&#x27;s already how it works and I just don&#x27;t know enough about &lt;code&gt;opam&lt;&#x2F;code&gt; yet.
+  &lt;&#x2F;div&gt;
+&lt;&#x2F;aside&gt;
+&lt;p&gt;After that install finishes, we can investigate our new LSP binary:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;camalbrarian&lt;&#x2F;span&gt;&lt;span&gt; $ which ocamllsp
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;~&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;&#x2F;development&#x2F;camalbrarian&#x2F;_opam&#x2F;bin&#x2F;ocamllsp
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Very nice. I&#x27;ll register that LSP in my NeoVim config (I use NeoVim btw 😎), and then we are ready to roll.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;actually-programming-now&quot;&gt;Actually Programming Now&lt;&#x2F;h2&gt;
+&lt;p&gt;Whenever we ran &lt;code&gt;dune init project camalbrarian&lt;&#x2F;code&gt;, the &quot;project&quot; argument told &lt;code&gt;dune&lt;&#x2F;code&gt; that we want a full project.
+That includes a library package (located in &lt;code&gt;lib&#x2F;&lt;&#x2F;code&gt;), a binary&#x2F;executable package (&lt;code&gt;bin&#x2F;&lt;&#x2F;code&gt;), and a test package (&lt;code&gt;test&#x2F;&lt;&#x2F;code&gt;).
+We will use all three of those packages eventually, but if you haven&#x27;t run any OCaml yet, you&#x27;ll want to start with the &lt;code&gt;bin&#x2F;&lt;&#x2F;code&gt; folder just so you can see some code execute.&lt;&#x2F;p&gt;
+&lt;p&gt;If you open up &lt;code&gt;bin&#x2F;main.ml&lt;&#x2F;code&gt;, you may see this error message from your LSP:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#282a36;color:#f8f8f2;&quot;&gt;&lt;code&gt;&lt;span&gt;No config found for file bin&#x2F;main.ml. Try calling &amp;#39;dune build&amp;#39;.
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;If you do what the friendly error message says and run &lt;code&gt;dune build&lt;&#x2F;code&gt;, then it should go away and you will be ready to write some code.&lt;&#x2F;p&gt;
+&lt;p&gt;Now, we can finally run our executable package and see the default output:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;camalbrarian&lt;&#x2F;span&gt;&lt;span&gt; $ dune exec camalbrarian
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;Hello,&lt;&#x2F;span&gt;&lt;span&gt; World!
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Great! Let&#x27;s get into some database-specific code.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;designing-a-query-language&quot;&gt;Designing a Query Language&lt;&#x2F;h2&gt;
+&lt;p&gt;Now that we have a project established, I&#x27;ll try to speed up and explain things more with code rather than long diatribes.&lt;&#x2F;p&gt;
+&lt;aside class=&quot;callout&quot;&gt;
+  &lt;div class=&quot;body&quot;&gt;
+    &lt;h5 class=&quot;label&quot;&gt;Diatribe&lt;&#x2F;h5&gt;
+
+    Seeing the word &quot;diatribe&quot; made me think of &quot;diabetes&quot;, which then made me wonder about the common prefix &quot;dia-&quot;.&lt;&#x2F;p&gt;
+&lt;p&gt;It turns out that &quot;dia-&quot; comes from Ancient Greek and can mean &quot;through, across, by, over&quot; (&lt;a href=&quot;https:&#x2F;&#x2F;en.wiktionary.org&#x2F;wiki&#x2F;dia-&quot;&gt;source&lt;&#x2F;a&gt;).
+  &lt;&#x2F;div&gt;
+&lt;&#x2F;aside&gt;
+&lt;p&gt;Anyway, OCaml has a rich type system that deserves its own article (&lt;a href=&quot;https:&#x2F;&#x2F;ocaml.org&#x2F;docs&#x2F;basic-data-types&quot;&gt;&quot;Basic Data Types and Pattern Matching&quot;&lt;&#x2F;a&gt;).
+What I am interested in are the Variant types because they will be great for representing our query language.
+If you have engaged with programming language design discourse before, you may have heard the term &lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;Abstract_syntax_tree&quot;&gt;AST&lt;&#x2F;a&gt;.
+Essentially, abstract syntax trees are a great technique for representing the structure and content of a language.
+Part of what makes ASTs so useful is that they provide a common language&#x2F;interface for all parts of your system to reason about the language.
+So for a database, your parser will take text input and produce an AST object, then your query optimizer might analyze the AST and simplify it where possible, then a query planner can analyze the AST again to determine the best query plan, then an executor can finally execute the AST to run the query.&lt;&#x2F;p&gt;
+&lt;p&gt;All that to say, OCaml&#x27;s variant types are fantastic for representing an AST with minimal boilerplate.
+So, let&#x27;s make &lt;code&gt;lib&#x2F;query.ml&lt;&#x2F;code&gt; and start writing our type:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;ocaml&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-ocaml &quot;&gt;&lt;code class=&quot;language-ocaml&quot; data-lang=&quot;ocaml&quot;&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;type &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;t &lt;&#x2F;span&gt;&lt;span&gt;= 
+&lt;&#x2F;span&gt;&lt;span&gt;  | LoadCSV &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;of &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;string
+&lt;&#x2F;span&gt;&lt;span&gt;  | Rename &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;of &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;string &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;* &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;string
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;aside class=&quot;callout&quot;&gt;
+  &lt;div class=&quot;body&quot;&gt;
+    &lt;h5 class=&quot;label&quot;&gt;Note&lt;&#x2F;h5&gt;
+
+    I had to run &lt;code&gt;dune build lib&#x2F;&lt;&#x2F;code&gt; so my LSP could find the new file.
+  &lt;&#x2F;div&gt;
+&lt;&#x2F;aside&gt;
+&lt;p&gt;So we have a basic variant type with two cases, &lt;code&gt;LoadCSV&lt;&#x2F;code&gt; and &lt;code&gt;Rename&lt;&#x2F;code&gt;.
+There are two points of interest here, how OCaml modules work and where our query language&#x27;s operators are coming from.
+I&#x27;ll start with OCaml modules.&lt;&#x2F;p&gt;
+&lt;p&gt;OCaml modules are similar to modules or namespaces in other languages, so far as they are a way of organizing related definitions together.
+The main point I wanted to bring up now is why we named our variant type just &lt;code&gt;t&lt;&#x2F;code&gt;.
+The reason is because we are already inside the &lt;code&gt;Query&lt;&#x2F;code&gt; module, so I didn&#x27;t want our type to be referred to as &lt;code&gt;Query.query&lt;&#x2F;code&gt;.
+You might be wondering &quot;How are we inside the &lt;code&gt;Query&lt;&#x2F;code&gt; module, we never declared a module?&quot;
+But OCaml has &lt;a href=&quot;https:&#x2F;&#x2F;ocaml.org&#x2F;docs&#x2F;modules#file-based-modules&quot;&gt;file-based modules&lt;&#x2F;a&gt;, so just by being inside of &lt;code&gt;lib&#x2F;query.ml&lt;&#x2F;code&gt;, our type &lt;code&gt;t&lt;&#x2F;code&gt; is part of the &lt;code&gt;Query&lt;&#x2F;code&gt; module.
+There is a lot more to say about modules and we may cover some more as it comes up, but for now I recommend you read the official OCaml docs on &lt;a href=&quot;https:&#x2F;&#x2F;ocaml.org&#x2F;docs&#x2F;modules&quot;&gt;modules&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;Now onto the operators.
+We are making a database that is based on relational algebra.
+I can&#x27;t do relational algebgra justice here, so I recommend you read the &lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;Relational_algebra&quot;&gt;Wikipedia&lt;&#x2F;a&gt; article to get up to speed.
+Aside from the theory, that article also introduces some of the basic operators that we will be implementing in our query language.
+I&#x27;m just starting with the rename operator for now because it is the simplest to reason about.
+&lt;code&gt;LoadCSV&lt;&#x2F;code&gt; is certainly not part of the relational algebra, but CSV files are a great source of test data because they are simple for machines and humans to work with.&lt;&#x2F;p&gt;
+&lt;aside class=&quot;callout&quot;&gt;
+  &lt;div class=&quot;body&quot;&gt;
+    &lt;h5 class=&quot;label&quot;&gt;Musing&lt;&#x2F;h5&gt;
+
+    All your code has to run inside of a human&#x27;s brain before it can run in your computer&#x27;s &quot;brain.&quot;
+So, optimizing code for human understanding can often be more important than optimizing it for computers.
+Using CSV files as a starting point is important because it gives us a cheap way to handle real data without worrying about pages and indexes and all the scary things that real databases have to handle.
+  &lt;&#x2F;div&gt;
+&lt;&#x2F;aside&gt;
+&lt;h2 id=&quot;getting-parsing-for-free&quot;&gt;Getting Parsing for Free&lt;&#x2F;h2&gt;
+&lt;p&gt;Now that we have a way to represent our query language, we need a way of converting plaintext input into that representation (AKA parsing).
+We could write our own parser by hand or use a fancy &lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;Parser_combinator&quot;&gt;parser combinator&lt;&#x2F;a&gt; library, but I would rather get our parsing for free, because free is awesome.
+To do that, first we need to talk about preprocessing, alternative standard libraries, and a high-frequency trading firm...&lt;&#x2F;p&gt;
+&lt;p&gt;I know, I know, that sounds insane, but it&#x27;s true.
+We have a lot of groundwork to lay to understand the OCaml ecosystem and how we can profit from it.&lt;&#x2F;p&gt;
+&lt;p&gt;I&#x27;ll explain things quickly and throw a couple of links at you.&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;First, OCaml has &lt;a href=&quot;https:&#x2F;&#x2F;ocaml.org&#x2F;docs&#x2F;metaprogramming&quot;&gt;metaprogramming&lt;&#x2F;a&gt; which allows you to run raw-text preproccessors or PPX preproccessors which transform the OCaml language AST (yes, OCaml uses an AST as well. I told you they are useful!).&lt;&#x2F;li&gt;
+&lt;li&gt;Second, OCaml has historically had a small standard library, so there are multiple alternative standard library packages that provide lots of useful stuff. The one we are interested in is called &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;janestreet&#x2F;base&quot;&gt;Core&lt;&#x2F;a&gt;. There is a PPX inside of the &lt;code&gt;Core&lt;&#x2F;code&gt; library that can essentially auto-generate a parser for our query type.&lt;&#x2F;li&gt;
+&lt;li&gt;Third, the &lt;code&gt;Core&lt;&#x2F;code&gt; library is made by a high-frequency trading firm called &lt;a href=&quot;https:&#x2F;&#x2F;www.janestreet.com&#x2F;&quot;&gt;Jane Street&lt;&#x2F;a&gt;. Jane Street is (probably) the biggest industrial user of OCaml and they drive a significant portion of the OCaml ecosystem. They are doing lots of interesting things with OCaml and they have made some very useful libraries to help them do that. Which means, people like me get to benefit from that work so I don&#x27;t have to write my own parser (for now, maybe I&#x27;ll write a fancier one later).&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;Makes sense? I hope so.&lt;&#x2F;p&gt;
+&lt;p&gt;Let&#x27;s start by installing the &lt;code&gt;Core&lt;&#x2F;code&gt; library:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;camalbrarian&lt;&#x2F;span&gt;&lt;span&gt; $ opam install core
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;While that&#x27;s installing, let&#x27;s talk about s-expressions.
+&lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;s-expression&quot;&gt;s-expressions&lt;&#x2F;a&gt; (sexps or sexpr for short) come from how Lisp languages represent data and code (data is code, and code is data λ).
+If you are using Lisp, then s-expressions are essentially the entire syntax you are using to write your code, but they are also how data is represented and (sometimes) serialized.
+For reasons beyond my knowledge, Jane Street decided that they would also use s-expressions as a common means of representing data.
+I would guess it&#x27;s because s-expressions are fairly simple and easy to grasp, and they probably have quite a few Lisp nerds working there which would make it a natural choice.
+Since Jane Street has already done the leg work and provided a PPX that can generate s-expression serialization&#x2F;deserialization functions for OCaml types, we are going to &lt;s&gt;steal&lt;&#x2F;s&gt; use that PPX for our query type.&lt;&#x2F;p&gt;
+&lt;p&gt;After &lt;code&gt;Core&lt;&#x2F;code&gt; has finished installing, you will need to declare the dependency in &lt;code&gt;lib&#x2F;dune&lt;&#x2F;code&gt; and we need to register the &lt;code&gt;ppx_sexp_conv&lt;&#x2F;code&gt; PPX for... reasons. Probably good reasons too:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;clojure&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-clojure &quot;&gt;&lt;code class=&quot;language-clojure&quot; data-lang=&quot;clojure&quot;&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;library
+&lt;&#x2F;span&gt;&lt;span&gt; (&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt; camalbrarian)
+&lt;&#x2F;span&gt;&lt;span&gt; (&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;libraries&lt;&#x2F;span&gt;&lt;span&gt; core)
+&lt;&#x2F;span&gt;&lt;span&gt; (&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;preprocess &lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;pps&lt;&#x2F;span&gt;&lt;span&gt; ppx_sexp_conv)))
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Now we can finally add the s-expression PPX to our type:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;ocaml&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-ocaml &quot;&gt;&lt;code class=&quot;language-ocaml&quot; data-lang=&quot;ocaml&quot;&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;open &lt;&#x2F;span&gt;&lt;span&gt;Core
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;type &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;t &lt;&#x2F;span&gt;&lt;span&gt;= 
+&lt;&#x2F;span&gt;&lt;span&gt;  | LoadCSV &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;of &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;string
+&lt;&#x2F;span&gt;&lt;span&gt;  | Rename &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;of &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;string &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;* &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;string
+&lt;&#x2F;span&gt;&lt;span&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;@@&lt;&#x2F;span&gt;&lt;span&gt;deriving &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;sexp&lt;&#x2F;span&gt;&lt;span&gt;]
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;We opened the &lt;code&gt;Core&lt;&#x2F;code&gt; library so we could have access to the various s-expression functions that it defines.
+&lt;code&gt;[@@deriving sexp]&lt;&#x2F;code&gt; specifies that the &lt;code&gt;sexp&lt;&#x2F;code&gt; PPX should be used to process our type.
+That PPX will generate some code that allows us to use different &lt;code&gt;sexp&lt;&#x2F;code&gt; functions on it.&lt;&#x2F;p&gt;
+&lt;p&gt;For example, we can now define some of the simplest parsing and printing functions ever:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;ocaml&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-ocaml &quot;&gt;&lt;code class=&quot;language-ocaml&quot; data-lang=&quot;ocaml&quot;&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;let &lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;(&amp;gt;&amp;gt;) &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ffb86c;&quot;&gt;f g x &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span&gt; g (f x)
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;let &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;parse &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span&gt;Sexp.of_string &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;&amp;gt;&amp;gt;&lt;&#x2F;span&gt;&lt;span&gt; t_of_sexp
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;let &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;print &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span&gt; sexp_of_t &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;&amp;gt;&amp;gt; &lt;&#x2F;span&gt;&lt;span&gt;Sexp.to_string 
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Okay, &lt;code&gt;&amp;gt;&amp;gt;&lt;&#x2F;code&gt; is a little obtuse, but I just like composing functions and OCaml doesn&#x27;t provide a built-in operator for it.
+If we were in F# land, then I could &lt;code&gt;&amp;gt;&amp;gt;&lt;&#x2F;code&gt; by default, but you have to define it yourself in OCaml.
+You could also use &lt;code&gt;Core.Fn.compose&lt;&#x2F;code&gt; since we installed &lt;code&gt;Core&lt;&#x2F;code&gt;, but its first two args are flipped compared to F#&#x27;s &lt;code&gt;&amp;gt;&amp;gt;&lt;&#x2F;code&gt;.
+And if we were using Haskell, then you could do the same using the &lt;code&gt;.&lt;&#x2F;code&gt; operator.&lt;&#x2F;p&gt;
+&lt;p&gt;Anyway, &lt;code&gt;&amp;gt;&amp;gt;&lt;&#x2F;code&gt; will run the first function, then take the result of that and pass it to the second argument.
+It&#x27;s also worth noting that &lt;code&gt;parse&lt;&#x2F;code&gt; and &lt;code&gt;print&lt;&#x2F;code&gt; are written in a &quot;point-free&quot; style, which means something smart that I forgot exactly and I&#x27;m too lazy to look it up.
+Basically it just means that they don&#x27;t take arguments and they use implicit arguments instead.
+So, I could have written &lt;code&gt;parse&lt;&#x2F;code&gt; like this:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;ocaml&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-ocaml &quot;&gt;&lt;code class=&quot;language-ocaml&quot; data-lang=&quot;ocaml&quot;&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;let &lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;parse &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ffb86c;&quot;&gt;input &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span&gt; t_of_sexp (Sexp.of_string input) 
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;And it would have been exactly the same, just less cool looking.&lt;&#x2F;p&gt;
+&lt;p&gt;To test out our new functions, we are going to use OCaml&#x27;s de-facto standard REPL, &lt;code&gt;utop&lt;&#x2F;code&gt;, to test it.
+If you don&#x27;t know what a REPL is, it stands for &lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;Read%E2%80%93eval%E2%80%93print_loop&quot;&gt;read, eval, print, loop&lt;&#x2F;a&gt; and it&#x27;s a great way of interacting with your code.
+I don&#x27;t know yet how great the REPL story is in OCaml, but for most Lisps you can integrate your REPL with your editor and you basically never have to run your project through the command line.
+Instead, you are able to evaluate select Lisp forms so you have a lot greater control over what code you want to run and when.&lt;&#x2F;p&gt;
+&lt;p&gt;Anyway, since OCaml tools are just packages that add a binary to your switch&#x27;s &lt;code&gt;_opam&#x2F;bin&#x2F;&lt;&#x2F;code&gt; folder, we have to install &lt;code&gt;utop&lt;&#x2F;code&gt; to our local switch before running it:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;camalbrarian&lt;&#x2F;span&gt;&lt;span&gt; $ opam install utop
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;With that done, we can enter the REPL with &lt;code&gt;dune utop&lt;&#x2F;code&gt;.
+I won&#x27;t explain how to use the REPL here.
+If you need help, follow along with &lt;a href=&quot;https:&#x2F;&#x2F;ocaml.org&#x2F;docs&#x2F;toplevel-introduction&quot;&gt;this&lt;&#x2F;a&gt; page and come back.&lt;&#x2F;p&gt;
+&lt;p&gt;Once you are in the REPL, you can load our &lt;code&gt;Query&lt;&#x2F;code&gt; module with &lt;code&gt;#use &quot;lib&#x2F;query.ml&quot;;;&lt;&#x2F;code&gt;.
+Once you enter an expression ending with &lt;code&gt;;;&lt;&#x2F;code&gt;, &lt;code&gt;utop&lt;&#x2F;code&gt; will execute your code and spit back out the results.
+Here is what my REPL session looked like when I tested the query module:&lt;&#x2F;p&gt;
+&lt;aside class=&quot;callout&quot;&gt;
+  &lt;div class=&quot;body&quot;&gt;
+    &lt;h5 class=&quot;label&quot;&gt;Note&lt;&#x2F;h5&gt;
+
+    Inputs are denoted with a &lt;code&gt;utop # &lt;&#x2F;code&gt; prefix.
+Outputs are any lines immediately following the inputs.
+  &lt;&#x2F;div&gt;
+&lt;&#x2F;aside&gt;
+&lt;pre data-lang=&quot;ocaml&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-ocaml &quot;&gt;&lt;code class=&quot;language-ocaml&quot; data-lang=&quot;ocaml&quot;&gt;&lt;span&gt;utop # &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;#use &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;lib&#x2F;query.ml&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;type &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;t &lt;&#x2F;span&gt;&lt;span&gt;= LoadCSV &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;of &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;string &lt;&#x2F;span&gt;&lt;span&gt;| Rename &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;of &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;string &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;* &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;string
+&lt;&#x2F;span&gt;&lt;span&gt;val ( &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;&amp;gt;&amp;gt;&lt;&#x2F;span&gt;&lt;span&gt; ) : (&amp;#39;a -&amp;gt; &amp;#39;b) -&amp;gt; (&amp;#39;b -&amp;gt; &amp;#39;c) -&amp;gt; &amp;#39;a -&amp;gt; &amp;#39;c &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &amp;lt;&lt;&#x2F;span&gt;&lt;span&gt;fun&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span&gt;File &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;lib&#x2F;query.ml&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;, line &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;10&lt;&#x2F;span&gt;&lt;span&gt;, characters &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;30-39&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;10 &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;| let &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;parse &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span&gt;Sexp.of_string &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;&amp;gt;&amp;gt;&lt;&#x2F;span&gt;&lt;span&gt; t_of_sexp
+&lt;&#x2F;span&gt;&lt;span&gt;                                   &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;^^^^^^^^^
+&lt;&#x2F;span&gt;&lt;span&gt;Error: Unbound value t_of_sexp
+&lt;&#x2F;span&gt;&lt;span&gt;Hint: Did you mean int_of_sexp &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;or&lt;&#x2F;span&gt;&lt;span&gt; mat_of_sexp?
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Doh. That&#x27;s not what we wanted.
+If we look up the error message, someone else has run into the &lt;a href=&quot;https:&#x2F;&#x2F;discuss.ocaml.org&#x2F;t&#x2F;no-t-of-sexp-generated-by-deriving-sexp&#x2F;1999&quot;&gt;same thing&lt;&#x2F;a&gt; and Jane Street&#x27;s OCamler in Chief came along with some helpful advice:&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Try typing &lt;code&gt;#require &quot;ppx_jane&quot;;;&lt;&#x2F;code&gt; first.&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;pre data-lang=&quot;ocaml&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-ocaml &quot;&gt;&lt;code class=&quot;language-ocaml&quot; data-lang=&quot;ocaml&quot;&gt;&lt;span&gt;utop # &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;#require &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;ppx_jane&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;;;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;utop # &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;#use &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;lib&#x2F;query.ml&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;type &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;t &lt;&#x2F;span&gt;&lt;span&gt;= LoadCSV &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;of &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;string &lt;&#x2F;span&gt;&lt;span&gt;| Rename &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;of &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;string &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;* &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;string
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;val &lt;&#x2F;span&gt;&lt;span&gt;t_of_sexp : Sexp&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;.t &lt;&#x2F;span&gt;&lt;span&gt;-&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;t &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &amp;lt;&lt;&#x2F;span&gt;&lt;span&gt;fun&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;val &lt;&#x2F;span&gt;&lt;span&gt;sexp_of_t : &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;t &lt;&#x2F;span&gt;&lt;span&gt;-&amp;gt; Sexp&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;.t &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &amp;lt;&lt;&#x2F;span&gt;&lt;span&gt;fun&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span&gt;val ( &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;&amp;gt;&amp;gt;&lt;&#x2F;span&gt;&lt;span&gt; ) : (&amp;#39;a -&amp;gt; &amp;#39;b) -&amp;gt; (&amp;#39;b -&amp;gt; &amp;#39;c) -&amp;gt; &amp;#39;a -&amp;gt; &amp;#39;c &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &amp;lt;&lt;&#x2F;span&gt;&lt;span&gt;fun&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;val &lt;&#x2F;span&gt;&lt;span&gt;parse : &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;string &lt;&#x2F;span&gt;&lt;span&gt;-&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;t &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &amp;lt;&lt;&#x2F;span&gt;&lt;span&gt;fun&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;val &lt;&#x2F;span&gt;&lt;span&gt;print : &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;t &lt;&#x2F;span&gt;&lt;span&gt;-&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;string &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &amp;lt;&lt;&#x2F;span&gt;&lt;span&gt;fun&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Okay now it works. I would recommend reading through the thread above if you want to know a little more about why that works, but I&#x27;ll skip over it for brevity.
+I have mixed feelings about the whole PPX ecosystem because it seems very powerful but I&#x27;ve struggled with it so far.
+I&#x27;ve already lost a couple of hours in total just fighting with the sexpr and JSON PPX libraries and I haven&#x27;t even been using OCaml that long.
+It&#x27;s part of the reason why I decided to write about my experiences with OCaml, so I could firm up my own understanding and document some of the frustrations.&lt;&#x2F;p&gt;
+&lt;p&gt;So far, it seems like more documentation would help. Right now, the PPXs I&#x27;ve used feel like a bit of a black box.
+I probably need to give it more time and maybe even try writing a PPX of my own so I can understand what&#x27;s happening better, but a lot of OCaml beginners would likely quit trying rather than digging into the internals to understand what&#x27;s going wrong.&lt;&#x2F;p&gt;
+&lt;p&gt;I know from my experience with Rust&#x27;s macro system that macros can become very complicated very quickly, and most programmers I know would rather not bother.
+But if using a language&#x27;s macro system requires you to almost be an expert in that language, then you are cutting off a significant portion of beginners from using it.
+Requiring someone to be an expert before they can write macros makes sense to me, but the barrier to entry should be a lot lower for just using macros.&lt;&#x2F;p&gt;
+&lt;p&gt;Okay, rant over. Now we can actually parse and print some queries:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;ocaml&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-ocaml &quot;&gt;&lt;code class=&quot;language-ocaml&quot; data-lang=&quot;ocaml&quot;&gt;&lt;span style=&quot;color:#6272a4;&quot;&gt;(* continuing the same utop session from above *)
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;utop # parse &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;(LoadCSV &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;\&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;people.csv&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;\&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;)&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;-&lt;&#x2F;span&gt;&lt;span&gt; : t &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span&gt;LoadCSV &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;people.csv&amp;quot;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Yup, that works.&lt;&#x2F;p&gt;
+&lt;p&gt;Whenever I was about to test the rename operator I realized that we have an issue with it.
+Right now, the rename case is of type &lt;code&gt;string * string&lt;&#x2F;code&gt;, but actually it needs to be &lt;code&gt;t * string * string&lt;&#x2F;code&gt; so it can take in an input query to rename.
+Here is what the updated type looks like:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;ocaml&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-ocaml &quot;&gt;&lt;code class=&quot;language-ocaml&quot; data-lang=&quot;ocaml&quot;&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;type &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;t &lt;&#x2F;span&gt;&lt;span&gt;= 
+&lt;&#x2F;span&gt;&lt;span&gt;  | LoadCSV &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;of &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;string
+&lt;&#x2F;span&gt;&lt;span&gt;  | Rename &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;of &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;t &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;* &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;string &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;* &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;string
+&lt;&#x2F;span&gt;&lt;span&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;@@&lt;&#x2F;span&gt;&lt;span&gt;deriving &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;sexp&lt;&#x2F;span&gt;&lt;span&gt;]
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Now we can reload our module in &lt;code&gt;utop&lt;&#x2F;code&gt; and test a more complicated query:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;ocaml&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-ocaml &quot;&gt;&lt;code class=&quot;language-ocaml&quot; data-lang=&quot;ocaml&quot;&gt;&lt;span&gt;utop # &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;#use &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;lib&#x2F;query.ml&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;type &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;t &lt;&#x2F;span&gt;&lt;span&gt;= LoadCSV &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;of &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;string &lt;&#x2F;span&gt;&lt;span&gt;| Rename &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;of &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;t &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;* &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;string &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;* &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;string
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;val &lt;&#x2F;span&gt;&lt;span&gt;t_of_sexp : Sexp&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;.t &lt;&#x2F;span&gt;&lt;span&gt;-&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;t &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &amp;lt;&lt;&#x2F;span&gt;&lt;span&gt;fun&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;val &lt;&#x2F;span&gt;&lt;span&gt;sexp_of_t : &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;t &lt;&#x2F;span&gt;&lt;span&gt;-&amp;gt; Sexp&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;.t &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &amp;lt;&lt;&#x2F;span&gt;&lt;span&gt;fun&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span&gt;val ( &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;&amp;gt;&amp;gt;&lt;&#x2F;span&gt;&lt;span&gt; ) : (&amp;#39;a -&amp;gt; &amp;#39;b) -&amp;gt; (&amp;#39;b -&amp;gt; &amp;#39;c) -&amp;gt; &amp;#39;a -&amp;gt; &amp;#39;c &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &amp;lt;&lt;&#x2F;span&gt;&lt;span&gt;fun&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;val &lt;&#x2F;span&gt;&lt;span&gt;parse : &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;string &lt;&#x2F;span&gt;&lt;span&gt;-&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;t &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &amp;lt;&lt;&#x2F;span&gt;&lt;span&gt;fun&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;val &lt;&#x2F;span&gt;&lt;span&gt;print : &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;t &lt;&#x2F;span&gt;&lt;span&gt;-&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;string &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &amp;lt;&lt;&#x2F;span&gt;&lt;span&gt;fun&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;utop # parse &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;(Rename (LoadCSV &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;\&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;people.csv&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;\&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;) &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;\&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;FirstName&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;\&amp;quot; \&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;\&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;)&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;-&lt;&#x2F;span&gt;&lt;span&gt; : t &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span&gt;Rename (LoadCSV &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;people.csv&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;FirstName&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;name&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Perfect, now we should be ready to write a simple query executor.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;executing-queries&quot;&gt;Executing Queries&lt;&#x2F;h2&gt;
+&lt;p&gt;So we have something to query against, I&#x27;ll make &lt;code&gt;employees.csv&lt;&#x2F;code&gt; using some data from the Wikipedia article on relational algebra that I linked earlier:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;csv&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-csv &quot;&gt;&lt;code class=&quot;language-csv&quot; data-lang=&quot;csv&quot;&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;Name&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;,&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;EmpId&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;,&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;DeptName
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;Harry&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;,&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;3415&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;,&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;Finance
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;Sally&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;,&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;2241&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;,&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;Sales
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;George&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;,&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;3401&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;,&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;Finance
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;Harriet&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;,&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;2202&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;,&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;Sales
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;Mary&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;,&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;1257&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;,&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;Human Resources
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;I&#x27;ll write all the execution code in a new file, &lt;code&gt;lib&#x2F;exec.ml&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;ocaml&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-ocaml &quot;&gt;&lt;code class=&quot;language-ocaml&quot; data-lang=&quot;ocaml&quot;&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;open &lt;&#x2F;span&gt;&lt;span&gt;Core
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;module &lt;&#x2F;span&gt;&lt;span&gt;TupleValue &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= struct
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;type &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;t &lt;&#x2F;span&gt;&lt;span&gt;=
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6272a4;&quot;&gt;(* For now, just load everything as a string to keep CSV loading simple *)
+&lt;&#x2F;span&gt;&lt;span&gt;    | String &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;of &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;string
+&lt;&#x2F;span&gt;&lt;span&gt;  [&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;@@&lt;&#x2F;span&gt;&lt;span&gt;deriving &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;sexp&lt;&#x2F;span&gt;&lt;span&gt;]
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;end
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;module &lt;&#x2F;span&gt;&lt;span&gt;Tuple &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= struct
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;type &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;t &lt;&#x2F;span&gt;&lt;span&gt;= Tuple &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;of &lt;&#x2F;span&gt;&lt;span&gt;TupleValue&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;.t list
+&lt;&#x2F;span&gt;&lt;span&gt;  [&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;@@&lt;&#x2F;span&gt;&lt;span&gt;deriving &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;sexp&lt;&#x2F;span&gt;&lt;span&gt;]
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;end
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;module &lt;&#x2F;span&gt;&lt;span&gt;Relation &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= struct
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;type &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;t &lt;&#x2F;span&gt;&lt;span&gt;= {
+&lt;&#x2F;span&gt;&lt;span&gt;    tuples : Tuple&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;.t list&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;    header_type : &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;string list&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;  }
+&lt;&#x2F;span&gt;&lt;span&gt;  [&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;@@&lt;&#x2F;span&gt;&lt;span&gt;deriving &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;sexp&lt;&#x2F;span&gt;&lt;span&gt;]
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;end
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;To start, I am defining types to represent data within our database.
+&lt;code&gt;TupleValue&lt;&#x2F;code&gt; is a single scalar value and currently only supports strings because that&#x27;s simple.
+&lt;code&gt;Tuple&lt;&#x2F;code&gt; is just a &lt;code&gt;TupleValue&lt;&#x2F;code&gt; list.
+And &lt;code&gt;Relation&lt;&#x2F;code&gt; is a &lt;code&gt;Tuple&lt;&#x2F;code&gt; list and a list of strings which represents the header names.
+This is probably not an ideal design, especially if you are trying to make a real database, but it works for now.&lt;&#x2F;p&gt;
+&lt;p&gt;This is also the first time we are seeing record types.
+They are basically immutable maps&#x2F;records&#x2F;structs which allow you to associate named keys with values, similar to what lots of other languages provide.
+If you want to read more about them, go &lt;a href=&quot;https:&#x2F;&#x2F;ocaml.org&#x2F;docs&#x2F;basic-data-types#records&quot;&gt;here&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;Since the only way we have of getting real data is through CSV files, let&#x27;s make some simple logic for loading CSVs:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;ocaml&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-ocaml &quot;&gt;&lt;code class=&quot;language-ocaml&quot; data-lang=&quot;ocaml&quot;&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;let &lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;_process_header_line &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ffb86c;&quot;&gt;line &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;=
+&lt;&#x2F;span&gt;&lt;span&gt;  String.split line &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;~on:&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;&amp;#39;,&amp;#39;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;let &lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;_process_csv_line &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ffb86c;&quot;&gt;line &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;=
+&lt;&#x2F;span&gt;&lt;span&gt;  String.split line &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;~on:&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;&amp;#39;,&amp;#39;
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;|&amp;gt; &lt;&#x2F;span&gt;&lt;span&gt;List.map &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;~f:&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;fun &lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ffb86c;&quot;&gt;x&lt;&#x2F;span&gt;&lt;span&gt;) -&amp;gt; TupleValue.String x)
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;|&amp;gt; fun &lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ffb86c;&quot;&gt;x&lt;&#x2F;span&gt;&lt;span&gt;) -&amp;gt; Tuple.Tuple x
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;let &lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;_load_csv &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ffb86c;&quot;&gt;path &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;=
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;let &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;lines &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span&gt;In_channel.read_lines path &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;in
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;match&lt;&#x2F;span&gt;&lt;span&gt; lines &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;with
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;| &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ffb86c;&quot;&gt;first&lt;&#x2F;span&gt;&lt;span&gt;::&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ffb86c;&quot;&gt;rst &lt;&#x2F;span&gt;&lt;span&gt;-&amp;gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    {
+&lt;&#x2F;span&gt;&lt;span&gt;      Relation.header_type&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span&gt; _process_header_line first;
+&lt;&#x2F;span&gt;&lt;span&gt;      Relation.tuples &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span&gt; rst &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;|&amp;gt; &lt;&#x2F;span&gt;&lt;span&gt;List.map &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;~f:&lt;&#x2F;span&gt;&lt;span&gt;_process_csv_line;
+&lt;&#x2F;span&gt;&lt;span&gt;    }
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;| &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;[] &lt;&#x2F;span&gt;&lt;span&gt;-&amp;gt; failwith &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;Cannot load an empty CSV&amp;quot;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;&lt;code&gt;_load_csv&lt;&#x2F;code&gt; will load a file from a given path, process the first line as a header, process the remaining lines as tuples, then spit out a &lt;code&gt;Relation&lt;&#x2F;code&gt;.
+This is a fairly standard functional style of programming.
+The main part that I found interesting is the use of &lt;code&gt;~{keyword}:{value}&lt;&#x2F;code&gt; to specify named values in OCaml.
+I thought I wouldn&#x27;t like it at first, but it&#x27;s been growing on me and I&#x27;ve come to enjoy those labels.
+I feel like that makes it a lot easier to parse out separate arguments, especially for higher-order functions.&lt;&#x2F;p&gt;
+&lt;p&gt;I also wish that variant case constructors would be considered more like plain functions so I could pipe values into them, that would allow me to rewrite &lt;code&gt;_process_csv_line&lt;&#x2F;code&gt; like this:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;ocaml&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-ocaml &quot;&gt;&lt;code class=&quot;language-ocaml&quot; data-lang=&quot;ocaml&quot;&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;let &lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;_process_csv_line &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ffb86c;&quot;&gt;line &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;=
+&lt;&#x2F;span&gt;&lt;span&gt;  String.split line &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;~on:&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;&amp;#39;,&amp;#39;
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;|&amp;gt; &lt;&#x2F;span&gt;&lt;span&gt;List.map &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;~f:&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;fun &lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ffb86c;&quot;&gt;x&lt;&#x2F;span&gt;&lt;span&gt;) -&amp;gt; TupleValue.String x)
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;|&amp;gt; &lt;&#x2F;span&gt;&lt;span&gt;Tuple.Tuple
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;I don&#x27;t think it really matters, I just feel like this style would flow better.
+There are probably valid reasons for why OCaml won&#x27;t let me do it.&lt;&#x2F;p&gt;
+&lt;p&gt;Now that we have CSV parsing, let&#x27;s also write the logic for our rename operator:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;ocaml&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-ocaml &quot;&gt;&lt;code class=&quot;language-ocaml&quot; data-lang=&quot;ocaml&quot;&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;let &lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;_rename_relation &lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ffb86c;&quot;&gt;from&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ffb86c;&quot;&gt;to_&lt;&#x2F;span&gt;&lt;span&gt;) &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ffb86c;&quot;&gt;relation &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;=
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;let open&lt;&#x2F;span&gt;&lt;span&gt; Relation &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;in
+&lt;&#x2F;span&gt;&lt;span&gt;  { relation &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;with&lt;&#x2F;span&gt;&lt;span&gt; header_type &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span&gt; relation.header_type &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;|&amp;gt; &lt;&#x2F;span&gt;&lt;span&gt;List.map &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;~f:&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;fun &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ffb86c;&quot;&gt;x &lt;&#x2F;span&gt;&lt;span&gt;-&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span&gt;String.equal x from &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;then&lt;&#x2F;span&gt;&lt;span&gt; to_ &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;else&lt;&#x2F;span&gt;&lt;span&gt; x) }
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;The &lt;code&gt;let open Relation in&lt;&#x2F;code&gt; line allows you to access the items within that module for the rest of your current scope.
+The &lt;code&gt;{ relation with ... }&lt;&#x2F;code&gt; syntax is a record update, which isn&#x27;t technically updating the record but instead it allocates a new record.&lt;&#x2F;p&gt;
+&lt;aside class=&quot;callout&quot;&gt;
+  &lt;div class=&quot;body&quot;&gt;
+    &lt;h5 class=&quot;label&quot;&gt;Note&lt;&#x2F;h5&gt;
+
+    Theoretically, with &lt;a href=&quot;https:&#x2F;&#x2F;blog.janestreet.com&#x2F;oxidizing-ocaml-ownership&#x2F;&quot;&gt;recent advances&lt;&#x2F;a&gt; in the OCaml compiler, it should be able to automatically optimize an immutable record update into a mutable update in certain circumstances. If you could statically guarantee that your reference is unique using some kind of ownership annotations (like in Rust), then you could optimize these immutable copies into mutable updates, which is great because allocation is expensive.&lt;&#x2F;p&gt;
+&lt;p&gt;You could also manually mark the field as mutable and do a mutable update instead, but then you&#x27;re introducing extra mental overhead.
+Wouldn&#x27;t it be great if the compiler could do the optimization for you so you don&#x27;t have to constantly track if you need a mutable&#x2F;immutable update every time you make a change?
+  &lt;&#x2F;div&gt;
+&lt;&#x2F;aside&gt;
+&lt;p&gt;Finally, we can pattern match on our query AST to evaluate it:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;ocaml&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-ocaml &quot;&gt;&lt;code class=&quot;language-ocaml&quot; data-lang=&quot;ocaml&quot;&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;let rec &lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;exec &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ffb86c;&quot;&gt;query &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;=
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;match&lt;&#x2F;span&gt;&lt;span&gt; query &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;with
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;| &lt;&#x2F;span&gt;&lt;span&gt;Query.LoadCSV &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ffb86c;&quot;&gt;path &lt;&#x2F;span&gt;&lt;span&gt;-&amp;gt; _load_csv path
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;| &lt;&#x2F;span&gt;&lt;span&gt;Query.Rename (&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ffb86c;&quot;&gt;inner_query&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ffb86c;&quot;&gt;from&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ffb86c;&quot;&gt;to_&lt;&#x2F;span&gt;&lt;span&gt;) -&amp;gt; exec inner_query &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;|&amp;gt;&lt;&#x2F;span&gt;&lt;span&gt; _rename_relation (from, to_)
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Specifying a function with &lt;code&gt;rec&lt;&#x2F;code&gt; before the name marks it as recursive, which is very useful for our use case here.
+This kind of recursive evaluation is &lt;em&gt;very&lt;&#x2F;em&gt; common when working with recursive types like an AST.
+We could already use this &lt;code&gt;exec&lt;&#x2F;code&gt; function in &lt;code&gt;utop&lt;&#x2F;code&gt;, but instead I want to build a dedicated REPL for this database.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;ocaml&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-ocaml &quot;&gt;&lt;code class=&quot;language-ocaml&quot; data-lang=&quot;ocaml&quot;&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;let rec &lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;repl &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ffb86c;&quot;&gt;() &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;=
+&lt;&#x2F;span&gt;&lt;span&gt;  print_string &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;&amp;gt; &amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;  Out_channel.(flush stdout);
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;let &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;input &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span&gt;In_channel.(input_line_exn stdin) &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;in
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;let &lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;ast &lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;Query.t &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span&gt;Query.parse input &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;in
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;let &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;result &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span&gt; exec ast &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;in
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;let &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;sexp &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span&gt;Relation.sexp_of_t result &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;in
+&lt;&#x2F;span&gt;&lt;span&gt;  print_endline (Sexp.to_string_hum &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;~indent:&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;4&lt;&#x2F;span&gt;&lt;span&gt; sexp);
+&lt;&#x2F;span&gt;&lt;span&gt;  repl &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;()
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Since we initialized this as a full-featured project ealier using &lt;code&gt;dune&lt;&#x2F;code&gt;, we already have our &lt;code&gt;bin&#x2F;&lt;&#x2F;code&gt; application folder which would be perfect for running a REPL.
+Let&#x27;s hook that up by call our &lt;code&gt;repl&lt;&#x2F;code&gt; function from &lt;code&gt;bin&#x2F;main.ml&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;ocaml&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-ocaml &quot;&gt;&lt;code class=&quot;language-ocaml&quot; data-lang=&quot;ocaml&quot;&gt;&lt;span&gt;Camalbrarian.Exec.repl &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;()
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Simple! Let&#x27;s see if it works. Calling &lt;code&gt;dune exec&lt;&#x2F;code&gt; in the shell should automatically load our project and evaluate &lt;code&gt;bin&#x2F;main.ml&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;camalbrarian&lt;&#x2F;span&gt;&lt;span&gt; $ dune exec camalbrarian
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;&amp;gt; &lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;Rename&lt;&#x2F;span&gt;&lt;span&gt; (LoadCSV &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;employees.csv&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;) &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;Name&amp;quot; &amp;quot;FirstName&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;span&gt;  ((&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;tuples
+&lt;&#x2F;span&gt;&lt;span&gt;    ((Tuple ((String Harry) (String &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;3415&lt;&#x2F;span&gt;&lt;span&gt;) (String Finance)))
+&lt;&#x2F;span&gt;&lt;span&gt;     (Tuple ((String Sally) (String &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;2241&lt;&#x2F;span&gt;&lt;span&gt;) (String Sales)))
+&lt;&#x2F;span&gt;&lt;span&gt;     (Tuple ((String George) (String &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;3401&lt;&#x2F;span&gt;&lt;span&gt;) (String Finance)))
+&lt;&#x2F;span&gt;&lt;span&gt;     (Tuple ((String Harriet) (String &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;2202&lt;&#x2F;span&gt;&lt;span&gt;) (String Sales)))
+&lt;&#x2F;span&gt;&lt;span&gt;     (Tuple ((String Mary) (String &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;1257&lt;&#x2F;span&gt;&lt;span&gt;) (String &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;Human Resources&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;)))))
+&lt;&#x2F;span&gt;&lt;span&gt;   (&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;header_type&lt;&#x2F;span&gt;&lt;span&gt; (FirstName EmpId DeptName)))
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Success!
+Our CSV loading worked great, and the rename operator worked because the first header is now &quot;FirstName&quot; instead of &quot;Name&quot;.&lt;&#x2F;p&gt;
+&lt;aside class=&quot;callout&quot;&gt;
+  &lt;div class=&quot;body&quot;&gt;
+    &lt;h5 class=&quot;label&quot;&gt;Tip&lt;&#x2F;h5&gt;
+
+    If you are on a UNIX-like operating system, you probably have (or could install) &lt;code&gt;rlwrap&lt;&#x2F;code&gt;, which can make your custom REPL experience a lot nicer.
+If you have it, just run &lt;code&gt;rlwrap dune exec camalbrarian&lt;&#x2F;code&gt;.
+  &lt;&#x2F;div&gt;
+&lt;&#x2F;aside&gt;
+&lt;p&gt;If you want to take this further there is a lot more interesting stuff to implement. Like:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;More relational algebra operators:
+&lt;ul&gt;
+&lt;li&gt;projection, selection, natural joins, equijoins, semijoins, antijoins, and division!&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;More data sources:
+&lt;ul&gt;
+&lt;li&gt;Just querying CSVs is pretty boring. This would get a lot more interesting if it could query other databases like Postgres, MySQL, and SQL Server&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;Query Optimization&#x2F;Planning:
+&lt;ul&gt;
+&lt;li&gt;Optimizing queries before running them would be a great way to get into more advanced pattern matching features like guard clauses. It can get very complicated (especially if paired with the next idea), but there are also a few simple optimizations that would be fun to add.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;Storing data:
+&lt;ul&gt;
+&lt;li&gt;This project would get &lt;em&gt;extremely fun&lt;&#x2F;em&gt; if we started supporting insertions&#x2F;updates&#x2F;deletes and storing our data on disk.
+If you care about performance, storing relational data gets complicated fast because now you have to worry about concurrency, filesystem corruption, indexing, and a million other things. Interestingly, you would also need a separate language for describing modifications if you wanted to maintain relational algebra purity because, as far as I know, the relational algebra doesn&#x27;t include any operators that mutate relations. It&#x27;s very similar to functional programming in that sense.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;I may tackle a few of the earlier ideas in a future post, but I&#x27;ll stop here for now.
+If you&#x27;re trying to get better with OCaml like I am, hopefully reading through my rants helped you a little bit.
+There were a lot of points where I could have chased a rabbit or dug into something deeper, but I decided not to just so I could finish the post.
+I&#x27;d like to write more about OCaml in the future because it helps me process what I&#x27;m learning and I hope it could help advertise the language to others who are curious about the functional way of doing things.
+Thanks for reading!&lt;&#x2F;p&gt;
+</content>
+        
+    </entry>
+</feed>

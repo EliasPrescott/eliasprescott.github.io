@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+    <title> - Ruby</title>
+    <link rel="self" type="application/atom+xml" href="https://eliasprescott.github.io/tags/ruby/atom.xml"/>
+    <link rel="alternate" type="text/html" href="https://eliasprescott.github.io"/>
+    <generator uri="https://www.getzola.org/">Zola</generator>
+    <updated>2025-05-06T00:00:00+00:00</updated>
+    <id>https://eliasprescott.github.io/tags/ruby/atom.xml</id>
+    <entry xml:lang="en">
+        <title>Making a NeoVim Clone with Ruby</title>
+        <published>2025-05-06T00:00:00+00:00</published>
+        <updated>2025-05-06T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Elias Prescott
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://eliasprescott.github.io/blog/neovim-ruby-clone/"/>
+        <id>https://eliasprescott.github.io/blog/neovim-ruby-clone/</id>
+        
+        <content type="html" xml:base="https://eliasprescott.github.io/blog/neovim-ruby-clone/">&lt;p&gt;I&#x27;ve been learning Ruby recently.
+I&#x27;ve really been enjoying it and I&#x27;ve been reading through the Ruby docs quite a bit.
+When I found this section on &lt;a href=&quot;https:&#x2F;&#x2F;docs.ruby-lang.org&#x2F;en&#x2F;3.4&#x2F;IO.html#class-IO-label-Extension+io-2Fconsole&quot;&gt;&lt;code&gt;io&#x2F;console&lt;&#x2F;code&gt;&lt;&#x2F;a&gt;, I thought it sounded like fun.
+Since I have grown quite attached to using NeoVim as my editor, I thought it would be fun to make a NeoVim clone.
+For now, I&#x27;m calling it RVim, which is short for Ruby Vim.
+A high-quality implementation of a text editor would require &lt;i&gt;tons&lt;&#x2F;i&gt; of code to handle all the little edge cases around text manipulation, buffer display, and cursor handling.
+Obviously RVim is a long way off from handling all of that correctly, but I am surprised by how many features I&#x27;ve been able to pack into ~600 lines of code.
+I&#x27;m attributing that to how expressive Ruby is, and how well suited it is as a scripting language.&lt;&#x2F;p&gt;
+&lt;p&gt;One example of how productive Ruby can be comes from how I implemented the command mode.
+NeoVim has a command mode (&lt;code&gt;:help Cmdline-mode&lt;&#x2F;code&gt; in Vim to learn more) which allows users to run a variety of commands.
+To implement something exactly equivalent to Vim&#x27;s command mode would essentially require a custom language parser and interpreter.
+As much as I enjoy making little languages, I realized I could cheat by just providing a Ruby REPL instead.
+To implement a basic version of this REPL, I made a &lt;code&gt;RVimCommandCenter&lt;&#x2F;code&gt; class which holds all the helper methods I want to expose to users.
+I made a basic eval method on &lt;code&gt;RVimCommandCenter&lt;&#x2F;code&gt; which will evaluate input within the context of the class instance by using &lt;code&gt;binding.eval input&lt;&#x2F;code&gt;.
+Any code evaluated using this method will have immediate access to the methods within &lt;code&gt;RVimCommandCenter&lt;&#x2F;code&gt;.
+So, to implement the &lt;code&gt;q&lt;&#x2F;code&gt; command to quit the editor, I can simply do this:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;ruby&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-ruby &quot;&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;def &lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;q
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffb86c;&quot;&gt;@state&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;should_quit &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;true
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;end
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;I&#x27;m still in the early stages of building out this command system, but it is surprisingly powerful.
+For now, it&#x27;s not useful as a general purpose REPL because it does not display the results of the evaluation to the user, but that can always be fixed later on.
+In the demo video below, you can see how I directly access the state variable on the command center class to monkey around with the internal state of the editor.
+In addition to providing some convenient alias methods that mirror NeoVim&#x27;s commands, the command center class also allows users full access to the internal state of the editor.
+Giving users that kind of power can be dangerous, but I believe the benefits far outweigh the risks.
+By implementing the editor in pure Ruby and exposing the editor state as much as possible, I believe RVim could be extremely introspectable and customizable with little implementation effort on my part.
+With the right API design on the command center and state classes, it could even be easier to extend than NeoVim is.
+But we are still a ways off from that point.&lt;&#x2F;p&gt;
+&lt;p&gt;To provide a better REPL experience while I am still building out the command mode, I also added a &lt;code&gt;dbg&lt;&#x2F;code&gt; method to the command center which will place the console back into cooked mode and open &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;ruby&#x2F;irb&quot;&gt;irb&lt;&#x2F;a&gt;.
+This will give users a much better REPL editing experience with autocomplete and history support.
+You can also see me using irb to debug the editor state in the below video.
+Currently you cannot use irb&#x27;s full debugging toolkit because the application will go back into raw mode as soon as you step out of the initial breakpoint, but I think that could be fixed without too much effort.&lt;&#x2F;p&gt;
+&lt;iframe width=&quot;560&quot; height=&quot;315&quot; src=&quot;https:&#x2F;&#x2F;www.youtube-nocookie.com&#x2F;embed&#x2F;hzL5Su0PDo0?si=w15WHxyCsWxge_fd&quot; title=&quot;YouTube video player&quot; frameborder=&quot;0&quot; allow=&quot;accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share&quot; referrerpolicy=&quot;strict-origin-when-cross-origin&quot; allowfullscreen&gt;&lt;&#x2F;iframe&gt;
+&lt;p&gt;I hope you enjoyed reading about my latest crazy project.
+Even if it never takes off or becomes a useful editor, I have already learned a lot about Ruby and I&#x27;ve had a lot of fun.
+&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;EliasPrescott&#x2F;rvim&quot;&gt;Here&lt;&#x2F;a&gt; is the repo for RVim if you want to look at the code or play around with it.
+You should be able to run &lt;code&gt;bundle&lt;&#x2F;code&gt; or &lt;code&gt;gem install -g&lt;&#x2F;code&gt;, and then just &lt;code&gt;ruby main.rb&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+</content>
+        
+    </entry>
+</feed>

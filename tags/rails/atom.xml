@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+    <title> - Rails</title>
+    <link rel="self" type="application/atom+xml" href="https://eliasprescott.github.io/tags/rails/atom.xml"/>
+    <link rel="alternate" type="text/html" href="https://eliasprescott.github.io"/>
+    <generator uri="https://www.getzola.org/">Zola</generator>
+    <updated>2025-04-28T00:00:00+00:00</updated>
+    <id>https://eliasprescott.github.io/tags/rails/atom.xml</id>
+    <entry xml:lang="en">
+        <title>Simple SQLite Backups for Rails 8 with SSHKit</title>
+        <published>2025-04-28T00:00:00+00:00</published>
+        <updated>2025-04-28T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Elias Prescott
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://eliasprescott.github.io/blog/rails-8-sshkit-sqlite-backups/"/>
+        <id>https://eliasprescott.github.io/blog/rails-8-sshkit-sqlite-backups/</id>
+        
+        <content type="html" xml:base="https://eliasprescott.github.io/blog/rails-8-sshkit-sqlite-backups/">&lt;p&gt;This won&#x27;t be a long post, I just wanted to record something I struggled with for a little while.
+I recently made a quick toy app using Rails 8 as a learning experience (&lt;a href=&quot;https:&#x2F;&#x2F;emoji-polls.australorp.dev&quot;&gt;emoji-polls.australorp.dev&lt;&#x2F;a&gt;).
+I don&#x27;t actually need database backups since this is only a toy app, but I thought it sounded like a fun project that wouldn&#x27;t take too long.
+It ended up taking longer than I thought because I had to play around with the user and group permissions on my VM a little bit, and directly accessing a named Docker volume from the host side turned out to be more difficult than I thought.
+Eventually, I realized that I could just use &lt;code&gt;docker volume inspect $VOLUME_NAME&lt;&#x2F;code&gt; and then parse out the mount point property.
+I tried to mess with the folder permissions so my admin user could access the docker volumes without using &lt;code&gt;sudo&lt;&#x2F;code&gt;, but I eventually gave up and started using &lt;code&gt;sudo&lt;&#x2F;code&gt;, and then everything worked perfectly.
+Sometimes, &lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;Worse_is_better&quot;&gt;worse really is better&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;This project was also a fun excuse to play around with &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;capistrano&#x2F;sshkit&quot;&gt;SSHKit&lt;&#x2F;a&gt;, which is a Ruby library for running commands on remote servers.
+My use case was really simple since I only have one host and I don&#x27;t have any complex logic.
+My favorite feature is the ability to &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;capistrano&#x2F;sshkit?tab=readme-ov-file#transferring-files&quot;&gt;transfer files&lt;&#x2F;a&gt;.
+Before settling on using SSHKit, I was looking into various other methods for automating this process using bash scripting, and none of them looked fun.
+But SSHKit makes transferring a file back to the host side super simple.
+This was my first experience replacing some of my normal bash scripting with Ruby, but it was a really positive one.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;ruby&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-ruby &quot;&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;&lt;span style=&quot;color:#6272a4;&quot;&gt;#!&#x2F;usr&#x2F;bin&#x2F;env ruby
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;require &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;sshkit&amp;quot;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;require &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;sshkit&#x2F;dsl&amp;quot;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;require &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;date&amp;quot;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;require &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;json&amp;quot;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;include &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#66d9ef;&quot;&gt;SSHKit&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;::&lt;&#x2F;span&gt;&lt;span&gt;DSL
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#66d9ef;&quot;&gt;SSHKit&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;::&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#66d9ef;&quot;&gt;Backend&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;::&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#66d9ef;&quot;&gt;Netssh&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;configure &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;do &lt;&#x2F;span&gt;&lt;span&gt;|&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ffb86c;&quot;&gt;ssh&lt;&#x2F;span&gt;&lt;span&gt;|
+&lt;&#x2F;span&gt;&lt;span&gt;  ssh&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;ssh_options &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;user: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39;admin&amp;#39;&lt;&#x2F;span&gt;&lt;span&gt;,
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;keys: &lt;&#x2F;span&gt;&lt;span&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39;.ssh&#x2F;kamal&amp;#39;&lt;&#x2F;span&gt;&lt;span&gt;],
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;forward_agent: false&lt;&#x2F;span&gt;&lt;span&gt;,
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;auth_methods: &lt;&#x2F;span&gt;&lt;span&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39;publickey&amp;#39;&lt;&#x2F;span&gt;&lt;span&gt;],
+&lt;&#x2F;span&gt;&lt;span&gt;  }
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;end
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;environment &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;production&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;on &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39;emoji-polls.australorp.dev&amp;#39; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;do
+&lt;&#x2F;span&gt;&lt;span&gt;  file_name &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;#{&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#66d9ef;&quot;&gt;DateTime&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;now&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;strftime(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;%Y&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;%m&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;%d&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;)}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;-&lt;&#x2F;span&gt;&lt;span&gt;#{environment}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;.db&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;  temp_file_path &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;&#x2F;tmp&#x2F;&lt;&#x2F;span&gt;&lt;span&gt;#{file_name}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;  local_image_path &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;.&#x2F;images&#x2F;&lt;&#x2F;span&gt;&lt;span&gt;#{file_name}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;  info &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;Backing up image to &lt;&#x2F;span&gt;&lt;span&gt;#{temp_file_path}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt; on &lt;&#x2F;span&gt;&lt;span&gt;#{host}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;  volumes_output &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span&gt; capture &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;:docker&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;volume&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;inspect&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;emoji_polls_storage&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;  volumes_info &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#66d9ef;&quot;&gt;JSON&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;parse volumes_output
+&lt;&#x2F;span&gt;&lt;span&gt;  volume_path &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span&gt; volumes_info[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;][&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;Mountpoint&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;]
+&lt;&#x2F;span&gt;&lt;span&gt;  execute &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;:sudo&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;:sqlite3&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;#{volume_path}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&#x2F;&lt;&#x2F;span&gt;&lt;span&gt;#{environment}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;.sqlite3&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;&amp;#39;.backup &lt;&#x2F;span&gt;&lt;span&gt;#{temp_file_path}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;  download! temp_file_path, local_image_path
+&lt;&#x2F;span&gt;&lt;span&gt;  info &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;Deleting image on &lt;&#x2F;span&gt;&lt;span&gt;#{host}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;  execute &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;:sudo&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;:rm&lt;&#x2F;span&gt;&lt;span&gt;, temp_file_path
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;end
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+</content>
+        
+    </entry>
+</feed>
