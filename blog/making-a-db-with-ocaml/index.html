@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Software Musings | Making a Database with OCaml</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Mono:ital,wght@0,200..800;1,200..800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+  <link href="/styles.css" rel="stylesheet">
+  <link rel="alternate" type="application/atom+xml" title="All Posts Feed" href="https://eliasprescott.github.io/atom.xml">
+  
+  
+    
+    
+    <link rel="alternate" type="application/atom+xml" title="All Posts about Bible Study" href="https://eliasprescott.github.io/tags/bible-study/atom.xml">
+  
+    
+    
+    <link rel="alternate" type="application/atom+xml" title="All Posts about Christianity" href="https://eliasprescott.github.io/tags/christianity/atom.xml">
+  
+    
+    
+    <link rel="alternate" type="application/atom+xml" title="All Posts about Databases" href="https://eliasprescott.github.io/tags/databases/atom.xml">
+  
+    
+    
+    <link rel="alternate" type="application/atom+xml" title="All Posts about Lua" href="https://eliasprescott.github.io/tags/lua/atom.xml">
+  
+    
+    
+    <link rel="alternate" type="application/atom+xml" title="All Posts about NeoVim" href="https://eliasprescott.github.io/tags/neovim/atom.xml">
+  
+    
+    
+    <link rel="alternate" type="application/atom+xml" title="All Posts about OCaml" href="https://eliasprescott.github.io/tags/ocaml/atom.xml">
+  
+    
+    
+    <link rel="alternate" type="application/atom+xml" title="All Posts about Programming" href="https://eliasprescott.github.io/tags/programming/atom.xml">
+  
+    
+    
+    <link rel="alternate" type="application/atom+xml" title="All Posts about Rails" href="https://eliasprescott.github.io/tags/rails/atom.xml">
+  
+    
+    
+    <link rel="alternate" type="application/atom+xml" title="All Posts about Ruby" href="https://eliasprescott.github.io/tags/ruby/atom.xml">
+  
+    
+    
+    <link rel="alternate" type="application/atom+xml" title="All Posts about Typst" href="https://eliasprescott.github.io/tags/typst/atom.xml">
+  
+</head>
+
+<body>
+  <header>
+    <a href="/">
+      <h1 class="title">
+        Software Musings
+      </h1>
+    </a>
+
+    <nav>
+      
+      <a href="https://eliasprescott.github.io/tags/programming/">Programming</a>
+      
+      <a href="https://eliasprescott.github.io/tags/christianity/">Christianity</a>
+    </nav>
+
+    <div></div>
+  </header>
+  <section class="section">
+    <div class="container">
+      
+<h1 class="title">
+  Making a Database with OCaml
+</h1>
+
+
+<div class="taglist">
+
+  
+  <span class="tag">
+    <a href="https://eliasprescott.github.io/tags/programming/">Programming</a>
+  </span>
+
+  
+  <span class="tag">
+    <a href="https://eliasprescott.github.io/tags/ocaml/">OCaml</a>
+  </span>
+
+  
+  <span class="tag">
+    <a href="https://eliasprescott.github.io/tags/databases/">Databases</a>
+  </span>
+
+</div>
+
+<p class="subtitle"><sub>Posted 2025-03-24</sub></p>
+<p class="subtitle"><sub>~22 minute read time</sub></p>
+
+<hr />
+
+<p>I've been playing around with OCaml recently and really enjoying it.
+I love functional programming and have also enjoyed playing around with F#, Elixir, and Haskell in the past, but I've never gotten super far with any of those languages for various reasons.
+So, I wanted to take on a more serious project to really kick the tires on the language and start building some deeper knowledge.
+In the past, I read a book about the pure relational algebra that inspires modern relational databases (<a href="https://a.co/d/jartLNm">Amazon book link</a>).
+Taking what I learned from the book, I wrote a small Rust library that would parse a query language and use it to run queries against CSV files.
+That project never turned into a full-on database engine, but I enjoyed the project a lot and thought it would be a good project to recreate in OCaml for a few reasons.</p>
+<h2 id="getting-started">Getting Started</h2>
+<p>If you want to follow along, you'll need <a href="https://opam.ocaml.org/"><code>opam</code></a> and <a href="https://dune.build/"><code>dune</code></a> installed.</p>
+<p>We can use <code>dune</code> to quickly initialize the new project:</p>
+<pre data-lang="bash" style="background-color:#282a36;color:#f8f8f2;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#50fa7b;">development</span><span> $ dune init project camalbrarian
+</span><span style="color:#50fa7b;">Success:</span><span> initialized project component named camalbrarian
+</span></code></pre>
+<aside class="callout">
+  <div class="body">
+    <h5 class="label">Note</h5>
+
+    Yes, camalbrarian stands for Camel Librarian, because we'll be starting with the query engine, and a query engine is basically a specialized librarian.
+And no, the typo in "camal" was not intentional, but let's just roll with it.
+  </div>
+</aside>
+<p>We can <code>cd</code> into the new folder and create an Opam switch.</p>
+<pre data-lang="bash" style="background-color:#282a36;color:#f8f8f2;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#50fa7b;">development</span><span> $ cd camalbrarian
+</span><span style="color:#50fa7b;">camalbrarian</span><span> $ opam switch create . 5.3.0
+</span></code></pre>
+<p>If you haven't used OCaml before, you're probably already confused why I created a "switch."
+Essentially, <code>opam</code> switches are "isolated OCaml environments" (<a href="https://ocaml.org/docs/opam-switch-introduction">source</a>).
+Switches allow you to have different versions of OCaml installed at the same time, so you can "switch" between them.
+Where I found switches confusing at first is that they also manage all packages that you install.
+I'm used to the C# or Rust model where installed packages are stored/managed within the project directory (e.g. <code>dotnet add package ...</code> or <code>cargo add ...</code>) and language versions are managed separately.
+But <code>opam</code> switches manage the language, tooling, and packages all at the same time.</p>
+<p>This means that you could create a single switch, maybe for a specific version of OCaml like 5.3.0, and then you could use that switch for all your projects.
+Sharing a switch between multiple projects would be faster, but it also means that all projects would be sharing versions of everything by default.
+This might be fine at first, but eventually you would want to use a different version of the language or a particular package, and then you would want another switch.
+Thankfully, <code>opam</code> has an easy solution for creating project-specific switches. <code>opam</code> calls these "local switches", while shared switches are called "global switches."</p>
+<p>To understand the difference better, we can peruse the <code>opam switch</code> man page by running <code>opam switch --help</code> or <code>man opam-switch</code>.
+If you run that and search for the <code>create</code> subcommand, you'll find this blurb:</p>
+<blockquote>
+<p>create SWITCH [COMPILER]</p>
+</blockquote>
+<blockquote>
+<blockquote>
+<p>Create a new switch, and install the given compiler there. SWITCH can be a plain name, or a directory, absolute or relative, in which case a local switch is created below the given directory. COMPILER, if omitted, defaults to SWITCH if it is a plain name, unless --packages, --formula or --empty is specified. When creating a local switch, and none of these options are present, the compiler is chosen according to the configuration default (see opam-init(1)). If the chosen directory contains package definitions, a compatible compiler is searched within the default selection, and the packages will automatically get installed.</p>
+</blockquote>
+</blockquote>
+<p>If you are allergic to man pages (Windows user! 🫵) or if you want more info, you can read through <a href="https://ocaml.org/docs/opam-switch-introduction#types-of-switches">Introduction to opam Switches</a>.</p>
+<p>My takeaway is that you should almost always want to create a local switch by running something like <code>opam switch create .</code> in your project directory.
+This will most closely mimic how other language package managers work and should provide the level of project isolation that you are used to.</p>
+<p>After my create switch command finished installing everything, it recommened that I run <code>eval $(opam env)</code> to update my current shell environment.
+After we run that, we can poke around a little bit to understand what <code>opam</code> did for us.</p>
+<p>I'll start by trying to source our <code>ocaml</code> binary with the <code>which</code> command:</p>
+<pre data-lang="bash" style="background-color:#282a36;color:#f8f8f2;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#50fa7b;">camalbrarian</span><span> $ which ocaml
+</span><span style="color:#bd93f9;">~</span><span style="color:#50fa7b;">/development/camalbrarian/_opam/bin/ocaml
+</span></code></pre>
+<p>Okay so <code>opam</code> made a little <code>bin/</code> folder local to our project. Let's investigate that a little bit:</p>
+<pre data-lang="bash" style="background-color:#282a36;color:#f8f8f2;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#50fa7b;">camalbrarian</span><span> $ ls _opam/bin/
+</span><span style="color:#50fa7b;">ocaml</span><span>                   ocamlcp                 ocamldoc                ocamlmklib              ocamlopt                ocamlrun
+</span><span style="color:#50fa7b;">ocamlc</span><span>                  ocamldebug              ocamldoc.opt            ocamlmktop              ocamlopt.byte           ocamlrund
+</span><span style="color:#50fa7b;">ocamlc.byte</span><span>             ocamldep                ocamllex                ocamlobjinfo            ocamlopt.opt            ocamlruni
+</span><span style="color:#50fa7b;">ocamlc.opt</span><span>              ocamldep.byte           ocamllex.byte           ocamlobjinfo.byte       ocamloptp               ocamlyacc
+</span><span style="color:#50fa7b;">ocamlcmt</span><span>                ocamldep.opt            ocamllex.opt            ocamlobjinfo.opt        ocamlprof
+</span></code></pre>
+<p>Looks good to me 👍</p>
+<p>I still haven't used OCaml enough to know what all of these are for, but you can chase down their man pages if you really care.
+The names indicate that they are all different tools that are useful for the compilation process.</p>
+<p>If we want to see what switch we are currently on, you can use <code>switch list</code>:</p>
+<pre data-lang="bash" style="background-color:#282a36;color:#f8f8f2;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#50fa7b;">camalbrarian</span><span> $ opam switch list
+</span><span style="color:#6272a4;">#  switch                      compiler                                           description
+</span><span style="color:#50fa7b;">→  </span><span style="color:#bd93f9;">~</span><span>/development/camalbrarian  ocaml-base-compiler.5.3.0,ocaml-options-vanilla.1  ocaml-base-compiler = 5.3.0 </span><span style="color:#ff79c6;">| </span><span style="color:#50fa7b;">ocaml-system</span><span> = 5.3.0
+</span><span>   </span><span style="color:#50fa7b;">5.3.0</span><span>                       ocaml-base-compiler.5.3.0,ocaml-options-vanilla.1  ocaml-base-compiler = 5.3.0 </span><span style="color:#ff79c6;">| </span><span style="color:#50fa7b;">ocaml-system</span><span> = 5.3.0
+</span><span>   </span><span style="color:#50fa7b;">default</span><span>                     ocaml.5.2.0                                        default
+</span><span>
+</span><span style="color:#50fa7b;">[NOTE]</span><span> Current switch has been selected based on the current directory.
+</span><span>       </span><span style="color:#50fa7b;">The</span><span> current global system switch is 5.3.0.
+</span></code></pre>
+<p>If you are a mega-nerd (which is likely if you are still reading) then you might be wondering what that <code>eval $(opam env)</code> command did earlier.</p>
+<p>Well let's see:</p>
+<pre data-lang="bash" style="background-color:#282a36;color:#f8f8f2;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#50fa7b;">camalbrarian</span><span> $ opam env
+</span><span style="color:#ffffff;">OPAM_LAST_ENV</span><span style="color:#ff79c6;">=</span><span style="color:#f1fa8c;">&#39;~/.opam/.last-env/env-21ef9d7979f317c6a64e8577a7d09daf-0&#39;</span><span style="color:#ff79c6;">; export </span><span style="color:#ffffff;">OPAM_LAST_ENV</span><span style="color:#ff79c6;">;
+</span><span style="color:#ffffff;">OPAM_SWITCH_PREFIX</span><span style="color:#ff79c6;">=</span><span style="color:#f1fa8c;">&#39;~/development/camalbrarian/_opam&#39;</span><span style="color:#ff79c6;">; export </span><span style="color:#ffffff;">OPAM_SWITCH_PREFIX</span><span style="color:#ff79c6;">;
+</span><span style="color:#ffffff;">OCAMLTOP_INCLUDE_PATH</span><span style="color:#ff79c6;">=</span><span style="color:#f1fa8c;">&#39;~/development/camalbrarian/_opam/lib/toplevel&#39;</span><span style="color:#ff79c6;">; export </span><span style="color:#ffffff;">OCAMLTOP_INCLUDE_PATH</span><span style="color:#ff79c6;">;
+</span><span style="color:#ffffff;">CAML_LD_LIBRARY_PATH</span><span style="color:#ff79c6;">=</span><span style="color:#f1fa8c;">&#39;~/development/camalbrarian/_opam/lib/stublibs:~/development/camalbrarian/_opam/lib/ocaml/stublibs:~/development/camalbrarian/_opam/lib/ocaml&#39;</span><span style="color:#ff79c6;">; export </span><span style="color:#ffffff;">CAML_LD_LIBRARY_PATH</span><span style="color:#ff79c6;">;
+</span><span style="color:#ffffff;">OCAML_TOPLEVEL_PATH</span><span style="color:#ff79c6;">=</span><span style="color:#f1fa8c;">&#39;~/development/camalbrarian/_opam/lib/toplevel&#39;</span><span style="color:#ff79c6;">; export </span><span style="color:#ffffff;">OCAML_TOPLEVEL_PATH</span><span style="color:#ff79c6;">;
+</span><span style="color:#ffffff;">PATH</span><span style="color:#ff79c6;">=</span><span style="color:#f1fa8c;">&#39;~/development/camalbrarian/_opam/bin:{rest of PATH omitted for privacy}&#39;</span><span style="color:#ff79c6;">; export </span><span style="color:#ffffff;">PATH</span><span style="color:#ff79c6;">;
+</span></code></pre>
+<p>I was worried that <code>opam env</code> would be some crazy complicated shell script, but it's refreshingly simple.
+It just sets up some environment variables to keep track of a few paths, and then it adds the local switch <code>bin/</code> folder to my <code>PATH</code>.</p>
+<p>Before we write any OCaml code (one day we will, I promise), I would like to at least set up an <a href="https://en.wikipedia.org/wiki/Language_Server_Protocol">LSP</a>.
+The primary LSP for OCaml is <a href="https://github.com/ocaml/ocaml-lsp">ocaml-lsp</a> and it has some simple install instructions if you are using <code>opam</code>:</p>
+<pre data-lang="bash" style="background-color:#282a36;color:#f8f8f2;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#50fa7b;">camalbrarian</span><span> $ opam install ocaml-lsp-server
+</span></code></pre>
+<aside class="callout">
+  <div class="body">
+    <h5 class="label">Note</h5>
+
+    The README for <code>ocaml-lsp</code> has this note:</p>
+<blockquote>
+<p>you will need to install ocaml-lsp-server in every switch where you would like to use it.</p>
+</blockquote>
+<p>I think it's a little unfortunate that you have to reinstall your tooling on every new switch, because that can feel like a drag if you are just starting to learn the language and starting lots of new projects.
+But it might be unavoidable.
+Part of me wonders if you could have a local and global switch registered at the same time.
+So, new library packages would be installed in the local switch, but you could also specify that tooling packages should be installed in your global switch.
+Then, both switches would be registered on your <code>PATH</code> when you run <code>eval $(opam env)</code>, with the local switch first so it takes precedence.
+Maybe that's a bad idea or maybe that's already how it works and I just don't know enough about <code>opam</code> yet.
+  </div>
+</aside>
+<p>After that install finishes, we can investigate our new LSP binary:</p>
+<pre data-lang="bash" style="background-color:#282a36;color:#f8f8f2;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#50fa7b;">camalbrarian</span><span> $ which ocamllsp
+</span><span style="color:#bd93f9;">~</span><span style="color:#50fa7b;">/development/camalbrarian/_opam/bin/ocamllsp
+</span></code></pre>
+<p>Very nice. I'll register that LSP in my NeoVim config (I use NeoVim btw 😎), and then we are ready to roll.</p>
+<h2 id="actually-programming-now">Actually Programming Now</h2>
+<p>Whenever we ran <code>dune init project camalbrarian</code>, the "project" argument told <code>dune</code> that we want a full project.
+That includes a library package (located in <code>lib/</code>), a binary/executable package (<code>bin/</code>), and a test package (<code>test/</code>).
+We will use all three of those packages eventually, but if you haven't run any OCaml yet, you'll want to start with the <code>bin/</code> folder just so you can see some code execute.</p>
+<p>If you open up <code>bin/main.ml</code>, you may see this error message from your LSP:</p>
+<pre style="background-color:#282a36;color:#f8f8f2;"><code><span>No config found for file bin/main.ml. Try calling &#39;dune build&#39;.
+</span></code></pre>
+<p>If you do what the friendly error message says and run <code>dune build</code>, then it should go away and you will be ready to write some code.</p>
+<p>Now, we can finally run our executable package and see the default output:</p>
+<pre data-lang="bash" style="background-color:#282a36;color:#f8f8f2;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#50fa7b;">camalbrarian</span><span> $ dune exec camalbrarian
+</span><span style="color:#50fa7b;">Hello,</span><span> World!
+</span></code></pre>
+<p>Great! Let's get into some database-specific code.</p>
+<h2 id="designing-a-query-language">Designing a Query Language</h2>
+<p>Now that we have a project established, I'll try to speed up and explain things more with code rather than long diatribes.</p>
+<aside class="callout">
+  <div class="body">
+    <h5 class="label">Diatribe</h5>
+
+    Seeing the word "diatribe" made me think of "diabetes", which then made me wonder about the common prefix "dia-".</p>
+<p>It turns out that "dia-" comes from Ancient Greek and can mean "through, across, by, over" (<a href="https://en.wiktionary.org/wiki/dia-">source</a>).
+  </div>
+</aside>
+<p>Anyway, OCaml has a rich type system that deserves its own article (<a href="https://ocaml.org/docs/basic-data-types">"Basic Data Types and Pattern Matching"</a>).
+What I am interested in are the Variant types because they will be great for representing our query language.
+If you have engaged with programming language design discourse before, you may have heard the term <a href="https://en.wikipedia.org/wiki/Abstract_syntax_tree">AST</a>.
+Essentially, abstract syntax trees are a great technique for representing the structure and content of a language.
+Part of what makes ASTs so useful is that they provide a common language/interface for all parts of your system to reason about the language.
+So for a database, your parser will take text input and produce an AST object, then your query optimizer might analyze the AST and simplify it where possible, then a query planner can analyze the AST again to determine the best query plan, then an executor can finally execute the AST to run the query.</p>
+<p>All that to say, OCaml's variant types are fantastic for representing an AST with minimal boilerplate.
+So, let's make <code>lib/query.ml</code> and start writing our type:</p>
+<pre data-lang="ocaml" style="background-color:#282a36;color:#f8f8f2;" class="language-ocaml "><code class="language-ocaml" data-lang="ocaml"><span style="color:#ff79c6;">type </span><span style="font-style:italic;color:#8be9fd;">t </span><span>= 
+</span><span>  | LoadCSV </span><span style="color:#ff79c6;">of </span><span style="font-style:italic;color:#8be9fd;">string
+</span><span>  | Rename </span><span style="color:#ff79c6;">of </span><span style="font-style:italic;color:#8be9fd;">string </span><span style="color:#ff79c6;">* </span><span style="font-style:italic;color:#8be9fd;">string
+</span></code></pre>
+<aside class="callout">
+  <div class="body">
+    <h5 class="label">Note</h5>
+
+    I had to run <code>dune build lib/</code> so my LSP could find the new file.
+  </div>
+</aside>
+<p>So we have a basic variant type with two cases, <code>LoadCSV</code> and <code>Rename</code>.
+There are two points of interest here, how OCaml modules work and where our query language's operators are coming from.
+I'll start with OCaml modules.</p>
+<p>OCaml modules are similar to modules or namespaces in other languages, so far as they are a way of organizing related definitions together.
+The main point I wanted to bring up now is why we named our variant type just <code>t</code>.
+The reason is because we are already inside the <code>Query</code> module, so I didn't want our type to be referred to as <code>Query.query</code>.
+You might be wondering "How are we inside the <code>Query</code> module, we never declared a module?"
+But OCaml has <a href="https://ocaml.org/docs/modules#file-based-modules">file-based modules</a>, so just by being inside of <code>lib/query.ml</code>, our type <code>t</code> is part of the <code>Query</code> module.
+There is a lot more to say about modules and we may cover some more as it comes up, but for now I recommend you read the official OCaml docs on <a href="https://ocaml.org/docs/modules">modules</a>.</p>
+<p>Now onto the operators.
+We are making a database that is based on relational algebra.
+I can't do relational algebgra justice here, so I recommend you read the <a href="https://en.wikipedia.org/wiki/Relational_algebra">Wikipedia</a> article to get up to speed.
+Aside from the theory, that article also introduces some of the basic operators that we will be implementing in our query language.
+I'm just starting with the rename operator for now because it is the simplest to reason about.
+<code>LoadCSV</code> is certainly not part of the relational algebra, but CSV files are a great source of test data because they are simple for machines and humans to work with.</p>
+<aside class="callout">
+  <div class="body">
+    <h5 class="label">Musing</h5>
+
+    All your code has to run inside of a human's brain before it can run in your computer's "brain."
+So, optimizing code for human understanding can often be more important than optimizing it for computers.
+Using CSV files as a starting point is important because it gives us a cheap way to handle real data without worrying about pages and indexes and all the scary things that real databases have to handle.
+  </div>
+</aside>
+<h2 id="getting-parsing-for-free">Getting Parsing for Free</h2>
+<p>Now that we have a way to represent our query language, we need a way of converting plaintext input into that representation (AKA parsing).
+We could write our own parser by hand or use a fancy <a href="https://en.wikipedia.org/wiki/Parser_combinator">parser combinator</a> library, but I would rather get our parsing for free, because free is awesome.
+To do that, first we need to talk about preprocessing, alternative standard libraries, and a high-frequency trading firm...</p>
+<p>I know, I know, that sounds insane, but it's true.
+We have a lot of groundwork to lay to understand the OCaml ecosystem and how we can profit from it.</p>
+<p>I'll explain things quickly and throw a couple of links at you.</p>
+<ul>
+<li>First, OCaml has <a href="https://ocaml.org/docs/metaprogramming">metaprogramming</a> which allows you to run raw-text preproccessors or PPX preproccessors which transform the OCaml language AST (yes, OCaml uses an AST as well. I told you they are useful!).</li>
+<li>Second, OCaml has historically had a small standard library, so there are multiple alternative standard library packages that provide lots of useful stuff. The one we are interested in is called <a href="https://github.com/janestreet/base">Core</a>. There is a PPX inside of the <code>Core</code> library that can essentially auto-generate a parser for our query type.</li>
+<li>Third, the <code>Core</code> library is made by a high-frequency trading firm called <a href="https://www.janestreet.com/">Jane Street</a>. Jane Street is (probably) the biggest industrial user of OCaml and they drive a significant portion of the OCaml ecosystem. They are doing lots of interesting things with OCaml and they have made some very useful libraries to help them do that. Which means, people like me get to benefit from that work so I don't have to write my own parser (for now, maybe I'll write a fancier one later).</li>
+</ul>
+<p>Makes sense? I hope so.</p>
+<p>Let's start by installing the <code>Core</code> library:</p>
+<pre data-lang="bash" style="background-color:#282a36;color:#f8f8f2;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#50fa7b;">camalbrarian</span><span> $ opam install core
+</span></code></pre>
+<p>While that's installing, let's talk about s-expressions.
+<a href="https://en.wikipedia.org/wiki/s-expression">s-expressions</a> (sexps or sexpr for short) come from how Lisp languages represent data and code (data is code, and code is data λ).
+If you are using Lisp, then s-expressions are essentially the entire syntax you are using to write your code, but they are also how data is represented and (sometimes) serialized.
+For reasons beyond my knowledge, Jane Street decided that they would also use s-expressions as a common means of representing data.
+I would guess it's because s-expressions are fairly simple and easy to grasp, and they probably have quite a few Lisp nerds working there which would make it a natural choice.
+Since Jane Street has already done the leg work and provided a PPX that can generate s-expression serialization/deserialization functions for OCaml types, we are going to <s>steal</s> use that PPX for our query type.</p>
+<p>After <code>Core</code> has finished installing, you will need to declare the dependency in <code>lib/dune</code> and we need to register the <code>ppx_sexp_conv</code> PPX for... reasons. Probably good reasons too:</p>
+<pre data-lang="clojure" style="background-color:#282a36;color:#f8f8f2;" class="language-clojure "><code class="language-clojure" data-lang="clojure"><span>(</span><span style="color:#50fa7b;">library
+</span><span> (</span><span style="color:#50fa7b;">name</span><span> camalbrarian)
+</span><span> (</span><span style="color:#50fa7b;">libraries</span><span> core)
+</span><span> (</span><span style="color:#50fa7b;">preprocess </span><span>(</span><span style="color:#50fa7b;">pps</span><span> ppx_sexp_conv)))
+</span></code></pre>
+<p>Now we can finally add the s-expression PPX to our type:</p>
+<pre data-lang="ocaml" style="background-color:#282a36;color:#f8f8f2;" class="language-ocaml "><code class="language-ocaml" data-lang="ocaml"><span style="color:#ff79c6;">open </span><span>Core
+</span><span>
+</span><span style="color:#ff79c6;">type </span><span style="font-style:italic;color:#8be9fd;">t </span><span>= 
+</span><span>  | LoadCSV </span><span style="color:#ff79c6;">of </span><span style="font-style:italic;color:#8be9fd;">string
+</span><span>  | Rename </span><span style="color:#ff79c6;">of </span><span style="font-style:italic;color:#8be9fd;">string </span><span style="color:#ff79c6;">* </span><span style="font-style:italic;color:#8be9fd;">string
+</span><span>[</span><span style="color:#ff79c6;">@@</span><span>deriving </span><span style="font-style:italic;color:#8be9fd;">sexp</span><span>]
+</span></code></pre>
+<p>We opened the <code>Core</code> library so we could have access to the various s-expression functions that it defines.
+<code>[@@deriving sexp]</code> specifies that the <code>sexp</code> PPX should be used to process our type.
+That PPX will generate some code that allows us to use different <code>sexp</code> functions on it.</p>
+<p>For example, we can now define some of the simplest parsing and printing functions ever:</p>
+<pre data-lang="ocaml" style="background-color:#282a36;color:#f8f8f2;" class="language-ocaml "><code class="language-ocaml" data-lang="ocaml"><span style="color:#ff79c6;">let </span><span style="color:#50fa7b;">(&gt;&gt;) </span><span style="font-style:italic;color:#ffb86c;">f g x </span><span style="color:#ff79c6;">=</span><span> g (f x)
+</span><span>
+</span><span style="color:#ff79c6;">let </span><span style="color:#ffffff;">parse </span><span style="color:#ff79c6;">= </span><span>Sexp.of_string </span><span style="color:#ff79c6;">&gt;&gt;</span><span> t_of_sexp
+</span><span style="color:#ff79c6;">let </span><span style="color:#ffffff;">print </span><span style="color:#ff79c6;">=</span><span> sexp_of_t </span><span style="color:#ff79c6;">&gt;&gt; </span><span>Sexp.to_string 
+</span></code></pre>
+<p>Okay, <code>&gt;&gt;</code> is a little obtuse, but I just like composing functions and OCaml doesn't provide a built-in operator for it.
+If we were in F# land, then I could <code>&gt;&gt;</code> by default, but you have to define it yourself in OCaml.
+You could also use <code>Core.Fn.compose</code> since we installed <code>Core</code>, but its first two args are flipped compared to F#'s <code>&gt;&gt;</code>.
+And if we were using Haskell, then you could do the same using the <code>.</code> operator.</p>
+<p>Anyway, <code>&gt;&gt;</code> will run the first function, then take the result of that and pass it to the second argument.
+It's also worth noting that <code>parse</code> and <code>print</code> are written in a "point-free" style, which means something smart that I forgot exactly and I'm too lazy to look it up.
+Basically it just means that they don't take arguments and they use implicit arguments instead.
+So, I could have written <code>parse</code> like this:</p>
+<pre data-lang="ocaml" style="background-color:#282a36;color:#f8f8f2;" class="language-ocaml "><code class="language-ocaml" data-lang="ocaml"><span style="color:#ff79c6;">let </span><span style="color:#50fa7b;">parse </span><span style="font-style:italic;color:#ffb86c;">input </span><span style="color:#ff79c6;">=</span><span> t_of_sexp (Sexp.of_string input) 
+</span></code></pre>
+<p>And it would have been exactly the same, just less cool looking.</p>
+<p>To test out our new functions, we are going to use OCaml's de-facto standard REPL, <code>utop</code>, to test it.
+If you don't know what a REPL is, it stands for <a href="https://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop">read, eval, print, loop</a> and it's a great way of interacting with your code.
+I don't know yet how great the REPL story is in OCaml, but for most Lisps you can integrate your REPL with your editor and you basically never have to run your project through the command line.
+Instead, you are able to evaluate select Lisp forms so you have a lot greater control over what code you want to run and when.</p>
+<p>Anyway, since OCaml tools are just packages that add a binary to your switch's <code>_opam/bin/</code> folder, we have to install <code>utop</code> to our local switch before running it:</p>
+<pre data-lang="bash" style="background-color:#282a36;color:#f8f8f2;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#50fa7b;">camalbrarian</span><span> $ opam install utop
+</span></code></pre>
+<p>With that done, we can enter the REPL with <code>dune utop</code>.
+I won't explain how to use the REPL here.
+If you need help, follow along with <a href="https://ocaml.org/docs/toplevel-introduction">this</a> page and come back.</p>
+<p>Once you are in the REPL, you can load our <code>Query</code> module with <code>#use "lib/query.ml";;</code>.
+Once you enter an expression ending with <code>;;</code>, <code>utop</code> will execute your code and spit back out the results.
+Here is what my REPL session looked like when I tested the query module:</p>
+<aside class="callout">
+  <div class="body">
+    <h5 class="label">Note</h5>
+
+    Inputs are denoted with a <code>utop # </code> prefix.
+Outputs are any lines immediately following the inputs.
+  </div>
+</aside>
+<pre data-lang="ocaml" style="background-color:#282a36;color:#f8f8f2;" class="language-ocaml "><code class="language-ocaml" data-lang="ocaml"><span>utop # </span><span style="font-style:italic;color:#8be9fd;">#use </span><span style="color:#f1fa8c;">&quot;lib/query.ml&quot;</span><span>;;
+</span><span style="color:#ff79c6;">type </span><span style="font-style:italic;color:#8be9fd;">t </span><span>= LoadCSV </span><span style="color:#ff79c6;">of </span><span style="font-style:italic;color:#8be9fd;">string </span><span>| Rename </span><span style="color:#ff79c6;">of </span><span style="font-style:italic;color:#8be9fd;">string </span><span style="color:#ff79c6;">* </span><span style="font-style:italic;color:#8be9fd;">string
+</span><span>val ( </span><span style="color:#ff79c6;">&gt;&gt;</span><span> ) : (&#39;a -&gt; &#39;b) -&gt; (&#39;b -&gt; &#39;c) -&gt; &#39;a -&gt; &#39;c </span><span style="color:#ff79c6;">= &lt;</span><span>fun</span><span style="color:#ff79c6;">&gt;
+</span><span>File </span><span style="color:#f1fa8c;">&quot;lib/query.ml&quot;</span><span>, line </span><span style="color:#bd93f9;">10</span><span>, characters </span><span style="color:#bd93f9;">30-39</span><span>:
+</span><span style="color:#bd93f9;">10 </span><span style="color:#ff79c6;">| let </span><span style="color:#ffffff;">parse </span><span style="color:#ff79c6;">= </span><span>Sexp.of_string </span><span style="color:#ff79c6;">&gt;&gt;</span><span> t_of_sexp
+</span><span>                                   </span><span style="color:#ff79c6;">^^^^^^^^^
+</span><span>Error: Unbound value t_of_sexp
+</span><span>Hint: Did you mean int_of_sexp </span><span style="color:#ff79c6;">or</span><span> mat_of_sexp?
+</span></code></pre>
+<p>Doh. That's not what we wanted.
+If we look up the error message, someone else has run into the <a href="https://discuss.ocaml.org/t/no-t-of-sexp-generated-by-deriving-sexp/1999">same thing</a> and Jane Street's OCamler in Chief came along with some helpful advice:</p>
+<blockquote>
+<p>Try typing <code>#require "ppx_jane";;</code> first.</p>
+</blockquote>
+<pre data-lang="ocaml" style="background-color:#282a36;color:#f8f8f2;" class="language-ocaml "><code class="language-ocaml" data-lang="ocaml"><span>utop # </span><span style="font-style:italic;color:#8be9fd;">#require </span><span style="color:#f1fa8c;">&quot;ppx_jane&quot;</span><span>;;
+</span><span>
+</span><span>utop # </span><span style="font-style:italic;color:#8be9fd;">#use </span><span style="color:#f1fa8c;">&quot;lib/query.ml&quot;</span><span>;;
+</span><span style="color:#ff79c6;">type </span><span style="font-style:italic;color:#8be9fd;">t </span><span>= LoadCSV </span><span style="color:#ff79c6;">of </span><span style="font-style:italic;color:#8be9fd;">string </span><span>| Rename </span><span style="color:#ff79c6;">of </span><span style="font-style:italic;color:#8be9fd;">string </span><span style="color:#ff79c6;">* </span><span style="font-style:italic;color:#8be9fd;">string
+</span><span style="color:#ff79c6;">val </span><span>t_of_sexp : Sexp</span><span style="font-style:italic;color:#8be9fd;">.t </span><span>-&gt; </span><span style="font-style:italic;color:#8be9fd;">t </span><span style="color:#ff79c6;">= &lt;</span><span>fun</span><span style="color:#ff79c6;">&gt;
+</span><span style="color:#ff79c6;">val </span><span>sexp_of_t : </span><span style="font-style:italic;color:#8be9fd;">t </span><span>-&gt; Sexp</span><span style="font-style:italic;color:#8be9fd;">.t </span><span style="color:#ff79c6;">= &lt;</span><span>fun</span><span style="color:#ff79c6;">&gt;
+</span><span>val ( </span><span style="color:#ff79c6;">&gt;&gt;</span><span> ) : (&#39;a -&gt; &#39;b) -&gt; (&#39;b -&gt; &#39;c) -&gt; &#39;a -&gt; &#39;c </span><span style="color:#ff79c6;">= &lt;</span><span>fun</span><span style="color:#ff79c6;">&gt;
+</span><span style="color:#ff79c6;">val </span><span>parse : </span><span style="font-style:italic;color:#8be9fd;">string </span><span>-&gt; </span><span style="font-style:italic;color:#8be9fd;">t </span><span style="color:#ff79c6;">= &lt;</span><span>fun</span><span style="color:#ff79c6;">&gt;
+</span><span style="color:#ff79c6;">val </span><span>print : </span><span style="font-style:italic;color:#8be9fd;">t </span><span>-&gt; </span><span style="font-style:italic;color:#8be9fd;">string </span><span style="color:#ff79c6;">= &lt;</span><span>fun</span><span style="color:#ff79c6;">&gt;
+</span></code></pre>
+<p>Okay now it works. I would recommend reading through the thread above if you want to know a little more about why that works, but I'll skip over it for brevity.
+I have mixed feelings about the whole PPX ecosystem because it seems very powerful but I've struggled with it so far.
+I've already lost a couple of hours in total just fighting with the sexpr and JSON PPX libraries and I haven't even been using OCaml that long.
+It's part of the reason why I decided to write about my experiences with OCaml, so I could firm up my own understanding and document some of the frustrations.</p>
+<p>So far, it seems like more documentation would help. Right now, the PPXs I've used feel like a bit of a black box.
+I probably need to give it more time and maybe even try writing a PPX of my own so I can understand what's happening better, but a lot of OCaml beginners would likely quit trying rather than digging into the internals to understand what's going wrong.</p>
+<p>I know from my experience with Rust's macro system that macros can become very complicated very quickly, and most programmers I know would rather not bother.
+But if using a language's macro system requires you to almost be an expert in that language, then you are cutting off a significant portion of beginners from using it.
+Requiring someone to be an expert before they can write macros makes sense to me, but the barrier to entry should be a lot lower for just using macros.</p>
+<p>Okay, rant over. Now we can actually parse and print some queries:</p>
+<pre data-lang="ocaml" style="background-color:#282a36;color:#f8f8f2;" class="language-ocaml "><code class="language-ocaml" data-lang="ocaml"><span style="color:#6272a4;">(* continuing the same utop session from above *)
+</span><span>
+</span><span>utop # parse </span><span style="color:#f1fa8c;">&quot;(LoadCSV </span><span style="color:#bd93f9;">\&quot;</span><span style="color:#f1fa8c;">people.csv</span><span style="color:#bd93f9;">\&quot;</span><span style="color:#f1fa8c;">)&quot;</span><span>;;
+</span><span style="color:#ff79c6;">-</span><span> : t </span><span style="color:#ff79c6;">= </span><span>LoadCSV </span><span style="color:#f1fa8c;">&quot;people.csv&quot;
+</span></code></pre>
+<p>Yup, that works.</p>
+<p>Whenever I was about to test the rename operator I realized that we have an issue with it.
+Right now, the rename case is of type <code>string * string</code>, but actually it needs to be <code>t * string * string</code> so it can take in an input query to rename.
+Here is what the updated type looks like:</p>
+<pre data-lang="ocaml" style="background-color:#282a36;color:#f8f8f2;" class="language-ocaml "><code class="language-ocaml" data-lang="ocaml"><span style="color:#ff79c6;">type </span><span style="font-style:italic;color:#8be9fd;">t </span><span>= 
+</span><span>  | LoadCSV </span><span style="color:#ff79c6;">of </span><span style="font-style:italic;color:#8be9fd;">string
+</span><span>  | Rename </span><span style="color:#ff79c6;">of </span><span style="font-style:italic;color:#8be9fd;">t </span><span style="color:#ff79c6;">* </span><span style="font-style:italic;color:#8be9fd;">string </span><span style="color:#ff79c6;">* </span><span style="font-style:italic;color:#8be9fd;">string
+</span><span>[</span><span style="color:#ff79c6;">@@</span><span>deriving </span><span style="font-style:italic;color:#8be9fd;">sexp</span><span>]
+</span></code></pre>
+<p>Now we can reload our module in <code>utop</code> and test a more complicated query:</p>
+<pre data-lang="ocaml" style="background-color:#282a36;color:#f8f8f2;" class="language-ocaml "><code class="language-ocaml" data-lang="ocaml"><span>utop # </span><span style="font-style:italic;color:#8be9fd;">#use </span><span style="color:#f1fa8c;">&quot;lib/query.ml&quot;</span><span>;;
+</span><span style="color:#ff79c6;">type </span><span style="font-style:italic;color:#8be9fd;">t </span><span>= LoadCSV </span><span style="color:#ff79c6;">of </span><span style="font-style:italic;color:#8be9fd;">string </span><span>| Rename </span><span style="color:#ff79c6;">of </span><span style="font-style:italic;color:#8be9fd;">t </span><span style="color:#ff79c6;">* </span><span style="font-style:italic;color:#8be9fd;">string </span><span style="color:#ff79c6;">* </span><span style="font-style:italic;color:#8be9fd;">string
+</span><span style="color:#ff79c6;">val </span><span>t_of_sexp : Sexp</span><span style="font-style:italic;color:#8be9fd;">.t </span><span>-&gt; </span><span style="font-style:italic;color:#8be9fd;">t </span><span style="color:#ff79c6;">= &lt;</span><span>fun</span><span style="color:#ff79c6;">&gt;
+</span><span style="color:#ff79c6;">val </span><span>sexp_of_t : </span><span style="font-style:italic;color:#8be9fd;">t </span><span>-&gt; Sexp</span><span style="font-style:italic;color:#8be9fd;">.t </span><span style="color:#ff79c6;">= &lt;</span><span>fun</span><span style="color:#ff79c6;">&gt;
+</span><span>val ( </span><span style="color:#ff79c6;">&gt;&gt;</span><span> ) : (&#39;a -&gt; &#39;b) -&gt; (&#39;b -&gt; &#39;c) -&gt; &#39;a -&gt; &#39;c </span><span style="color:#ff79c6;">= &lt;</span><span>fun</span><span style="color:#ff79c6;">&gt;
+</span><span style="color:#ff79c6;">val </span><span>parse : </span><span style="font-style:italic;color:#8be9fd;">string </span><span>-&gt; </span><span style="font-style:italic;color:#8be9fd;">t </span><span style="color:#ff79c6;">= &lt;</span><span>fun</span><span style="color:#ff79c6;">&gt;
+</span><span style="color:#ff79c6;">val </span><span>print : </span><span style="font-style:italic;color:#8be9fd;">t </span><span>-&gt; </span><span style="font-style:italic;color:#8be9fd;">string </span><span style="color:#ff79c6;">= &lt;</span><span>fun</span><span style="color:#ff79c6;">&gt;
+</span><span>
+</span><span>utop # parse </span><span style="color:#f1fa8c;">&quot;(Rename (LoadCSV </span><span style="color:#bd93f9;">\&quot;</span><span style="color:#f1fa8c;">people.csv</span><span style="color:#bd93f9;">\&quot;</span><span style="color:#f1fa8c;">) </span><span style="color:#bd93f9;">\&quot;</span><span style="color:#f1fa8c;">FirstName</span><span style="color:#bd93f9;">\&quot; \&quot;</span><span style="color:#f1fa8c;">name</span><span style="color:#bd93f9;">\&quot;</span><span style="color:#f1fa8c;">)&quot;</span><span>;;
+</span><span style="color:#ff79c6;">-</span><span> : t </span><span style="color:#ff79c6;">= </span><span>Rename (LoadCSV </span><span style="color:#f1fa8c;">&quot;people.csv&quot;</span><span>, </span><span style="color:#f1fa8c;">&quot;FirstName&quot;</span><span>, </span><span style="color:#f1fa8c;">&quot;name&quot;</span><span>)
+</span></code></pre>
+<p>Perfect, now we should be ready to write a simple query executor.</p>
+<h2 id="executing-queries">Executing Queries</h2>
+<p>So we have something to query against, I'll make <code>employees.csv</code> using some data from the Wikipedia article on relational algebra that I linked earlier:</p>
+<pre data-lang="csv" style="background-color:#282a36;color:#f8f8f2;" class="language-csv "><code class="language-csv" data-lang="csv"><span style="font-style:italic;color:#8be9fd;">Name</span><span style="color:#ff79c6;">,</span><span style="font-style:italic;color:#8be9fd;">EmpId</span><span style="color:#ff79c6;">,</span><span style="font-style:italic;color:#8be9fd;">DeptName
+</span><span style="font-style:italic;color:#8be9fd;">Harry</span><span style="color:#ff79c6;">,</span><span style="color:#bd93f9;">3415</span><span style="color:#ff79c6;">,</span><span style="font-style:italic;color:#8be9fd;">Finance
+</span><span style="font-style:italic;color:#8be9fd;">Sally</span><span style="color:#ff79c6;">,</span><span style="color:#bd93f9;">2241</span><span style="color:#ff79c6;">,</span><span style="font-style:italic;color:#8be9fd;">Sales
+</span><span style="font-style:italic;color:#8be9fd;">George</span><span style="color:#ff79c6;">,</span><span style="color:#bd93f9;">3401</span><span style="color:#ff79c6;">,</span><span style="font-style:italic;color:#8be9fd;">Finance
+</span><span style="font-style:italic;color:#8be9fd;">Harriet</span><span style="color:#ff79c6;">,</span><span style="color:#bd93f9;">2202</span><span style="color:#ff79c6;">,</span><span style="font-style:italic;color:#8be9fd;">Sales
+</span><span style="font-style:italic;color:#8be9fd;">Mary</span><span style="color:#ff79c6;">,</span><span style="color:#bd93f9;">1257</span><span style="color:#ff79c6;">,</span><span style="font-style:italic;color:#8be9fd;">Human Resources
+</span></code></pre>
+<p>I'll write all the execution code in a new file, <code>lib/exec.ml</code>:</p>
+<pre data-lang="ocaml" style="background-color:#282a36;color:#f8f8f2;" class="language-ocaml "><code class="language-ocaml" data-lang="ocaml"><span style="color:#ff79c6;">open </span><span>Core
+</span><span>
+</span><span style="color:#ff79c6;">module </span><span>TupleValue </span><span style="color:#ff79c6;">= struct
+</span><span>  </span><span style="color:#ff79c6;">type </span><span style="font-style:italic;color:#8be9fd;">t </span><span>=
+</span><span>    </span><span style="color:#6272a4;">(* For now, just load everything as a string to keep CSV loading simple *)
+</span><span>    | String </span><span style="color:#ff79c6;">of </span><span style="font-style:italic;color:#8be9fd;">string
+</span><span>  [</span><span style="color:#ff79c6;">@@</span><span>deriving </span><span style="font-style:italic;color:#8be9fd;">sexp</span><span>]
+</span><span style="color:#ff79c6;">end
+</span><span>
+</span><span style="color:#ff79c6;">module </span><span>Tuple </span><span style="color:#ff79c6;">= struct
+</span><span>  </span><span style="color:#ff79c6;">type </span><span style="font-style:italic;color:#8be9fd;">t </span><span>= Tuple </span><span style="color:#ff79c6;">of </span><span>TupleValue</span><span style="font-style:italic;color:#8be9fd;">.t list
+</span><span>  [</span><span style="color:#ff79c6;">@@</span><span>deriving </span><span style="font-style:italic;color:#8be9fd;">sexp</span><span>]
+</span><span style="color:#ff79c6;">end
+</span><span>
+</span><span style="color:#ff79c6;">module </span><span>Relation </span><span style="color:#ff79c6;">= struct
+</span><span>  </span><span style="color:#ff79c6;">type </span><span style="font-style:italic;color:#8be9fd;">t </span><span>= {
+</span><span>    tuples : Tuple</span><span style="font-style:italic;color:#8be9fd;">.t list</span><span style="color:#ff79c6;">;
+</span><span>    header_type : </span><span style="font-style:italic;color:#8be9fd;">string list</span><span style="color:#ff79c6;">;
+</span><span>  }
+</span><span>  [</span><span style="color:#ff79c6;">@@</span><span>deriving </span><span style="font-style:italic;color:#8be9fd;">sexp</span><span>]
+</span><span style="color:#ff79c6;">end
+</span></code></pre>
+<p>To start, I am defining types to represent data within our database.
+<code>TupleValue</code> is a single scalar value and currently only supports strings because that's simple.
+<code>Tuple</code> is just a <code>TupleValue</code> list.
+And <code>Relation</code> is a <code>Tuple</code> list and a list of strings which represents the header names.
+This is probably not an ideal design, especially if you are trying to make a real database, but it works for now.</p>
+<p>This is also the first time we are seeing record types.
+They are basically immutable maps/records/structs which allow you to associate named keys with values, similar to what lots of other languages provide.
+If you want to read more about them, go <a href="https://ocaml.org/docs/basic-data-types#records">here</a>.</p>
+<p>Since the only way we have of getting real data is through CSV files, let's make some simple logic for loading CSVs:</p>
+<pre data-lang="ocaml" style="background-color:#282a36;color:#f8f8f2;" class="language-ocaml "><code class="language-ocaml" data-lang="ocaml"><span style="color:#ff79c6;">let </span><span style="color:#50fa7b;">_process_header_line </span><span style="font-style:italic;color:#ffb86c;">line </span><span style="color:#ff79c6;">=
+</span><span>  String.split line </span><span style="color:#ff79c6;">~on:</span><span style="color:#bd93f9;">&#39;,&#39;
+</span><span>
+</span><span style="color:#ff79c6;">let </span><span style="color:#50fa7b;">_process_csv_line </span><span style="font-style:italic;color:#ffb86c;">line </span><span style="color:#ff79c6;">=
+</span><span>  String.split line </span><span style="color:#ff79c6;">~on:</span><span style="color:#bd93f9;">&#39;,&#39;
+</span><span>  </span><span style="color:#ff79c6;">|&gt; </span><span>List.map </span><span style="color:#ff79c6;">~f:</span><span>(</span><span style="color:#ff79c6;">fun </span><span>(</span><span style="font-style:italic;color:#ffb86c;">x</span><span>) -&gt; TupleValue.String x)
+</span><span>  </span><span style="color:#ff79c6;">|&gt; fun </span><span>(</span><span style="font-style:italic;color:#ffb86c;">x</span><span>) -&gt; Tuple.Tuple x
+</span><span>
+</span><span style="color:#ff79c6;">let </span><span style="color:#50fa7b;">_load_csv </span><span style="font-style:italic;color:#ffb86c;">path </span><span style="color:#ff79c6;">=
+</span><span>  </span><span style="color:#ff79c6;">let </span><span style="color:#ffffff;">lines </span><span style="color:#ff79c6;">= </span><span>In_channel.read_lines path </span><span style="color:#ff79c6;">in
+</span><span>  </span><span style="color:#ff79c6;">match</span><span> lines </span><span style="color:#ff79c6;">with
+</span><span>  </span><span style="color:#ff79c6;">| </span><span style="font-style:italic;color:#ffb86c;">first</span><span>::</span><span style="font-style:italic;color:#ffb86c;">rst </span><span>-&gt;
+</span><span>    {
+</span><span>      Relation.header_type</span><span style="color:#ff79c6;">=</span><span> _process_header_line first;
+</span><span>      Relation.tuples </span><span style="color:#ff79c6;">=</span><span> rst </span><span style="color:#ff79c6;">|&gt; </span><span>List.map </span><span style="color:#ff79c6;">~f:</span><span>_process_csv_line;
+</span><span>    }
+</span><span>  </span><span style="color:#ff79c6;">| </span><span style="color:#bd93f9;">[] </span><span>-&gt; failwith </span><span style="color:#f1fa8c;">&quot;Cannot load an empty CSV&quot;
+</span></code></pre>
+<p><code>_load_csv</code> will load a file from a given path, process the first line as a header, process the remaining lines as tuples, then spit out a <code>Relation</code>.
+This is a fairly standard functional style of programming.
+The main part that I found interesting is the use of <code>~{keyword}:{value}</code> to specify named values in OCaml.
+I thought I wouldn't like it at first, but it's been growing on me and I've come to enjoy those labels.
+I feel like that makes it a lot easier to parse out separate arguments, especially for higher-order functions.</p>
+<p>I also wish that variant case constructors would be considered more like plain functions so I could pipe values into them, that would allow me to rewrite <code>_process_csv_line</code> like this:</p>
+<pre data-lang="ocaml" style="background-color:#282a36;color:#f8f8f2;" class="language-ocaml "><code class="language-ocaml" data-lang="ocaml"><span style="color:#ff79c6;">let </span><span style="color:#50fa7b;">_process_csv_line </span><span style="font-style:italic;color:#ffb86c;">line </span><span style="color:#ff79c6;">=
+</span><span>  String.split line </span><span style="color:#ff79c6;">~on:</span><span style="color:#bd93f9;">&#39;,&#39;
+</span><span>  </span><span style="color:#ff79c6;">|&gt; </span><span>List.map </span><span style="color:#ff79c6;">~f:</span><span>(</span><span style="color:#ff79c6;">fun </span><span>(</span><span style="font-style:italic;color:#ffb86c;">x</span><span>) -&gt; TupleValue.String x)
+</span><span>  </span><span style="color:#ff79c6;">|&gt; </span><span>Tuple.Tuple
+</span></code></pre>
+<p>I don't think it really matters, I just feel like this style would flow better.
+There are probably valid reasons for why OCaml won't let me do it.</p>
+<p>Now that we have CSV parsing, let's also write the logic for our rename operator:</p>
+<pre data-lang="ocaml" style="background-color:#282a36;color:#f8f8f2;" class="language-ocaml "><code class="language-ocaml" data-lang="ocaml"><span style="color:#ff79c6;">let </span><span style="color:#50fa7b;">_rename_relation </span><span>(</span><span style="font-style:italic;color:#ffb86c;">from</span><span>, </span><span style="font-style:italic;color:#ffb86c;">to_</span><span>) </span><span style="font-style:italic;color:#ffb86c;">relation </span><span style="color:#ff79c6;">=
+</span><span>  </span><span style="color:#ff79c6;">let open</span><span> Relation </span><span style="color:#ff79c6;">in
+</span><span>  { relation </span><span style="color:#ff79c6;">with</span><span> header_type </span><span style="color:#ff79c6;">=</span><span> relation.header_type </span><span style="color:#ff79c6;">|&gt; </span><span>List.map </span><span style="color:#ff79c6;">~f:</span><span>(</span><span style="color:#ff79c6;">fun </span><span style="font-style:italic;color:#ffb86c;">x </span><span>-&gt; </span><span style="color:#ff79c6;">if </span><span>String.equal x from </span><span style="color:#ff79c6;">then</span><span> to_ </span><span style="color:#ff79c6;">else</span><span> x) }
+</span></code></pre>
+<p>The <code>let open Relation in</code> line allows you to access the items within that module for the rest of your current scope.
+The <code>{ relation with ... }</code> syntax is a record update, which isn't technically updating the record but instead it allocates a new record.</p>
+<aside class="callout">
+  <div class="body">
+    <h5 class="label">Note</h5>
+
+    Theoretically, with <a href="https://blog.janestreet.com/oxidizing-ocaml-ownership/">recent advances</a> in the OCaml compiler, it should be able to automatically optimize an immutable record update into a mutable update in certain circumstances. If you could statically guarantee that your reference is unique using some kind of ownership annotations (like in Rust), then you could optimize these immutable copies into mutable updates, which is great because allocation is expensive.</p>
+<p>You could also manually mark the field as mutable and do a mutable update instead, but then you're introducing extra mental overhead.
+Wouldn't it be great if the compiler could do the optimization for you so you don't have to constantly track if you need a mutable/immutable update every time you make a change?
+  </div>
+</aside>
+<p>Finally, we can pattern match on our query AST to evaluate it:</p>
+<pre data-lang="ocaml" style="background-color:#282a36;color:#f8f8f2;" class="language-ocaml "><code class="language-ocaml" data-lang="ocaml"><span style="color:#ff79c6;">let rec </span><span style="color:#50fa7b;">exec </span><span style="font-style:italic;color:#ffb86c;">query </span><span style="color:#ff79c6;">=
+</span><span>  </span><span style="color:#ff79c6;">match</span><span> query </span><span style="color:#ff79c6;">with
+</span><span>  </span><span style="color:#ff79c6;">| </span><span>Query.LoadCSV </span><span style="font-style:italic;color:#ffb86c;">path </span><span>-&gt; _load_csv path
+</span><span>  </span><span style="color:#ff79c6;">| </span><span>Query.Rename (</span><span style="font-style:italic;color:#ffb86c;">inner_query</span><span>, </span><span style="font-style:italic;color:#ffb86c;">from</span><span>, </span><span style="font-style:italic;color:#ffb86c;">to_</span><span>) -&gt; exec inner_query </span><span style="color:#ff79c6;">|&gt;</span><span> _rename_relation (from, to_)
+</span></code></pre>
+<p>Specifying a function with <code>rec</code> before the name marks it as recursive, which is very useful for our use case here.
+This kind of recursive evaluation is <em>very</em> common when working with recursive types like an AST.
+We could already use this <code>exec</code> function in <code>utop</code>, but instead I want to build a dedicated REPL for this database.</p>
+<pre data-lang="ocaml" style="background-color:#282a36;color:#f8f8f2;" class="language-ocaml "><code class="language-ocaml" data-lang="ocaml"><span style="color:#ff79c6;">let rec </span><span style="color:#50fa7b;">repl </span><span style="font-style:italic;color:#ffb86c;">() </span><span style="color:#ff79c6;">=
+</span><span>  print_string </span><span style="color:#f1fa8c;">&quot;&gt; &quot;</span><span>;
+</span><span>  Out_channel.(flush stdout);
+</span><span>  </span><span style="color:#ff79c6;">let </span><span style="color:#ffffff;">input </span><span style="color:#ff79c6;">= </span><span>In_channel.(input_line_exn stdin) </span><span style="color:#ff79c6;">in
+</span><span>  </span><span style="color:#ff79c6;">let </span><span style="color:#50fa7b;">ast </span><span>: </span><span style="font-style:italic;color:#8be9fd;">Query.t </span><span style="color:#ff79c6;">= </span><span>Query.parse input </span><span style="color:#ff79c6;">in
+</span><span>  </span><span style="color:#ff79c6;">let </span><span style="color:#ffffff;">result </span><span style="color:#ff79c6;">=</span><span> exec ast </span><span style="color:#ff79c6;">in
+</span><span>  </span><span style="color:#ff79c6;">let </span><span style="color:#ffffff;">sexp </span><span style="color:#ff79c6;">= </span><span>Relation.sexp_of_t result </span><span style="color:#ff79c6;">in
+</span><span>  print_endline (Sexp.to_string_hum </span><span style="color:#ff79c6;">~indent:</span><span style="color:#bd93f9;">4</span><span> sexp);
+</span><span>  repl </span><span style="color:#bd93f9;">()
+</span></code></pre>
+<p>Since we initialized this as a full-featured project ealier using <code>dune</code>, we already have our <code>bin/</code> application folder which would be perfect for running a REPL.
+Let's hook that up by call our <code>repl</code> function from <code>bin/main.ml</code>:</p>
+<pre data-lang="ocaml" style="background-color:#282a36;color:#f8f8f2;" class="language-ocaml "><code class="language-ocaml" data-lang="ocaml"><span>Camalbrarian.Exec.repl </span><span style="color:#bd93f9;">()
+</span></code></pre>
+<p>Simple! Let's see if it works. Calling <code>dune exec</code> in the shell should automatically load our project and evaluate <code>bin/main.ml</code>:</p>
+<pre data-lang="bash" style="background-color:#282a36;color:#f8f8f2;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#50fa7b;">camalbrarian</span><span> $ dune exec camalbrarian
+</span><span style="color:#ff79c6;">&gt; </span><span>(</span><span style="color:#50fa7b;">Rename</span><span> (LoadCSV </span><span style="color:#f1fa8c;">&quot;employees.csv&quot;</span><span>) </span><span style="color:#f1fa8c;">&quot;Name&quot; &quot;FirstName&quot;</span><span>)
+</span><span>  ((</span><span style="color:#50fa7b;">tuples
+</span><span>    ((Tuple ((String Harry) (String </span><span style="color:#bd93f9;">3415</span><span>) (String Finance)))
+</span><span>     (Tuple ((String Sally) (String </span><span style="color:#bd93f9;">2241</span><span>) (String Sales)))
+</span><span>     (Tuple ((String George) (String </span><span style="color:#bd93f9;">3401</span><span>) (String Finance)))
+</span><span>     (Tuple ((String Harriet) (String </span><span style="color:#bd93f9;">2202</span><span>) (String Sales)))
+</span><span>     (Tuple ((String Mary) (String </span><span style="color:#bd93f9;">1257</span><span>) (String </span><span style="color:#f1fa8c;">&quot;Human Resources&quot;</span><span>)))))
+</span><span>   (</span><span style="color:#50fa7b;">header_type</span><span> (FirstName EmpId DeptName)))
+</span></code></pre>
+<p>Success!
+Our CSV loading worked great, and the rename operator worked because the first header is now "FirstName" instead of "Name".</p>
+<aside class="callout">
+  <div class="body">
+    <h5 class="label">Tip</h5>
+
+    If you are on a UNIX-like operating system, you probably have (or could install) <code>rlwrap</code>, which can make your custom REPL experience a lot nicer.
+If you have it, just run <code>rlwrap dune exec camalbrarian</code>.
+  </div>
+</aside>
+<p>If you want to take this further there is a lot more interesting stuff to implement. Like:</p>
+<ul>
+<li>More relational algebra operators:
+<ul>
+<li>projection, selection, natural joins, equijoins, semijoins, antijoins, and division!</li>
+</ul>
+</li>
+<li>More data sources:
+<ul>
+<li>Just querying CSVs is pretty boring. This would get a lot more interesting if it could query other databases like Postgres, MySQL, and SQL Server</li>
+</ul>
+</li>
+<li>Query Optimization/Planning:
+<ul>
+<li>Optimizing queries before running them would be a great way to get into more advanced pattern matching features like guard clauses. It can get very complicated (especially if paired with the next idea), but there are also a few simple optimizations that would be fun to add.</li>
+</ul>
+</li>
+<li>Storing data:
+<ul>
+<li>This project would get <em>extremely fun</em> if we started supporting insertions/updates/deletes and storing our data on disk.
+If you care about performance, storing relational data gets complicated fast because now you have to worry about concurrency, filesystem corruption, indexing, and a million other things. Interestingly, you would also need a separate language for describing modifications if you wanted to maintain relational algebra purity because, as far as I know, the relational algebra doesn't include any operators that mutate relations. It's very similar to functional programming in that sense.</li>
+</ul>
+</li>
+</ul>
+<p>I may tackle a few of the earlier ideas in a future post, but I'll stop here for now.
+If you're trying to get better with OCaml like I am, hopefully reading through my rants helped you a little bit.
+There were a lot of points where I could have chased a rabbit or dug into something deeper, but I decided not to just so I could finish the post.
+I'd like to write more about OCaml in the future because it helps me process what I'm learning and I hope it could help advertise the language to others who are curious about the functional way of doing things.
+Thanks for reading!</p>
+
+
+    </div>
+  </section>
+</body>
+</html>

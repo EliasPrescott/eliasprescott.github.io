@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Software Musings | Integrating a Music Player into NeoVim</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Mono:ital,wght@0,200..800;1,200..800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+  <link href="/styles.css" rel="stylesheet">
+  <link rel="alternate" type="application/atom+xml" title="All Posts Feed" href="https://eliasprescott.github.io/atom.xml">
+  
+  
+    
+    
+    <link rel="alternate" type="application/atom+xml" title="All Posts about Bible Study" href="https://eliasprescott.github.io/tags/bible-study/atom.xml">
+  
+    
+    
+    <link rel="alternate" type="application/atom+xml" title="All Posts about Christianity" href="https://eliasprescott.github.io/tags/christianity/atom.xml">
+  
+    
+    
+    <link rel="alternate" type="application/atom+xml" title="All Posts about Databases" href="https://eliasprescott.github.io/tags/databases/atom.xml">
+  
+    
+    
+    <link rel="alternate" type="application/atom+xml" title="All Posts about Lua" href="https://eliasprescott.github.io/tags/lua/atom.xml">
+  
+    
+    
+    <link rel="alternate" type="application/atom+xml" title="All Posts about NeoVim" href="https://eliasprescott.github.io/tags/neovim/atom.xml">
+  
+    
+    
+    <link rel="alternate" type="application/atom+xml" title="All Posts about OCaml" href="https://eliasprescott.github.io/tags/ocaml/atom.xml">
+  
+    
+    
+    <link rel="alternate" type="application/atom+xml" title="All Posts about Programming" href="https://eliasprescott.github.io/tags/programming/atom.xml">
+  
+    
+    
+    <link rel="alternate" type="application/atom+xml" title="All Posts about Rails" href="https://eliasprescott.github.io/tags/rails/atom.xml">
+  
+    
+    
+    <link rel="alternate" type="application/atom+xml" title="All Posts about Ruby" href="https://eliasprescott.github.io/tags/ruby/atom.xml">
+  
+    
+    
+    <link rel="alternate" type="application/atom+xml" title="All Posts about Typst" href="https://eliasprescott.github.io/tags/typst/atom.xml">
+  
+</head>
+
+<body>
+  <header>
+    <a href="/">
+      <h1 class="title">
+        Software Musings
+      </h1>
+    </a>
+
+    <nav>
+      
+      <a href="https://eliasprescott.github.io/tags/programming/">Programming</a>
+      
+      <a href="https://eliasprescott.github.io/tags/christianity/">Christianity</a>
+    </nav>
+
+    <div></div>
+  </header>
+  <section class="section">
+    <div class="container">
+      
+<h1 class="title">
+  Integrating a Music Player into NeoVim
+</h1>
+
+
+<div class="taglist">
+
+  
+  <span class="tag">
+    <a href="https://eliasprescott.github.io/tags/neovim/">NeoVim</a>
+  </span>
+
+  
+  <span class="tag">
+    <a href="https://eliasprescott.github.io/tags/lua/">Lua</a>
+  </span>
+
+  
+  <span class="tag">
+    <a href="https://eliasprescott.github.io/tags/programming/">Programming</a>
+  </span>
+
+</div>
+
+<p class="subtitle"><sub>Posted 2025-03-27</sub></p>
+<p class="subtitle"><sub>~6 minute read time</sub></p>
+
+<hr />
+
+<p>A while back, I wanted to start listening to my music playlist from the terminal (as one does).
+So, I looked around for different music <a href="https://en.wikipedia.org/wiki/Text-based_user_interface">TUIs</a> and I eventually found <a href="https://mpv.io/">mpv</a>.
+I enjoy using <code>mpv</code>, but I wondered if there could be a way to integrate it in my NeoVim setup.
+The answer, as it usually is with NeoVim, is yes you can, but you probably shouldn't.</p>
+<p>I think my NeoVim config is set up in a fairly standard way, but I haven't read through other people's configs to confirm that.
+I have a <code>lua/</code> folder in the root of my config (which lives in <code>~/.config/nvim/</code>).
+Then I have a <code>lua/custom/</code> folder where I stash any scripts or helpers I am working on.
+So I decided to place my new music player integration in that folder to keep everything organized.</p>
+<pre data-lang="lua" style="background-color:#282a36;color:#f8f8f2;" class="language-lua "><code class="language-lua" data-lang="lua"><span style="color:#6272a4;">-- lua/custom/music.lua
+</span><span style="color:#ff79c6;">local </span><span style="color:#ffffff;">M </span><span style="color:#ff79c6;">= </span><span style="color:#ffffff;">{}
+</span></code></pre>
+<p>This is a trick I learned from <a href="https://www.youtube.com/@teej_dv">teej_dv</a> and is a fairly standard way of defining modules in Lua as far as I know.
+Basically you define a local table <code>M</code>, add a bunch of methods onto it, then you can return <code>M</code> at the end so other files can use your module like <code>require(...).whatever()</code>.</p>
+<p>Before we go any further, we need to talk a little bit about how NeoVim works.
+NeoVim works on the concept of buffers.
+A buffer is, on a very abstract level, just a collection of text on which NeoVim can run lots of different operations, like inserting whatever characters you type when you are in insert mode.
+So for every file you open, NeoVim will load that file into a buffer.
+But it won't automatically delete that buffer after you load into a different file.
+NeoVim keeps these buffers around in the background.
+If you want to list all your current buffers, you can run <code>:ls</code></p>
+<p><img src="https://eliasprescott.github.io/blog/nvim-music-player/./list-buffers.png" alt="Running :ls in NeoVim and getting a list of two open buffers" /></p>
+<p>Another important thing to know about NeoVim is that it has a terminal mode where you can run a terminal emulator inside of the editor.
+When you run the <code>:term</code> command, NeoVim will spawn a new instance of your <code>$SHELL</code>, and hook up its I/O to a new buffer.
+We can <s>ab</s>use that to our advantage by spawning <code>mpv</code> in a terminal buffer, and then sending commands to it.</p>
+<p>Let's start with opening our background terminal buffer:</p>
+<pre data-lang="lua" style="background-color:#282a36;color:#f8f8f2;" class="language-lua "><code class="language-lua" data-lang="lua"><span style="color:#ff79c6;">local </span><span style="font-style:italic;color:#8be9fd;">function </span><span style="color:#50fa7b;">start_music</span><span>()
+</span><span>  </span><span style="color:#ff79c6;">local </span><span style="color:#ffffff;">current_buf </span><span style="color:#ff79c6;">= </span><span style="color:#ffffff;">vim</span><span style="color:#ff79c6;">.</span><span>fn</span><span style="color:#ff79c6;">.</span><span style="color:#50fa7b;">bufnr</span><span>()
+</span><span>  </span><span style="color:#ff79c6;">local </span><span style="color:#ffffff;">player_buf </span><span style="color:#ff79c6;">= </span><span style="color:#ffffff;">vim</span><span style="color:#ff79c6;">.</span><span>fn</span><span style="color:#ff79c6;">.</span><span style="color:#50fa7b;">bufnr</span><span>(</span><span style="color:#f1fa8c;">&quot;MusicPlayer&quot;</span><span>)
+</span><span>
+</span><span>  </span><span style="color:#ff79c6;">if </span><span style="color:#ffffff;">player_buf </span><span style="color:#ff79c6;">== -</span><span style="color:#bd93f9;">1 </span><span style="color:#ff79c6;">then
+</span><span>    </span><span style="color:#ffffff;">vim</span><span style="color:#ff79c6;">.</span><span style="color:#50fa7b;">cmd</span><span>(</span><span style="color:#f1fa8c;">&#39;:term&#39;</span><span>)
+</span><span>    </span><span style="color:#ffffff;">vim</span><span style="color:#ff79c6;">.</span><span style="color:#50fa7b;">cmd</span><span>(</span><span style="color:#f1fa8c;">&#39;:file MusicPlayer&#39;</span><span>)
+</span><span>    </span><span style="color:#ff79c6;">local </span><span style="color:#ffffff;">channel </span><span style="color:#ff79c6;">= </span><span style="color:#ffffff;">vim</span><span style="color:#ff79c6;">.</span><span>bo</span><span style="color:#ff79c6;">.</span><span>channel
+</span><span>    </span><span style="color:#ffffff;">vim</span><span style="color:#ff79c6;">.</span><span>api</span><span style="color:#ff79c6;">.</span><span style="color:#50fa7b;">nvim_chan_send</span><span>(</span><span style="color:#ffffff;">channel</span><span>, </span><span style="color:#ffffff;">vim</span><span style="color:#ff79c6;">.</span><span>api</span><span style="color:#ff79c6;">.</span><span style="color:#50fa7b;">nvim_replace_termcodes</span><span>(</span><span style="color:#f1fa8c;">&quot;mpv ~/Music --shuffle&lt;cr&gt;&quot;</span><span>, </span><span style="color:#bd93f9;">true</span><span>, </span><span style="color:#bd93f9;">false</span><span>, </span><span style="color:#bd93f9;">true</span><span>))
+</span><span>  </span><span style="color:#ff79c6;">else
+</span><span>    </span><span style="color:#50fa7b;">send_command_to_player</span><span>(</span><span style="color:#f1fa8c;">&#39;&lt;Space&gt;&#39;</span><span>)
+</span><span>  </span><span style="color:#ff79c6;">end
+</span><span>
+</span><span>  </span><span style="color:#ffffff;">vim</span><span style="color:#ff79c6;">.</span><span style="color:#50fa7b;">cmd</span><span>(</span><span style="color:#f1fa8c;">&#39;:b &#39; </span><span style="color:#ff79c6;">.. </span><span style="color:#ffffff;">current_buf</span><span>)
+</span><span style="color:#ff79c6;">end
+</span></code></pre>
+<p>Calling <code>vim.fn.bufnr()</code> without any arguments will return the ID of our current buffer, which we will need later to jump back to it.
+Calling that same function with a string allows you to get a buffer by its name, which is helpful because that means we don't have to keep track of its ID.
+So, if <code>player_buf</code> is <code>-1</code>, then we don't already have a music buffer and we need to create one.</p>
+<p>To create our music player, first we use <code>vim.cmd()</code> to call <code>:term</code> to create a new terminal buffer and switch to it.
+Then, <code>:file MusicPlayer</code> sets the name of our current buffer (the new terminal we just created) to <code>MusicPlayer</code>.
+We then grab the channel ID, which allows us to send text to the buffer as input.
+I believe that channels on terminal buffers are special in some sense, so NeoVim has some plumbing that helps hook up whatever you send to the channel to the stdin of the running program.
+Which is great for us, because it means all we need to do is grab the channel ID for our <code>MusicPlayer</code> buffer, then we can send input to it just like if we were using it ourselves.</p>
+<p>To finish off creating the music player buffer, you can send whatever command you use to start your music player.
+<code>nvim_replace_termcodes</code> is important because it will translate all the nice-looking NeoVim key codes into what they actually need to be for the terminal to actually pick up on them.
+So, the <code>&lt;cr&gt;</code> in our command will be replaced by an actual carriage return or newline.</p>
+<p>Now if <code>player_buf</code> is not equal to <code>-1</code>, then we know that our player buffer is already open.
+You could just ignore calls to <code>start_music()</code> when the player already exists, but I wanted it to also pause/unpause the player whenever I hook it up to a keymapping, so I send <code>&lt;Space&gt;</code> which tells <code>mpv</code> to toggle the paused state.</p>
+<p>Now that we can play the music, it would be nice to have a function to kill the music player:</p>
+<pre data-lang="lua" style="background-color:#282a36;color:#f8f8f2;" class="language-lua "><code class="language-lua" data-lang="lua"><span style="color:#ff79c6;">local </span><span style="font-style:italic;color:#8be9fd;">function </span><span style="color:#50fa7b;">stop_music</span><span>()
+</span><span>  </span><span style="color:#ff79c6;">local </span><span style="color:#ffffff;">player_buf </span><span style="color:#ff79c6;">= </span><span style="color:#ffffff;">vim</span><span style="color:#ff79c6;">.</span><span>fn</span><span style="color:#ff79c6;">.</span><span style="color:#50fa7b;">bufnr</span><span>(</span><span style="color:#f1fa8c;">&quot;MusicPlayer&quot;</span><span>)
+</span><span>
+</span><span>  </span><span style="color:#ff79c6;">if </span><span style="color:#ffffff;">player_buf </span><span style="color:#ff79c6;">~= -</span><span style="color:#bd93f9;">1 </span><span style="color:#ff79c6;">then
+</span><span>    </span><span style="color:#ffffff;">vim</span><span style="color:#ff79c6;">.</span><span style="color:#50fa7b;">cmd</span><span>(</span><span style="color:#f1fa8c;">&#39;:bd! &#39; </span><span style="color:#ff79c6;">.. </span><span style="color:#ffffff;">player_buf</span><span>)
+</span><span>  </span><span style="color:#ff79c6;">end
+</span><span style="color:#ff79c6;">end
+</span></code></pre>
+<p><code>:bd!</code> closes whatever buffer ID you give it, so it's a simple way to stop the music player entirely.</p>
+<p>Now we are ready to hook up some keymappings and start using the player:</p>
+<pre data-lang="lua" style="background-color:#282a36;color:#f8f8f2;" class="language-lua "><code class="language-lua" data-lang="lua"><span style="color:#6272a4;">-- lua/custom/music.lua
+</span><span style="color:#ffffff;">M</span><span style="color:#ff79c6;">.</span><span style="color:#50fa7b;">setup </span><span style="color:#ff79c6;">= </span><span style="font-style:italic;color:#8be9fd;">function</span><span>()
+</span><span>  </span><span style="color:#ffffff;">vim</span><span style="color:#ff79c6;">.</span><span>keymap</span><span style="color:#ff79c6;">.</span><span style="color:#50fa7b;">set</span><span>(</span><span style="color:#f1fa8c;">&#39;n&#39;</span><span>, </span><span style="color:#f1fa8c;">&#39;&lt;leader&gt;mp&#39;</span><span>, </span><span style="color:#ffffff;">start_music</span><span>)
+</span><span>  </span><span style="color:#ffffff;">vim</span><span style="color:#ff79c6;">.</span><span>keymap</span><span style="color:#ff79c6;">.</span><span style="color:#50fa7b;">set</span><span>(</span><span style="color:#f1fa8c;">&#39;n&#39;</span><span>, </span><span style="color:#f1fa8c;">&#39;&lt;leader&gt;ms&#39;</span><span>, </span><span style="color:#ffffff;">stop_music</span><span>)
+</span><span>  </span><span style="color:#ffffff;">vim</span><span style="color:#ff79c6;">.</span><span>keymap</span><span style="color:#ff79c6;">.</span><span style="color:#50fa7b;">set</span><span>(</span><span style="color:#f1fa8c;">&#39;n&#39;</span><span>, </span><span style="color:#f1fa8c;">&#39;&lt;leader&gt;m&gt;&#39;</span><span>, </span><span style="font-style:italic;color:#8be9fd;">function</span><span>() </span><span style="color:#50fa7b;">send_command_to_player</span><span>(</span><span style="color:#f1fa8c;">&#39;&gt;&#39;</span><span>) </span><span style="color:#ff79c6;">end</span><span>)
+</span><span>  </span><span style="color:#ffffff;">vim</span><span style="color:#ff79c6;">.</span><span>keymap</span><span style="color:#ff79c6;">.</span><span style="color:#50fa7b;">set</span><span>(</span><span style="color:#f1fa8c;">&#39;n&#39;</span><span>, </span><span style="color:#f1fa8c;">&#39;&lt;leader&gt;m&lt;&#39;</span><span>, </span><span style="font-style:italic;color:#8be9fd;">function</span><span>() </span><span style="color:#50fa7b;">send_command_to_player</span><span>(</span><span style="color:#f1fa8c;">&#39;&lt;&#39;</span><span>) </span><span style="color:#ff79c6;">end</span><span>)
+</span><span style="color:#ff79c6;">end
+</span><span>
+</span><span style="color:#ff79c6;">return </span><span style="color:#ffffff;">M
+</span><span>
+</span><span style="color:#6272a4;">-- init.lua
+</span><span style="color:#8be9fd;">require</span><span>(</span><span style="color:#f1fa8c;">&quot;custom.music&quot;</span><span>)</span><span style="color:#ff79c6;">.</span><span style="color:#50fa7b;">setup</span><span>()
+</span></code></pre>
+<p>I just defined a <code>setup()</code> method for initializing all the keymaps, then we can call that from <code>init.lua</code> (or wherever else you want).
+Another benefit of our <code>send_command_to_player()</code> function is that it becomes trivial to support whatever shortcuts your music player uses.
+<code>mpv</code> uses <code>&lt;</code> and <code>&gt;</code> to seek, and I wanted to be able to skip songs that I've grown tired of.</p>
+<p>We could stop there, but I wanted some visual indication in my editor that music is playing.
+So, I decided to parse <code>mpv</code>'s output so I could display it in my status line.</p>
+<pre data-lang="lua" style="background-color:#282a36;color:#f8f8f2;" class="language-lua "><code class="language-lua" data-lang="lua"><span style="color:#ffffff;">M</span><span style="color:#ff79c6;">.</span><span style="color:#50fa7b;">get_current_song </span><span style="color:#ff79c6;">= </span><span style="font-style:italic;color:#8be9fd;">function</span><span>()
+</span><span>  </span><span style="color:#ff79c6;">local </span><span style="color:#ffffff;">player_buf </span><span style="color:#ff79c6;">= </span><span style="color:#ffffff;">vim</span><span style="color:#ff79c6;">.</span><span>fn</span><span style="color:#ff79c6;">.</span><span style="color:#50fa7b;">bufnr</span><span>(</span><span style="color:#f1fa8c;">&quot;MusicPlayer&quot;</span><span>)
+</span><span>  </span><span style="color:#ff79c6;">if </span><span style="color:#ffffff;">player_buf </span><span style="color:#ff79c6;">== -</span><span style="color:#bd93f9;">1 </span><span style="color:#ff79c6;">then
+</span><span>    </span><span style="color:#ff79c6;">return </span><span style="color:#f1fa8c;">&quot;&quot;
+</span><span>  </span><span style="color:#ff79c6;">end
+</span><span>
+</span><span>  </span><span style="color:#ff79c6;">local </span><span style="color:#ffffff;">lines </span><span style="color:#ff79c6;">= </span><span style="color:#ffffff;">vim</span><span style="color:#ff79c6;">.</span><span>api</span><span style="color:#ff79c6;">.</span><span style="color:#50fa7b;">nvim_buf_get_lines</span><span>(</span><span style="color:#ffffff;">player_buf</span><span>, </span><span style="color:#bd93f9;">0</span><span>, </span><span style="color:#ff79c6;">-</span><span style="color:#bd93f9;">1</span><span>, </span><span style="color:#bd93f9;">true</span><span>)
+</span><span>
+</span><span>  </span><span style="color:#ff79c6;">local </span><span style="color:#ffffff;">last_song_entry </span><span style="color:#ff79c6;">= </span><span style="color:#bd93f9;">nil
+</span><span>  </span><span style="color:#ff79c6;">local </span><span style="color:#ffffff;">last_non_empty_index </span><span style="color:#ff79c6;">= </span><span style="color:#bd93f9;">0
+</span><span>  </span><span style="color:#ff79c6;">for </span><span style="color:#ffffff;">index</span><span>, </span><span style="color:#ffffff;">line </span><span style="color:#ff79c6;">in </span><span style="color:#8be9fd;">pairs</span><span>(</span><span style="color:#ffffff;">lines</span><span>) </span><span style="color:#ff79c6;">do
+</span><span>    </span><span style="color:#ff79c6;">if </span><span style="color:#6be5fd;">string</span><span style="color:#ff79c6;">.</span><span style="color:#8be9fd;">match</span><span>(</span><span style="color:#ffffff;">line</span><span>, </span><span style="color:#f1fa8c;">&#39;^Playing: &#39;</span><span>) </span><span style="color:#ff79c6;">then
+</span><span>      </span><span style="color:#ffffff;">last_song_entry </span><span style="color:#ff79c6;">= </span><span style="color:#ffffff;">line
+</span><span>    </span><span style="color:#ff79c6;">end
+</span><span>
+</span><span>    </span><span style="color:#ff79c6;">if </span><span style="color:#ffffff;">line </span><span style="color:#ff79c6;">~= </span><span style="color:#f1fa8c;">&quot;&quot; </span><span style="color:#ff79c6;">then
+</span><span>      </span><span style="color:#ffffff;">last_non_empty_index </span><span style="color:#ff79c6;">= </span><span style="color:#ffffff;">index
+</span><span>    </span><span style="color:#ff79c6;">end
+</span><span>  </span><span style="color:#ff79c6;">end
+</span><span>
+</span><span>  </span><span style="color:#ff79c6;">local </span><span style="color:#ffffff;">is_paused </span><span style="color:#ff79c6;">= </span><span style="color:#bd93f9;">false
+</span><span>  </span><span style="color:#ff79c6;">local </span><span style="color:#ffffff;">percentage_played </span><span style="color:#ff79c6;">= </span><span style="color:#f1fa8c;">&#39;&#39;
+</span><span>  </span><span style="color:#ff79c6;">local </span><span style="color:#ffffff;">last_entry </span><span style="color:#ff79c6;">= </span><span style="color:#ffffff;">lines</span><span>[</span><span style="color:#ffffff;">last_non_empty_index</span><span>]
+</span><span>  </span><span style="color:#ff79c6;">if </span><span style="color:#ffffff;">last_entry </span><span style="color:#ff79c6;">~= </span><span style="color:#bd93f9;">nil </span><span style="color:#ff79c6;">then
+</span><span>    </span><span style="color:#ff79c6;">if </span><span style="color:#6be5fd;">string</span><span style="color:#ff79c6;">.</span><span style="color:#8be9fd;">match</span><span>(</span><span style="color:#ffffff;">last_entry</span><span>, </span><span style="color:#f1fa8c;">&#39;^%(Paused%)&#39;</span><span>) </span><span style="color:#ff79c6;">then
+</span><span>      </span><span style="color:#ffffff;">is_paused </span><span style="color:#ff79c6;">= </span><span style="color:#bd93f9;">true
+</span><span>    </span><span style="color:#ff79c6;">end
+</span><span>    </span><span style="color:#ffffff;">percentage_played </span><span style="color:#ff79c6;">= </span><span style="color:#6be5fd;">string</span><span style="color:#ff79c6;">.</span><span style="color:#8be9fd;">match</span><span>(</span><span style="color:#ffffff;">last_entry</span><span>, </span><span style="color:#f1fa8c;">&#39;%(%d+%%%)&#39;</span><span>) </span><span style="color:#ff79c6;">or </span><span style="color:#f1fa8c;">&#39;&#39;
+</span><span>  </span><span style="color:#ff79c6;">end
+</span><span>
+</span><span>  </span><span style="color:#ff79c6;">local </span><span style="color:#ffffff;">filename </span><span style="color:#ff79c6;">= </span><span style="color:#ffffff;">vim</span><span style="color:#ff79c6;">.</span><span>fs</span><span style="color:#ff79c6;">.</span><span style="color:#50fa7b;">basename</span><span>(</span><span style="color:#ffffff;">last_song_entry</span><span>)
+</span><span>
+</span><span>  </span><span style="color:#ff79c6;">if </span><span style="color:#ffffff;">filename </span><span style="color:#ff79c6;">== </span><span style="color:#bd93f9;">nil </span><span style="color:#ff79c6;">then
+</span><span>    </span><span style="color:#ff79c6;">return </span><span style="color:#f1fa8c;">&quot;&quot;
+</span><span>  </span><span style="color:#ff79c6;">end
+</span><span>
+</span><span>  </span><span style="color:#ff79c6;">if </span><span style="color:#ffffff;">percentage_played </span><span style="color:#ff79c6;">~= </span><span style="color:#f1fa8c;">&#39;&#39; </span><span style="color:#ff79c6;">then
+</span><span>    </span><span style="color:#6272a4;">-- need to double the % to escape it for lualine
+</span><span>    </span><span style="color:#ffffff;">percentage_played </span><span style="color:#ff79c6;">= </span><span style="color:#f1fa8c;">&#39; &#39; </span><span style="color:#ff79c6;">.. </span><span style="color:#6be5fd;">string</span><span style="color:#ff79c6;">.</span><span style="color:#8be9fd;">gsub</span><span>(</span><span style="color:#ffffff;">percentage_played</span><span>, </span><span style="color:#f1fa8c;">&#39;%%&#39;</span><span>, </span><span style="color:#f1fa8c;">&#39;%%%%&#39;</span><span>)
+</span><span>  </span><span style="color:#ff79c6;">end
+</span><span>
+</span><span>  </span><span style="color:#ff79c6;">if </span><span style="color:#ffffff;">is_paused </span><span style="color:#ff79c6;">then
+</span><span>    </span><span style="color:#ff79c6;">return </span><span style="color:#f1fa8c;">&#39;🎵 Paused: &#39; </span><span style="color:#ff79c6;">.. </span><span style="color:#ffffff;">filename </span><span style="color:#ff79c6;">.. </span><span style="color:#ffffff;">percentage_played
+</span><span>  </span><span style="color:#ff79c6;">else
+</span><span>    </span><span style="color:#ff79c6;">return </span><span style="color:#f1fa8c;">&#39;🎵 Playing: &#39; </span><span style="color:#ff79c6;">.. </span><span style="color:#ffffff;">filename </span><span style="color:#ff79c6;">.. </span><span style="color:#ffffff;">percentage_played
+</span><span>  </span><span style="color:#ff79c6;">end
+</span><span style="color:#ff79c6;">end
+</span></code></pre>
+<p>I won't go through it entirely.
+Basically it just grabs the latest relevant entries because those will be for the current song.
+Then it tries to grab out the audio file name and the playback progress percentage.
+Once you have those you can display them wherever you feel like.
+I use <a href="https://github.com/nvim-lualine/lualine.nvim">lualine.nvim</a> for my status line, so here is a snippet of my config for that:</p>
+<pre data-lang="lua" style="background-color:#282a36;color:#f8f8f2;" class="language-lua "><code class="language-lua" data-lang="lua"><span>
+</span><span style="color:#50fa7b;">config </span><span style="color:#ff79c6;">= </span><span style="font-style:italic;color:#8be9fd;">function</span><span>()
+</span><span>  </span><span style="color:#ff79c6;">local </span><span style="color:#ffffff;">music_player </span><span style="color:#ff79c6;">= </span><span style="color:#8be9fd;">require</span><span>(</span><span style="color:#f1fa8c;">&#39;custom.music&#39;</span><span>)
+</span><span>
+</span><span>  </span><span style="color:#8be9fd;">require</span><span>(</span><span style="color:#f1fa8c;">&#39;lualine&#39;</span><span>)</span><span style="color:#ff79c6;">.</span><span style="color:#50fa7b;">setup </span><span style="color:#ffffff;">{
+</span><span>    </span><span style="color:#6272a4;">-- rest of config omitted for clarity
+</span><span>    </span><span style="color:#f1fa8c;">sections </span><span>= </span><span style="color:#ffffff;">{
+</span><span>      </span><span style="color:#f1fa8c;">lualine_a </span><span>= </span><span style="color:#ffffff;">{</span><span style="color:#f1fa8c;">&#39;mode&#39;</span><span style="color:#ffffff;">}</span><span>,
+</span><span>      </span><span style="color:#f1fa8c;">lualine_b </span><span>= </span><span style="color:#ffffff;">{</span><span style="color:#f1fa8c;">&#39;branch&#39;</span><span>, </span><span style="color:#f1fa8c;">&#39;diff&#39;</span><span>, </span><span style="color:#f1fa8c;">&#39;diagnostics&#39;</span><span style="color:#ffffff;">}</span><span>,
+</span><span>      </span><span style="color:#f1fa8c;">lualine_c </span><span>= </span><span style="color:#ffffff;">{
+</span><span>        </span><span style="color:#ffffff;">{
+</span><span>          </span><span style="color:#f1fa8c;">&#39;filename&#39;</span><span>,
+</span><span>          </span><span style="color:#f1fa8c;">file_status </span><span>= </span><span style="color:#bd93f9;">true</span><span>,
+</span><span>          </span><span style="color:#f1fa8c;">newfile_status </span><span>= </span><span style="color:#bd93f9;">true</span><span>,
+</span><span>          </span><span style="color:#f1fa8c;">path </span><span>= </span><span style="color:#bd93f9;">1</span><span>,
+</span><span>          </span><span style="color:#f1fa8c;">shorting_target </span><span>= </span><span style="color:#bd93f9;">40</span><span>,
+</span><span>        </span><span style="color:#ffffff;">}
+</span><span>      </span><span style="color:#ffffff;">}</span><span>,
+</span><span>      </span><span style="color:#f1fa8c;">lualine_x </span><span>= </span><span style="color:#ffffff;">{</span><span style="color:#f1fa8c;">&#39;filetype&#39;</span><span style="color:#ffffff;">}</span><span>,
+</span><span>      </span><span style="color:#f1fa8c;">lualine_y </span><span>= </span><span style="color:#ffffff;">{</span><span style="color:#f1fa8c;">&#39;progress&#39;</span><span>, </span><span style="color:#f1fa8c;">&#39;location&#39;</span><span style="color:#ffffff;">}</span><span>,
+</span><span>      </span><span style="color:#f1fa8c;">lualine_z </span><span>= </span><span style="color:#ffffff;">{music_player</span><span style="color:#ff79c6;">.</span><span>get_current_song</span><span style="color:#ffffff;">}</span><span>,
+</span><span>    </span><span style="color:#ffffff;">}</span><span>,
+</span><span>  </span><span style="color:#ffffff;">}
+</span><span style="color:#ff79c6;">end
+</span></code></pre>
+<p>And here is the final result:</p>
+<p><img src="https://eliasprescott.github.io/blog/nvim-music-player/./final-result.png" alt="My NeoVim status line with a section that reads: &quot;Playing: Programming Playlist 1.mp3 (0%)&quot;" /></p>
+<p><img src="https://eliasprescott.github.io/blog/nvim-music-player/./final-result-alt.png" alt="The status line section that now reads: &quot;Paused: Programming Playlist 1.mp3 (11%)&quot;" /></p>
+<p>I hope you enjoy this crazy idea as much as I do.
+Thanks for reading!</p>
+
+
+    </div>
+  </section>
+</body>
+</html>

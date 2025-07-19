@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+    <title> - Typst</title>
+    <link rel="self" type="application/atom+xml" href="https://eliasprescott.github.io/tags/typst/atom.xml"/>
+    <link rel="alternate" type="text/html" href="https://eliasprescott.github.io"/>
+    <generator uri="https://www.getzola.org/">Zola</generator>
+    <updated>2025-07-19T00:00:00+00:00</updated>
+    <id>https://eliasprescott.github.io/tags/typst/atom.xml</id>
+    <entry xml:lang="en">
+        <title>Making Memes with Typst</title>
+        <published>2025-07-19T00:00:00+00:00</published>
+        <updated>2025-07-19T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Elias Prescott
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://eliasprescott.github.io/blog/making-memes-with-typst/"/>
+        <id>https://eliasprescott.github.io/blog/making-memes-with-typst/</id>
+        
+        <content type="html" xml:base="https://eliasprescott.github.io/blog/making-memes-with-typst/">&lt;p&gt;I&#x27;ve been having fun using &lt;a href=&quot;https:&#x2F;&#x2F;typst.app&#x2F;&quot;&gt;Typst&lt;&#x2F;a&gt; to make various documents, and the thought struck me that I should try making a meme with it.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;code&quot;&gt;Code:&lt;&#x2F;h2&gt;
+&lt;pre data-lang=&quot;typst&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-typst &quot;&gt;&lt;code class=&quot;language-typst&quot; data-lang=&quot;typst&quot;&gt;&lt;span&gt;#set page(width: auto, height: auto, margin: 0pt)
+&lt;&#x2F;span&gt;&lt;span&gt;#set text(48pt, font: &amp;quot;Impact&amp;quot;, fill: white, stroke: (paint: black, thickness: 2pt))
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;#image(&amp;quot;griffin.jpg&amp;quot;, width: 800pt)
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;#place(
+&lt;&#x2F;span&gt;&lt;span&gt;  center + bottom,
+&lt;&#x2F;span&gt;&lt;span&gt;  dy: -10pt,
+&lt;&#x2F;span&gt;&lt;span&gt;  [Don&amp;#39;t use Typst to make memes],
+&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h2 id=&quot;command&quot;&gt;Command:&lt;&#x2F;h2&gt;
+&lt;pre data-lang=&quot;shell&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-shell &quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;&lt;span&gt;typst compile meme.typ --format png
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h2 id=&quot;output&quot;&gt;Output:&lt;&#x2F;h2&gt;
+&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;eliasprescott.github.io&#x2F;blog&#x2F;making-memes-with-typst&#x2F;.&#x2F;meme.png&quot; alt=&quot;An image of Peter Griffin running from an airplane with the caption &amp;quot;Don&amp;#39;t use Typst to make memes&amp;quot;&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+</content>
+        
+    </entry>
+</feed>

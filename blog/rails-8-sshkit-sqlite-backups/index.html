@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Software Musings | Simple SQLite Backups for Rails 8 with SSHKit</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Mono:ital,wght@0,200..800;1,200..800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+  <link href="/styles.css" rel="stylesheet">
+  <link rel="alternate" type="application/atom+xml" title="All Posts Feed" href="https://eliasprescott.github.io/atom.xml">
+  
+  
+    
+    
+    <link rel="alternate" type="application/atom+xml" title="All Posts about Bible Study" href="https://eliasprescott.github.io/tags/bible-study/atom.xml">
+  
+    
+    
+    <link rel="alternate" type="application/atom+xml" title="All Posts about Christianity" href="https://eliasprescott.github.io/tags/christianity/atom.xml">
+  
+    
+    
+    <link rel="alternate" type="application/atom+xml" title="All Posts about Databases" href="https://eliasprescott.github.io/tags/databases/atom.xml">
+  
+    
+    
+    <link rel="alternate" type="application/atom+xml" title="All Posts about Lua" href="https://eliasprescott.github.io/tags/lua/atom.xml">
+  
+    
+    
+    <link rel="alternate" type="application/atom+xml" title="All Posts about NeoVim" href="https://eliasprescott.github.io/tags/neovim/atom.xml">
+  
+    
+    
+    <link rel="alternate" type="application/atom+xml" title="All Posts about OCaml" href="https://eliasprescott.github.io/tags/ocaml/atom.xml">
+  
+    
+    
+    <link rel="alternate" type="application/atom+xml" title="All Posts about Programming" href="https://eliasprescott.github.io/tags/programming/atom.xml">
+  
+    
+    
+    <link rel="alternate" type="application/atom+xml" title="All Posts about Rails" href="https://eliasprescott.github.io/tags/rails/atom.xml">
+  
+    
+    
+    <link rel="alternate" type="application/atom+xml" title="All Posts about Ruby" href="https://eliasprescott.github.io/tags/ruby/atom.xml">
+  
+    
+    
+    <link rel="alternate" type="application/atom+xml" title="All Posts about Typst" href="https://eliasprescott.github.io/tags/typst/atom.xml">
+  
+</head>
+
+<body>
+  <header>
+    <a href="/">
+      <h1 class="title">
+        Software Musings
+      </h1>
+    </a>
+
+    <nav>
+      
+      <a href="https://eliasprescott.github.io/tags/programming/">Programming</a>
+      
+      <a href="https://eliasprescott.github.io/tags/christianity/">Christianity</a>
+    </nav>
+
+    <div></div>
+  </header>
+  <section class="section">
+    <div class="container">
+      
+<h1 class="title">
+  Simple SQLite Backups for Rails 8 with SSHKit
+</h1>
+
+
+<div class="taglist">
+
+  
+  <span class="tag">
+    <a href="https://eliasprescott.github.io/tags/programming/">Programming</a>
+  </span>
+
+  
+  <span class="tag">
+    <a href="https://eliasprescott.github.io/tags/rails/">Rails</a>
+  </span>
+
+</div>
+
+<p class="subtitle"><sub>Posted 2025-04-28</sub></p>
+<p class="subtitle"><sub>~2 minute read time</sub></p>
+
+<hr />
+
+<p>This won't be a long post, I just wanted to record something I struggled with for a little while.
+I recently made a quick toy app using Rails 8 as a learning experience (<a href="https://emoji-polls.australorp.dev">emoji-polls.australorp.dev</a>).
+I don't actually need database backups since this is only a toy app, but I thought it sounded like a fun project that wouldn't take too long.
+It ended up taking longer than I thought because I had to play around with the user and group permissions on my VM a little bit, and directly accessing a named Docker volume from the host side turned out to be more difficult than I thought.
+Eventually, I realized that I could just use <code>docker volume inspect $VOLUME_NAME</code> and then parse out the mount point property.
+I tried to mess with the folder permissions so my admin user could access the docker volumes without using <code>sudo</code>, but I eventually gave up and started using <code>sudo</code>, and then everything worked perfectly.
+Sometimes, <a href="https://en.wikipedia.org/wiki/Worse_is_better">worse really is better</a>.</p>
+<p>This project was also a fun excuse to play around with <a href="https://github.com/capistrano/sshkit">SSHKit</a>, which is a Ruby library for running commands on remote servers.
+My use case was really simple since I only have one host and I don't have any complex logic.
+My favorite feature is the ability to <a href="https://github.com/capistrano/sshkit?tab=readme-ov-file#transferring-files">transfer files</a>.
+Before settling on using SSHKit, I was looking into various other methods for automating this process using bash scripting, and none of them looked fun.
+But SSHKit makes transferring a file back to the host side super simple.
+This was my first experience replacing some of my normal bash scripting with Ruby, but it was a really positive one.</p>
+<pre data-lang="ruby" style="background-color:#282a36;color:#f8f8f2;" class="language-ruby "><code class="language-ruby" data-lang="ruby"><span style="color:#6272a4;">#!/usr/bin/env ruby
+</span><span style="color:#ff79c6;">require </span><span style="color:#f1fa8c;">&quot;sshkit&quot;
+</span><span style="color:#ff79c6;">require </span><span style="color:#f1fa8c;">&quot;sshkit/dsl&quot;
+</span><span style="color:#ff79c6;">require </span><span style="color:#f1fa8c;">&quot;date&quot;
+</span><span style="color:#ff79c6;">require </span><span style="color:#f1fa8c;">&quot;json&quot;
+</span><span style="color:#ff79c6;">include </span><span style="font-style:italic;color:#66d9ef;">SSHKit</span><span style="color:#ff79c6;">::</span><span>DSL
+</span><span>
+</span><span style="font-style:italic;color:#66d9ef;">SSHKit</span><span style="color:#ff79c6;">::</span><span style="font-style:italic;color:#66d9ef;">Backend</span><span style="color:#ff79c6;">::</span><span style="font-style:italic;color:#66d9ef;">Netssh</span><span style="color:#ff79c6;">.</span><span>configure </span><span style="color:#ff79c6;">do </span><span>|</span><span style="font-style:italic;color:#ffb86c;">ssh</span><span>|
+</span><span>  ssh</span><span style="color:#ff79c6;">.</span><span>ssh_options </span><span style="color:#ff79c6;">= </span><span>{
+</span><span>    </span><span style="color:#bd93f9;">user: </span><span style="color:#f1fa8c;">&#39;admin&#39;</span><span>,
+</span><span>    </span><span style="color:#bd93f9;">keys: </span><span>[</span><span style="color:#f1fa8c;">&#39;.ssh/kamal&#39;</span><span>],
+</span><span>    </span><span style="color:#bd93f9;">forward_agent: false</span><span>,
+</span><span>    </span><span style="color:#bd93f9;">auth_methods: </span><span>[</span><span style="color:#f1fa8c;">&#39;publickey&#39;</span><span>],
+</span><span>  }
+</span><span style="color:#ff79c6;">end
+</span><span>
+</span><span>environment </span><span style="color:#ff79c6;">= </span><span style="color:#f1fa8c;">&quot;production&quot;
+</span><span>
+</span><span>on </span><span style="color:#f1fa8c;">&#39;emoji-polls.australorp.dev&#39; </span><span style="color:#ff79c6;">do
+</span><span>  file_name </span><span style="color:#ff79c6;">= </span><span style="color:#f1fa8c;">&quot;</span><span>#{</span><span style="font-style:italic;color:#66d9ef;">DateTime</span><span style="color:#ff79c6;">.</span><span>now</span><span style="color:#ff79c6;">.</span><span>strftime(</span><span style="color:#f1fa8c;">&quot;</span><span style="color:#bd93f9;">%Y</span><span style="color:#f1fa8c;">-</span><span style="color:#bd93f9;">%m</span><span style="color:#f1fa8c;">-</span><span style="color:#bd93f9;">%d</span><span style="color:#f1fa8c;">&quot;</span><span>)}</span><span style="color:#f1fa8c;">-</span><span>#{environment}</span><span style="color:#f1fa8c;">.db&quot;
+</span><span>  temp_file_path </span><span style="color:#ff79c6;">= </span><span style="color:#f1fa8c;">&quot;/tmp/</span><span>#{file_name}</span><span style="color:#f1fa8c;">&quot;
+</span><span>  local_image_path </span><span style="color:#ff79c6;">= </span><span style="color:#f1fa8c;">&quot;./images/</span><span>#{file_name}</span><span style="color:#f1fa8c;">&quot;
+</span><span>  info </span><span style="color:#f1fa8c;">&quot;Backing up image to </span><span>#{temp_file_path}</span><span style="color:#f1fa8c;"> on </span><span>#{host}</span><span style="color:#f1fa8c;">&quot;
+</span><span>  volumes_output </span><span style="color:#ff79c6;">=</span><span> capture </span><span style="color:#bd93f9;">:docker</span><span>, </span><span style="color:#f1fa8c;">&quot;volume&quot;</span><span>, </span><span style="color:#f1fa8c;">&quot;inspect&quot;</span><span>, </span><span style="color:#f1fa8c;">&quot;emoji_polls_storage&quot;
+</span><span>  volumes_info </span><span style="color:#ff79c6;">= </span><span style="font-style:italic;color:#66d9ef;">JSON</span><span style="color:#ff79c6;">.</span><span>parse volumes_output
+</span><span>  volume_path </span><span style="color:#ff79c6;">=</span><span> volumes_info[</span><span style="color:#bd93f9;">0</span><span>][</span><span style="color:#f1fa8c;">&quot;Mountpoint&quot;</span><span>]
+</span><span>  execute </span><span style="color:#bd93f9;">:sudo</span><span>, </span><span style="color:#bd93f9;">:sqlite3</span><span>, </span><span style="color:#f1fa8c;">&quot;</span><span>#{volume_path}</span><span style="color:#f1fa8c;">/</span><span>#{environment}</span><span style="color:#f1fa8c;">.sqlite3&quot;</span><span>, </span><span style="color:#f1fa8c;">&quot;&#39;.backup </span><span>#{temp_file_path}</span><span style="color:#f1fa8c;">&#39;&quot;
+</span><span>  download! temp_file_path, local_image_path
+</span><span>  info </span><span style="color:#f1fa8c;">&quot;Deleting image on </span><span>#{host}</span><span style="color:#f1fa8c;">&quot;
+</span><span>  execute </span><span style="color:#bd93f9;">:sudo</span><span>, </span><span style="color:#bd93f9;">:rm</span><span>, temp_file_path
+</span><span style="color:#ff79c6;">end
+</span></code></pre>
+
+
+    </div>
+  </section>
+</body>
+</html>

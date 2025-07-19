@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Software Musings | Working with OCaml expect tests in NeoVim</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Mono:ital,wght@0,200..800;1,200..800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+  <link href="/styles.css" rel="stylesheet">
+  <link rel="alternate" type="application/atom+xml" title="All Posts Feed" href="https://eliasprescott.github.io/atom.xml">
+  
+  
+    
+    
+    <link rel="alternate" type="application/atom+xml" title="All Posts about Bible Study" href="https://eliasprescott.github.io/tags/bible-study/atom.xml">
+  
+    
+    
+    <link rel="alternate" type="application/atom+xml" title="All Posts about Christianity" href="https://eliasprescott.github.io/tags/christianity/atom.xml">
+  
+    
+    
+    <link rel="alternate" type="application/atom+xml" title="All Posts about Databases" href="https://eliasprescott.github.io/tags/databases/atom.xml">
+  
+    
+    
+    <link rel="alternate" type="application/atom+xml" title="All Posts about Lua" href="https://eliasprescott.github.io/tags/lua/atom.xml">
+  
+    
+    
+    <link rel="alternate" type="application/atom+xml" title="All Posts about NeoVim" href="https://eliasprescott.github.io/tags/neovim/atom.xml">
+  
+    
+    
+    <link rel="alternate" type="application/atom+xml" title="All Posts about OCaml" href="https://eliasprescott.github.io/tags/ocaml/atom.xml">
+  
+    
+    
+    <link rel="alternate" type="application/atom+xml" title="All Posts about Programming" href="https://eliasprescott.github.io/tags/programming/atom.xml">
+  
+    
+    
+    <link rel="alternate" type="application/atom+xml" title="All Posts about Rails" href="https://eliasprescott.github.io/tags/rails/atom.xml">
+  
+    
+    
+    <link rel="alternate" type="application/atom+xml" title="All Posts about Ruby" href="https://eliasprescott.github.io/tags/ruby/atom.xml">
+  
+    
+    
+    <link rel="alternate" type="application/atom+xml" title="All Posts about Typst" href="https://eliasprescott.github.io/tags/typst/atom.xml">
+  
+</head>
+
+<body>
+  <header>
+    <a href="/">
+      <h1 class="title">
+        Software Musings
+      </h1>
+    </a>
+
+    <nav>
+      
+      <a href="https://eliasprescott.github.io/tags/programming/">Programming</a>
+      
+      <a href="https://eliasprescott.github.io/tags/christianity/">Christianity</a>
+    </nav>
+
+    <div></div>
+  </header>
+  <section class="section">
+    <div class="container">
+      
+<h1 class="title">
+  Working with OCaml expect tests in NeoVim
+</h1>
+
+
+<div class="taglist">
+
+  
+  <span class="tag">
+    <a href="https://eliasprescott.github.io/tags/programming/">Programming</a>
+  </span>
+
+  
+  <span class="tag">
+    <a href="https://eliasprescott.github.io/tags/ocaml/">OCaml</a>
+  </span>
+
+  
+  <span class="tag">
+    <a href="https://eliasprescott.github.io/tags/neovim/">NeoVim</a>
+  </span>
+
+</div>
+
+<p class="subtitle"><sub>Posted 2025-03-25</sub></p>
+<p class="subtitle"><sub>~2 minute read time</sub></p>
+
+<hr />
+
+<p>This is just a quick note and not a full-on post.
+I've been playing around with inline expect tests in OCaml using the <a href="https://github.com/janestreet/ppx_expect">ppx_expect</a> library.
+The way these expect tests work is that they will capture <code>stdout</code> from select parts of your test function, then they will either store that as their value if you are running it for the first time, or they will compare the output against their stored value.
+If the new output is different from the stored output, then <code>dune</code> will give you a nice diff and tell you that it stored a corrected version of that file.</p>
+<pre data-lang="diff" style="background-color:#282a36;color:#f8f8f2;" class="language-diff "><code class="language-diff" data-lang="diff"><span style="color:#6272a4;">--- a/_build/default/lib/query.ml
+</span><span style="color:#6272a4;">+++ b/_build/.sandbox/6248834ca8898cf067c96e6df4119c43/default/lib/query.ml.corrected
+</span><span style="color:#6272a4;">@@ -15,7 +15,7 @@ let print = sexp_of_t &gt;&gt; Sexp.to_string
+</span><span>
+</span><span> let%expect_test &quot;parse load csv&quot; =
+</span><span>   printf &quot;%s&quot; (print (parse &quot;(LoadCSV blah.csv)&quot;));
+</span><span style="color:#ff79c6;">-  [%expect {| |}]
+</span><span style="color:#50fa7b;">+  [%expect {| (LoadCSV blah.csv) |}]
+</span></code></pre>
+<p>If you decide you want to accept that diff, then you can run <code>dune promote</code>:</p>
+<pre data-lang="bash" style="background-color:#282a36;color:#f8f8f2;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#50fa7b;">camalbrarian</span><span> (main) </span><span style="color:#50fa7b;">$</span><span> dune promote
+</span><span style="color:#50fa7b;">Promoting</span><span> _build/default/lib/query.ml.corrected to lib/query.ml.
+</span></code></pre>
+<p>I want to read through all of the <a href="https://dune.readthedocs.io/en/stable/">dune docs</a> and maybe write a post dedicated to <code>dune</code>'s features, but I love the integration between <code>dune</code> and the testing library.
+This workflows feels great even if you are switching tabs/terminals to manually run <code>dune promote</code>.</p>
+<p>But, I use NeoVim, so of course, I have to make my own keymappings so I can do all of this within my editor:</p>
+<pre data-lang="lua" style="background-color:#282a36;color:#f8f8f2;" class="language-lua "><code class="language-lua" data-lang="lua"><span style="color:#6272a4;">-- Run all tests and try to promote the current file
+</span><span style="color:#ffffff;">vim</span><span style="color:#ff79c6;">.</span><span>keymap</span><span style="color:#ff79c6;">.</span><span style="color:#50fa7b;">set</span><span>(</span><span style="color:#f1fa8c;">&#39;n&#39;</span><span>, </span><span style="color:#f1fa8c;">&#39;&lt;leader&gt;rp&#39;</span><span>, </span><span style="color:#f1fa8c;">&#39;:silent !dune runtest&lt;cr&gt;:silent !dune promote %&lt;cr&gt;&#39;</span><span>)
+</span><span style="color:#6272a4;">-- Run all tests and show the results
+</span><span style="color:#ffffff;">vim</span><span style="color:#ff79c6;">.</span><span>keymap</span><span style="color:#ff79c6;">.</span><span style="color:#50fa7b;">set</span><span>(</span><span style="color:#f1fa8c;">&#39;n&#39;</span><span>, </span><span style="color:#f1fa8c;">&#39;&lt;leader&gt;rr&#39;</span><span>, </span><span style="color:#f1fa8c;">&#39;:!dune runtest&lt;cr&gt;&#39;</span><span>)
+</span></code></pre>
+<p>These keymaps have been working great so far!
+My only complaint is that <code>dune</code> does not support running inline tests for a single file (as far as I can tell).
+So, you have to run all the tests in a project.
+But, at least <code>dune promote</code> can take in a file parameter, so I can only promote the changes for the file I'm looking at.</p>
+<p>Most of the time, I like to run <code>&lt;leader&gt;rr</code> first to view the changes in NeoVim to make sure they look good.
+Then I run <code>&lt;leader&gt;rp</code> to run and promote.
+Now that I think about it, I may just change <code>&lt;leader&gt;rp</code> to only promote and let it promote changes for all files.</p>
+<p>I'm usually only working on writing one test at a time anyways.</p>
+<p>I hope you enjoyed the NeoVim + OCaml tip.
+Thanks for reading!</p>
+
+
+    </div>
+  </section>
+</body>
+</html>

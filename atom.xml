@@ -1,0 +1,1317 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+    <title></title>
+    <link rel="self" type="application/atom+xml" href="https://eliasprescott.github.io/atom.xml"/>
+    <link rel="alternate" type="text/html" href="https://eliasprescott.github.io"/>
+    <generator uri="https://www.getzola.org/">Zola</generator>
+    <updated>2025-07-19T00:00:00+00:00</updated>
+    <id>https://eliasprescott.github.io/atom.xml</id>
+    <entry xml:lang="en">
+        <title>Making Memes with Typst</title>
+        <published>2025-07-19T00:00:00+00:00</published>
+        <updated>2025-07-19T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Elias Prescott
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://eliasprescott.github.io/blog/making-memes-with-typst/"/>
+        <id>https://eliasprescott.github.io/blog/making-memes-with-typst/</id>
+        
+        <content type="html" xml:base="https://eliasprescott.github.io/blog/making-memes-with-typst/">&lt;p&gt;I&#x27;ve been having fun using &lt;a href=&quot;https:&#x2F;&#x2F;typst.app&#x2F;&quot;&gt;Typst&lt;&#x2F;a&gt; to make various documents, and the thought struck me that I should try making a meme with it.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;code&quot;&gt;Code:&lt;&#x2F;h2&gt;
+&lt;pre data-lang=&quot;typst&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-typst &quot;&gt;&lt;code class=&quot;language-typst&quot; data-lang=&quot;typst&quot;&gt;&lt;span&gt;#set page(width: auto, height: auto, margin: 0pt)
+&lt;&#x2F;span&gt;&lt;span&gt;#set text(48pt, font: &amp;quot;Impact&amp;quot;, fill: white, stroke: (paint: black, thickness: 2pt))
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;#image(&amp;quot;griffin.jpg&amp;quot;, width: 800pt)
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;#place(
+&lt;&#x2F;span&gt;&lt;span&gt;  center + bottom,
+&lt;&#x2F;span&gt;&lt;span&gt;  dy: -10pt,
+&lt;&#x2F;span&gt;&lt;span&gt;  [Don&amp;#39;t use Typst to make memes],
+&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h2 id=&quot;command&quot;&gt;Command:&lt;&#x2F;h2&gt;
+&lt;pre data-lang=&quot;shell&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-shell &quot;&gt;&lt;code class=&quot;language-shell&quot; data-lang=&quot;shell&quot;&gt;&lt;span&gt;typst compile meme.typ --format png
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h2 id=&quot;output&quot;&gt;Output:&lt;&#x2F;h2&gt;
+&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;eliasprescott.github.io&#x2F;blog&#x2F;making-memes-with-typst&#x2F;.&#x2F;meme.png&quot; alt=&quot;An image of Peter Griffin running from an airplane with the caption &amp;quot;Don&amp;#39;t use Typst to make memes&amp;quot;&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+</content>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>Making a NeoVim Clone with Ruby</title>
+        <published>2025-05-06T00:00:00+00:00</published>
+        <updated>2025-05-06T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Elias Prescott
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://eliasprescott.github.io/blog/neovim-ruby-clone/"/>
+        <id>https://eliasprescott.github.io/blog/neovim-ruby-clone/</id>
+        
+        <content type="html" xml:base="https://eliasprescott.github.io/blog/neovim-ruby-clone/">&lt;p&gt;I&#x27;ve been learning Ruby recently.
+I&#x27;ve really been enjoying it and I&#x27;ve been reading through the Ruby docs quite a bit.
+When I found this section on &lt;a href=&quot;https:&#x2F;&#x2F;docs.ruby-lang.org&#x2F;en&#x2F;3.4&#x2F;IO.html#class-IO-label-Extension+io-2Fconsole&quot;&gt;&lt;code&gt;io&#x2F;console&lt;&#x2F;code&gt;&lt;&#x2F;a&gt;, I thought it sounded like fun.
+Since I have grown quite attached to using NeoVim as my editor, I thought it would be fun to make a NeoVim clone.
+For now, I&#x27;m calling it RVim, which is short for Ruby Vim.
+A high-quality implementation of a text editor would require &lt;i&gt;tons&lt;&#x2F;i&gt; of code to handle all the little edge cases around text manipulation, buffer display, and cursor handling.
+Obviously RVim is a long way off from handling all of that correctly, but I am surprised by how many features I&#x27;ve been able to pack into ~600 lines of code.
+I&#x27;m attributing that to how expressive Ruby is, and how well suited it is as a scripting language.&lt;&#x2F;p&gt;
+&lt;p&gt;One example of how productive Ruby can be comes from how I implemented the command mode.
+NeoVim has a command mode (&lt;code&gt;:help Cmdline-mode&lt;&#x2F;code&gt; in Vim to learn more) which allows users to run a variety of commands.
+To implement something exactly equivalent to Vim&#x27;s command mode would essentially require a custom language parser and interpreter.
+As much as I enjoy making little languages, I realized I could cheat by just providing a Ruby REPL instead.
+To implement a basic version of this REPL, I made a &lt;code&gt;RVimCommandCenter&lt;&#x2F;code&gt; class which holds all the helper methods I want to expose to users.
+I made a basic eval method on &lt;code&gt;RVimCommandCenter&lt;&#x2F;code&gt; which will evaluate input within the context of the class instance by using &lt;code&gt;binding.eval input&lt;&#x2F;code&gt;.
+Any code evaluated using this method will have immediate access to the methods within &lt;code&gt;RVimCommandCenter&lt;&#x2F;code&gt;.
+So, to implement the &lt;code&gt;q&lt;&#x2F;code&gt; command to quit the editor, I can simply do this:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;ruby&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-ruby &quot;&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;def &lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;q
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffb86c;&quot;&gt;@state&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;should_quit &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;true
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;end
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;I&#x27;m still in the early stages of building out this command system, but it is surprisingly powerful.
+For now, it&#x27;s not useful as a general purpose REPL because it does not display the results of the evaluation to the user, but that can always be fixed later on.
+In the demo video below, you can see how I directly access the state variable on the command center class to monkey around with the internal state of the editor.
+In addition to providing some convenient alias methods that mirror NeoVim&#x27;s commands, the command center class also allows users full access to the internal state of the editor.
+Giving users that kind of power can be dangerous, but I believe the benefits far outweigh the risks.
+By implementing the editor in pure Ruby and exposing the editor state as much as possible, I believe RVim could be extremely introspectable and customizable with little implementation effort on my part.
+With the right API design on the command center and state classes, it could even be easier to extend than NeoVim is.
+But we are still a ways off from that point.&lt;&#x2F;p&gt;
+&lt;p&gt;To provide a better REPL experience while I am still building out the command mode, I also added a &lt;code&gt;dbg&lt;&#x2F;code&gt; method to the command center which will place the console back into cooked mode and open &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;ruby&#x2F;irb&quot;&gt;irb&lt;&#x2F;a&gt;.
+This will give users a much better REPL editing experience with autocomplete and history support.
+You can also see me using irb to debug the editor state in the below video.
+Currently you cannot use irb&#x27;s full debugging toolkit because the application will go back into raw mode as soon as you step out of the initial breakpoint, but I think that could be fixed without too much effort.&lt;&#x2F;p&gt;
+&lt;iframe width=&quot;560&quot; height=&quot;315&quot; src=&quot;https:&#x2F;&#x2F;www.youtube-nocookie.com&#x2F;embed&#x2F;hzL5Su0PDo0?si=w15WHxyCsWxge_fd&quot; title=&quot;YouTube video player&quot; frameborder=&quot;0&quot; allow=&quot;accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share&quot; referrerpolicy=&quot;strict-origin-when-cross-origin&quot; allowfullscreen&gt;&lt;&#x2F;iframe&gt;
+&lt;p&gt;I hope you enjoyed reading about my latest crazy project.
+Even if it never takes off or becomes a useful editor, I have already learned a lot about Ruby and I&#x27;ve had a lot of fun.
+&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;EliasPrescott&#x2F;rvim&quot;&gt;Here&lt;&#x2F;a&gt; is the repo for RVim if you want to look at the code or play around with it.
+You should be able to run &lt;code&gt;bundle&lt;&#x2F;code&gt; or &lt;code&gt;gem install -g&lt;&#x2F;code&gt;, and then just &lt;code&gt;ruby main.rb&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+</content>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>Study of Ephesians Chapter 2</title>
+        <published>2025-05-01T00:00:00+00:00</published>
+        <updated>2025-05-01T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Elias Prescott
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://eliasprescott.github.io/blog/ephesians-2/"/>
+        <id>https://eliasprescott.github.io/blog/ephesians-2/</id>
+        
+        <content type="html" xml:base="https://eliasprescott.github.io/blog/ephesians-2/">&lt;p&gt;To set the stage, as I go through some of Paul&#x27;s more minor books in the New Testament, I am trying to focus on how Paul affected the shape of the modern church, but also how he affected modern society.
+I am influenced in this idea by books such as &lt;a href=&quot;https:&#x2F;&#x2F;www.thegoodbook.com&#x2F;the-air-we-breathe&quot;&gt;The Air We Breathe&lt;&#x2F;a&gt; by Glen Scrivener and &lt;a href=&quot;https:&#x2F;&#x2F;www.amazon.com&#x2F;Dominion-Christian-Revolution-Remade-World&#x2F;dp&#x2F;0465093507&quot;&gt;Dominion&lt;&#x2F;a&gt; by Tom Holland (the historian, not the actor who played Spider-Man).&lt;&#x2F;p&gt;
+&lt;p&gt;The common thread I find in both these books is the idea that the foundation of modern society and modern morality is Christianity.
+The world that the Ancient Romans and Greek lived in was radically different than the world we live in today.
+Their assumptions about freedom, justice, and morality were completely different from the ideals that we hold today in Western society.&lt;&#x2F;p&gt;
+&lt;aside class=&quot;callout&quot;&gt;
+  &lt;div class=&quot;body&quot;&gt;
+    &lt;h5 class=&quot;label&quot;&gt;Ephesians 2:1-3 (CSB)&lt;&#x2F;h5&gt;
+
+    &lt;sup&gt;1&lt;&#x2F;sup&gt; And you were dead in your trespasses and sins
+&lt;sup&gt;2&lt;&#x2F;sup&gt; in which you previously walked according to the ways of this world, according to the ruler of the power of the air, the spirit now working in the disobedient.
+&lt;sup&gt;3&lt;&#x2F;sup&gt; We too all previously lived among them in our fleshly desires, carrying out the inclinations of our flesh and thoughts, and we were by nature children under wrath as the others were also.
+  &lt;&#x2F;div&gt;
+&lt;&#x2F;aside&gt;
+&lt;p&gt;First off, I think the imagery of being &quot;dead&quot; in our trespasses and sins is an important reminder.
+From our own lives and from all of human history, we have seen how we humans tend to mess things up when left to our own devices.
+We crave meaning in our lives and we desire justice and fulfillment, but we struggle to find that.
+Instead of finding the meaning we seek, we often struggle in vain or lose our way and believe that there is no meaning or purpose to life.
+When we live our lives in this way, it is almost as if we are dead.
+We are going through the motions of life without clear direction, relying on our base instincts and desires to guide us.
+I think this is what Paul means when he says we walk &quot;according to the ways of this world.&quot;
+We live in confusion and chaos because we so easily become blinded to the true meaning of life.&lt;&#x2F;p&gt;
+&lt;aside class=&quot;callout&quot;&gt;
+  &lt;div class=&quot;body&quot;&gt;
+    &lt;h5 class=&quot;label&quot;&gt;Ephesians 2:4-5 (CSB)&lt;&#x2F;h5&gt;
+
+    &lt;sup&gt;4&lt;&#x2F;sup&gt; But God, who is rich in mercy, because of his great love that he had for us,
+&lt;sup&gt;5&lt;&#x2F;sup&gt; made us alive with Christ even though we were dead in trespasses. You are saved by grace!
+  &lt;&#x2F;div&gt;
+&lt;&#x2F;aside&gt;
+&lt;p&gt;Even though we are dead in our ways of living, God has taken mercy upon us by sending Jesus to save us.
+We take this for granted sometimes as Christians, but this point of view requires an incredible amount of humility.
+To willingly partake of the grace that God is extending to us, we have to truly believe that we are in desperate need of such grace.
+We have to believe that we are sinful, that we have made a mess of things on Earth.&lt;&#x2F;p&gt;
+&lt;p&gt;I love the phrase &quot;made us alive with Christ.&quot;
+Jesus&#x27; live, death, and resurrection quite literally saved us from death.
+His death was a means of granting us life.
+It was a way of reminding us of the life we are truly meant to live, and it provides us a path towards finding that life.&lt;&#x2F;p&gt;
+&lt;aside class=&quot;callout&quot;&gt;
+  &lt;div class=&quot;body&quot;&gt;
+    &lt;h5 class=&quot;label&quot;&gt;Ephesians 2:8-10 (CSB)&lt;&#x2F;h5&gt;
+
+    &lt;sup&gt;8&lt;&#x2F;sup&gt; For you are saved by grace through faith, and this is not from yourselves; it is God’s gift,
+&lt;sup&gt;9&lt;&#x2F;sup&gt; not from works, so that no one can boast.
+&lt;sup&gt;10&lt;&#x2F;sup&gt; For we are his workmanship, created in Christ Jesus for good works, which God prepared ahead of time for us to do.
+  &lt;&#x2F;div&gt;
+&lt;&#x2F;aside&gt;
+&lt;p&gt;Verse 8 is a great verse that you may recognize.
+The debate over works versus grace is a common one in Christian circles.
+Every Christian group believes that God&#x27;s grace is vital to the process of our salvation, but many groups argue over the role that our faith plays in the process.
+Many people have gotten down in the weeds to argue about this topic, but I think everything you need to understand about it is presented clearly in these verses.
+We are saved by God&#x27;s grace through our faith.
+I believe our faith is a factor because God wants it to be.
+God desires a close relationship with us and he wants to save us, but he will not force a relationship with us if we are not willing.
+Faith is our way of accepting God&#x27;s mercy and entering into a relationship with him.&lt;&#x2F;p&gt;
+&lt;p&gt;I think it&#x27;s interesting how verse 10 says we are &quot;created in Christ Jesus for good works.&quot;
+Even though our works do not save us, clearly works still play a role in the equation.
+I&#x27;ve often heard that works are a product of faith, which I think is a good way of looking at it.
+Again, it&#x27;s important to emphasize that we are not earning our salvation at all.
+Even whenever Paul mentions the good works that we are created for, he specifies that God &quot;prepared [the works] ahead of time for us to do.&quot;
+There is nothing that we can give to God that he does not already have.
+Literally anything that I have, anything that I am capable of providing, I only have it because God created it and me.
+So I cannot bring anything to the table that God would need.
+My faith or my belief in God is simply my way of coming to the table.
+God does not need or want me to bring anything to the table, he just wants me to sit with him and enter into that relationship with him.&lt;&#x2F;p&gt;
+&lt;aside class=&quot;callout&quot;&gt;
+  &lt;div class=&quot;body&quot;&gt;
+    &lt;h5 class=&quot;label&quot;&gt;Ephesians 2:11-22 (CSB)&lt;&#x2F;h5&gt;
+
+    &lt;sup&gt;11&lt;&#x2F;sup&gt; So, then, remember that at one time you were Gentiles in the flesh, called “the uncircumcised” by those called “the circumcised,” which is done in the flesh by human hands.
+&lt;sup&gt;12&lt;&#x2F;sup&gt; At that time you were without Christ, excluded from the citizenship of Israel, and foreigners to the covenants of promise, without hope and without God in the world.
+&lt;sup&gt;13&lt;&#x2F;sup&gt; But now in Christ Jesus, you who were far away have been brought near by the blood of Christ.
+&lt;sup&gt;14&lt;&#x2F;sup&gt; For he is our peace, who made both groups one and tore down the dividing wall of hostility. In his flesh,
+&lt;sup&gt;15&lt;&#x2F;sup&gt; he made of no effect the law consisting of commands and expressed in regulations, so that he might create in himself one new man from the two, resulting in peace.
+&lt;sup&gt;16&lt;&#x2F;sup&gt; He did this so that he might reconcile both to God in one body through the cross by which he put the hostility to death.
+&lt;sup&gt;17&lt;&#x2F;sup&gt; He came and proclaimed the good news of peace to you who were far away and peace to those who were near.
+&lt;sup&gt;18&lt;&#x2F;sup&gt; For through him we both have access in one Spirit to the Father.
+&lt;sup&gt;19&lt;&#x2F;sup&gt; So, then, you are no longer foreigners and strangers, but fellow citizens with the saints, and members of God’s household,
+&lt;sup&gt;20&lt;&#x2F;sup&gt; built on the foundation of the apostles and prophets, with Christ Jesus himself as the cornerstone.
+&lt;sup&gt;21&lt;&#x2F;sup&gt; In him the whole building, being put together, grows into a holy temple in the Lord.
+&lt;sup&gt;22&lt;&#x2F;sup&gt; In him you are also being built together for God’s dwelling in the Spirit.
+  &lt;&#x2F;div&gt;
+&lt;&#x2F;aside&gt;
+&lt;p&gt;I didn&#x27;t want to split up this group of verses because they flow so well together.
+Sometimes you just have to let Paul preach and stay out of his way.&lt;&#x2F;p&gt;
+&lt;p&gt;This section is a perfect example of Paul working to bring together Jew and Gentile and unite them under one God.
+He starts by acknowledging the separation.
+He acknowledges that the Ephesians were Gentiles in the flesh, separate from Israel.
+He is honest and said that without God, the Gentiles were without hope.
+But in Jesus, all who were far away have been brought near.&lt;&#x2F;p&gt;
+&lt;p&gt;Going back to what I mentioned at the beginning about the effects of Paul&#x27;s writings on modern morality and society, what I find interesting here is the idea of cross-cultural community.
+There was some homogenization between cultures at the time (e.g. Diaspora Jews), but not in the same way that there is today.
+For much of their history, many Jews were very untrusting and even hateful towards Gentiles.
+And the Greeks and Romans had their fair share of spite towards the Jews.
+When Paul talks about Jesus uniting Jews and Gentiles, he is talking about a kingdom that crosses cultures in a revolutionary way.
+This is something we take for granted in the United States because we are known as a cultural melting pot.
+This idea of mixing cultures and tolerating other people&#x27;s culture is celebrated today, but it certainly would not have been in Paul&#x27;s day.
+This is one way in which we can see the effects of Paul&#x27;s writing and Christianity in general on our modern society.
+I think you could pick nearly any point in human history, and you will find devout Christians who are crossing societal barriers because their devotion to God is greater than their devotion to culture.&lt;&#x2F;p&gt;
+&lt;p&gt;I find it very interesting how Paul brings up the law in verse 15.
+I can understand why a lot of Jews of the time did not believe in Jesus and were not willing to follow Christianity.
+Saying that Jesus made the law &quot;of no effect&quot; would have been a scandalous idea to many Jews in that time.
+I believe when Paul talks about Jesus creating one new man from the two, and doing this to reconcile both groups to God in one body, he is saying that Jesus&#x27; life and crucifixion are more important than the law.
+A better way of saying it might be that Jesus was the ultimate fulfillment of the law.&lt;&#x2F;p&gt;
+&lt;p&gt;In an interview recently, biblical scholar and apologist Wes Huff talked about how the law was essentially a mirror to the Jews.
+It was a mirror because they were supposed to use it to reveal when they were dirty.
+But instead of using the law as a mirror to reveal something about themselves, Wes said the Jews often tried to use the law to clean themselves.
+The idea of cleaning yourself with a mirror is preposterous, but I like the metaphor because it shows how the Jews had perverted the law which they had been given.
+They were trying to use the law in ways that it wasn&#x27;t meant to be used, oftentimes making it into a stumbling block that took them even further than God.&lt;&#x2F;p&gt;
+&lt;p&gt;If the Jewish law is a mirror that shows people they are dirty, then Jesus is the water that cleanses us.
+Jesus is the fulfillment of all the prophecies and promises in the Old Testament.
+Jesus is God&#x27;s ultimate method for sanctifying humanity and reconciling us to him.
+To those Jews who blindly followed their laws without ever understanding the character of God, Jesus was a blasphemer.
+To those Gentiles who ignored or doubted Jesus, he was just another failed Jewish Messiah, condemned to a criminal&#x27;s death.
+But to the Jews and Gentiles who listened to Jesus and believed, he is salvation.&lt;&#x2F;p&gt;
+&lt;p&gt;I believe we have the same choice today.
+We live in a world that is suffering from pain and confusion.
+People are broken, desperately searching for meaning and fulfillment.
+If we listen to Jesus and accept him as our king, then we will no longer be &quot;foreigners and strangers&quot;, but we will instead be &quot;fellow citizens with the saints, members of God&#x27;s household.&quot;&lt;&#x2F;p&gt;
+</content>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>Simple SQLite Backups for Rails 8 with SSHKit</title>
+        <published>2025-04-28T00:00:00+00:00</published>
+        <updated>2025-04-28T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Elias Prescott
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://eliasprescott.github.io/blog/rails-8-sshkit-sqlite-backups/"/>
+        <id>https://eliasprescott.github.io/blog/rails-8-sshkit-sqlite-backups/</id>
+        
+        <content type="html" xml:base="https://eliasprescott.github.io/blog/rails-8-sshkit-sqlite-backups/">&lt;p&gt;This won&#x27;t be a long post, I just wanted to record something I struggled with for a little while.
+I recently made a quick toy app using Rails 8 as a learning experience (&lt;a href=&quot;https:&#x2F;&#x2F;emoji-polls.australorp.dev&quot;&gt;emoji-polls.australorp.dev&lt;&#x2F;a&gt;).
+I don&#x27;t actually need database backups since this is only a toy app, but I thought it sounded like a fun project that wouldn&#x27;t take too long.
+It ended up taking longer than I thought because I had to play around with the user and group permissions on my VM a little bit, and directly accessing a named Docker volume from the host side turned out to be more difficult than I thought.
+Eventually, I realized that I could just use &lt;code&gt;docker volume inspect $VOLUME_NAME&lt;&#x2F;code&gt; and then parse out the mount point property.
+I tried to mess with the folder permissions so my admin user could access the docker volumes without using &lt;code&gt;sudo&lt;&#x2F;code&gt;, but I eventually gave up and started using &lt;code&gt;sudo&lt;&#x2F;code&gt;, and then everything worked perfectly.
+Sometimes, &lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;Worse_is_better&quot;&gt;worse really is better&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;This project was also a fun excuse to play around with &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;capistrano&#x2F;sshkit&quot;&gt;SSHKit&lt;&#x2F;a&gt;, which is a Ruby library for running commands on remote servers.
+My use case was really simple since I only have one host and I don&#x27;t have any complex logic.
+My favorite feature is the ability to &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;capistrano&#x2F;sshkit?tab=readme-ov-file#transferring-files&quot;&gt;transfer files&lt;&#x2F;a&gt;.
+Before settling on using SSHKit, I was looking into various other methods for automating this process using bash scripting, and none of them looked fun.
+But SSHKit makes transferring a file back to the host side super simple.
+This was my first experience replacing some of my normal bash scripting with Ruby, but it was a really positive one.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;ruby&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-ruby &quot;&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;&lt;span style=&quot;color:#6272a4;&quot;&gt;#!&#x2F;usr&#x2F;bin&#x2F;env ruby
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;require &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;sshkit&amp;quot;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;require &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;sshkit&#x2F;dsl&amp;quot;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;require &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;date&amp;quot;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;require &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;json&amp;quot;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;include &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#66d9ef;&quot;&gt;SSHKit&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;::&lt;&#x2F;span&gt;&lt;span&gt;DSL
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#66d9ef;&quot;&gt;SSHKit&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;::&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#66d9ef;&quot;&gt;Backend&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;::&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#66d9ef;&quot;&gt;Netssh&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;configure &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;do &lt;&#x2F;span&gt;&lt;span&gt;|&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ffb86c;&quot;&gt;ssh&lt;&#x2F;span&gt;&lt;span&gt;|
+&lt;&#x2F;span&gt;&lt;span&gt;  ssh&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;ssh_options &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;user: &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39;admin&amp;#39;&lt;&#x2F;span&gt;&lt;span&gt;,
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;keys: &lt;&#x2F;span&gt;&lt;span&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39;.ssh&#x2F;kamal&amp;#39;&lt;&#x2F;span&gt;&lt;span&gt;],
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;forward_agent: false&lt;&#x2F;span&gt;&lt;span&gt;,
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;auth_methods: &lt;&#x2F;span&gt;&lt;span&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39;publickey&amp;#39;&lt;&#x2F;span&gt;&lt;span&gt;],
+&lt;&#x2F;span&gt;&lt;span&gt;  }
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;end
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;environment &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;production&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;on &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39;emoji-polls.australorp.dev&amp;#39; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;do
+&lt;&#x2F;span&gt;&lt;span&gt;  file_name &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;#{&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#66d9ef;&quot;&gt;DateTime&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;now&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;strftime(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;%Y&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;%m&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;%d&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;)}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;-&lt;&#x2F;span&gt;&lt;span&gt;#{environment}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;.db&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;  temp_file_path &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;&#x2F;tmp&#x2F;&lt;&#x2F;span&gt;&lt;span&gt;#{file_name}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;  local_image_path &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;.&#x2F;images&#x2F;&lt;&#x2F;span&gt;&lt;span&gt;#{file_name}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;  info &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;Backing up image to &lt;&#x2F;span&gt;&lt;span&gt;#{temp_file_path}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt; on &lt;&#x2F;span&gt;&lt;span&gt;#{host}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;  volumes_output &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span&gt; capture &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;:docker&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;volume&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;inspect&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;emoji_polls_storage&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;  volumes_info &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#66d9ef;&quot;&gt;JSON&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;parse volumes_output
+&lt;&#x2F;span&gt;&lt;span&gt;  volume_path &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span&gt; volumes_info[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;][&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;Mountpoint&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;]
+&lt;&#x2F;span&gt;&lt;span&gt;  execute &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;:sudo&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;:sqlite3&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;#{volume_path}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&#x2F;&lt;&#x2F;span&gt;&lt;span&gt;#{environment}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;.sqlite3&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;&amp;#39;.backup &lt;&#x2F;span&gt;&lt;span&gt;#{temp_file_path}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;  download! temp_file_path, local_image_path
+&lt;&#x2F;span&gt;&lt;span&gt;  info &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;Deleting image on &lt;&#x2F;span&gt;&lt;span&gt;#{host}&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;  execute &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;:sudo&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;:rm&lt;&#x2F;span&gt;&lt;span&gt;, temp_file_path
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;end
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+</content>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>From GUI to TUI: My Journey with git</title>
+        <published>2025-03-29T00:00:00+00:00</published>
+        <updated>2025-03-29T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Elias Prescott
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://eliasprescott.github.io/blog/gui-to-tui-version-control/"/>
+        <id>https://eliasprescott.github.io/blog/gui-to-tui-version-control/</id>
+        
+        <content type="html" xml:base="https://eliasprescott.github.io/blog/gui-to-tui-version-control/">&lt;aside class=&quot;callout&quot;&gt;
+  &lt;div class=&quot;body&quot;&gt;
+    &lt;h5 class=&quot;label&quot;&gt;Note&lt;&#x2F;h5&gt;
+
+    For any non-programmers reading this, I am not using the word git in the pejorative sense.
+&lt;a href=&quot;https:&#x2F;&#x2F;git-scm.com&#x2F;&quot;&gt;git&lt;&#x2F;a&gt; is a distributed version control system.
+Essentially, it is a tool that developers use to store code and coordinate their work.
+  &lt;&#x2F;div&gt;
+&lt;&#x2F;aside&gt;
+&lt;p&gt;I don&#x27;t remember my first encounter with &lt;code&gt;git&lt;&#x2F;code&gt;.
+It was probably one of my more intermediate classes in college where we had to turn in a final project to GitHub.
+I&#x27;m sure I just stumbled around with &lt;code&gt;git&lt;&#x2F;code&gt; in Powershell or Command Prompt until I happened to find the right incantation.
+I got by with knowing the least amount that I could about &lt;code&gt;git&lt;&#x2F;code&gt; while still getting my assignments done.&lt;&#x2F;p&gt;
+&lt;p&gt;I got my first programming job while I was still in college, and I don&#x27;t actually remember using &lt;code&gt;git&lt;&#x2F;code&gt; there.
+I&#x27;m sure I did some, I just don&#x27;t remember it.
+Using &lt;code&gt;git&lt;&#x2F;code&gt; wasn&#x27;t significant or meaningful to me, it was just something I did because my industry labeled it a &quot;best practice.&quot;&lt;&#x2F;p&gt;
+&lt;p&gt;After I was out of college and at my next job, I started to understand &lt;code&gt;git&lt;&#x2F;code&gt; better just by working with it more.
+At some point after college, I realized that VSCode had a nice &lt;code&gt;git&lt;&#x2F;code&gt; integration that made it easier to work with.
+But looking back, my workflow was still very primitive.
+I would add a few files and modify a couple of other files, then I might look through the unstaged files, write a quick commit message, then I would commit my changes.
+I don&#x27;t think I even understood what staging a change even meant.
+It was just some weird quirk of using &lt;code&gt;git&lt;&#x2F;code&gt; that I accepted.
+I think I even turned on some setting in VSCode so it would auto-stage all my changes when I went to make a commit.&lt;&#x2F;p&gt;
+&lt;p&gt;I was content using &lt;code&gt;git&lt;&#x2F;code&gt; in its simplest form, but I lacked the necessary understanding to do anything more with &lt;code&gt;git&lt;&#x2F;code&gt;.
+I struggled my way through merge conflicts without truly understanding why they were happening.
+If I messed something up on my branch or local repo, I would have to lookup the right reset command or ask someone else for help.
+But things changed when I started using NeoVim as my editor.&lt;&#x2F;p&gt;
+&lt;p&gt;Before I used NeoVim, I didn&#x27;t really understand the terminal.
+I understood how to copy and paste commands so that I could set up different frameworks or use Docker, but I never truly appreciated the terminal or the shell for what they were.
+But I started to get an appreciation for the terminal when I watched &lt;a href=&quot;https:&#x2F;&#x2F;www.youtube.com&#x2F;@ThePrimeagen&quot;&gt;ThePrimeagen&lt;&#x2F;a&gt; code in his YouTube videos.
+He was using tools that I had never heard of, to do things in the terminal that I couldn&#x27;t even understand.
+Even though I couldn&#x27;t fully understand what he was doing at the time, I recognized the power of the terminal.
+I knew it was something that I needed to understand if I wanted to become a better developer.
+So, one day I decided I needed to fully switch over if I was ever going to learn.
+I quit VSCode cold turkey and started using NeoVim for all my coding.&lt;&#x2F;p&gt;
+&lt;p&gt;Getting used to NeoVim honestly didn&#x27;t even take that long looking back.
+But at some point early on in the switch, I realized that quitting VSCode meant I would need to find some other way to use &lt;code&gt;git&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;At first, I went back to what I learned in college.
+Good old &lt;code&gt;git status&lt;&#x2F;code&gt;, &lt;code&gt;git pull&lt;&#x2F;code&gt;, &lt;code&gt;git commit -a&lt;&#x2F;code&gt;, and &lt;code&gt;git push&lt;&#x2F;code&gt;.
+It was refreshing coming back to this workflow, but I still didn&#x27;t understand &lt;code&gt;git&lt;&#x2F;code&gt; very well.
+Now that I was trying to understand the terminal better and become a better developer, I knew I had to take &lt;code&gt;git&lt;&#x2F;code&gt; more seriously.
+So I found that &lt;a href=&quot;https:&#x2F;&#x2F;git-scm.com&#x2F;book&#x2F;en&#x2F;v2&quot;&gt;Pro Git&lt;&#x2F;a&gt; is available to read for free online.
+I read through that whole book on my phone while we were on vacation.
+That book gave me a whole new appreciation for how &lt;code&gt;git&lt;&#x2F;code&gt; works.
+All of the sudden, I was able to place those basic commands I was using within the wider context of how &lt;code&gt;git&lt;&#x2F;code&gt; works.
+I understood that branches are really just pointers to a commit hash.
+Now I understood why merge conflicts happened, and I even learned a few basic approaches to fixing them (or avoiding them).
+I even learned how the &lt;code&gt;.git&#x2F;&lt;&#x2F;code&gt; folder works and how &lt;code&gt;git&lt;&#x2F;code&gt; organizes the commit data.
+I learned the power of &lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;Content-addressable_storage&quot;&gt;content-addressable stores&lt;&#x2F;a&gt;.
+Taking the time to learn &lt;code&gt;git&lt;&#x2F;code&gt; better was an important moment for me as a developer because it taught me the value of digging deeper into a topic.
+I could have kept on programming and using &lt;code&gt;git&lt;&#x2F;code&gt; without truly understanding it.
+No one asked me or expected me to learn more about &lt;code&gt;git&lt;&#x2F;code&gt;.
+Instead, it was something that I expected of myself.&lt;&#x2F;p&gt;
+&lt;aside class=&quot;callout&quot;&gt;
+  &lt;div class=&quot;body&quot;&gt;
+    &lt;h5 class=&quot;label&quot;&gt;Musing&lt;&#x2F;h5&gt;
+
+    It&#x27;s been a little while now since I went through the &lt;a href=&quot;https:&#x2F;&#x2F;git-scm.com&#x2F;book&#x2F;en&#x2F;v2&#x2F;Git-Branching-Branches-in-a-Nutshell&quot;&gt;git book&lt;&#x2F;a&gt;.
+I probably need to go through it again.
+I&#x27;m sure I would pick up a whole lot more now that I have some extra experience under my belt.
+  &lt;&#x2F;div&gt;
+&lt;&#x2F;aside&gt;
+&lt;p&gt;After I understood &lt;code&gt;git&lt;&#x2F;code&gt; better, I kept using it in the command line for a while.
+But eventually, one of the NeoVim YouTubers I like (either &lt;a href=&quot;https:&#x2F;&#x2F;www.youtube.com&#x2F;@ThePrimeagen&quot;&gt;ThePrimeagen&lt;&#x2F;a&gt; or &lt;a href=&quot;https:&#x2F;&#x2F;www.youtube.com&#x2F;@teej_dv&quot;&gt;teej_dv&lt;&#x2F;a&gt;) mentioned how great &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;tpope&#x2F;vim-fugitive&quot;&gt;vim-fugitive&lt;&#x2F;a&gt; is.
+&lt;code&gt;vim-fugitive&lt;&#x2F;code&gt; is a NeoVim plugin that allows you to intuitively use &lt;code&gt;git&lt;&#x2F;code&gt; from within NeoVim.
+The plugin is almost like an alias for the &lt;code&gt;git&lt;&#x2F;code&gt; command that is built in to NeoVim.
+It allows you to run &lt;code&gt;:G ...&lt;&#x2F;code&gt; within vim, which will then behave as if you ran &lt;code&gt;git ...&lt;&#x2F;code&gt; in another terminal.
+But what makes the plugin awesome is the extra conveniences it provides.
+You can run just &lt;code&gt;:G&lt;&#x2F;code&gt; to get a nice status buffer with a bunch of keymappings for quickly performing a whole bunch of different &lt;code&gt;git&lt;&#x2F;code&gt; operations.
+Running &lt;code&gt;:G blame&lt;&#x2F;code&gt; in a file will give you a nice extra buffer on the left side, and you can even press &lt;code&gt;&amp;lt;Enter&amp;gt;&lt;&#x2F;code&gt; on any of the blame lines to navigate through to that commit&#x27;s details.
+Fugitive is a very nice &lt;code&gt;git&lt;&#x2F;code&gt; wrapper for NeoVim and I would highly recommend it if you are looking for something like that.&lt;&#x2F;p&gt;
+&lt;p&gt;But my story with &lt;code&gt;git&lt;&#x2F;code&gt; is not done yet, because one day, I stumbled upon this video: &lt;a href=&quot;https:&#x2F;&#x2F;youtu.be&#x2F;_94Ja45AVzU?si=sMLiWZZql24lPheW&quot;&gt;Lazygit creator interviews DHH (Rails creator)&lt;&#x2F;a&gt;.
+YouTube recommended the video to me because I was on a Ruby on Rails kick and I was watching a lot of DHH&#x27;s videos.
+Listening to the interview made me very curious about this &lt;code&gt;lazygit&lt;&#x2F;code&gt; tool, so I went and found this video: &lt;a href=&quot;https:&#x2F;&#x2F;youtu.be&#x2F;CPLdltN7wgE?si=ilHPf4kuYXpFXEZV&quot;&gt;15 Lazygit Features In Under 15 Minutes&lt;&#x2F;a&gt;.
+Seeing how fast Jesse was able to do some of these &lt;code&gt;git&lt;&#x2F;code&gt; operations that I wouldn&#x27;t even know how to do off the top of my head was impressive.
+It was like when I first watched &lt;code&gt;ThePrimeagen&lt;&#x2F;code&gt; using NeoVim or the terminal.
+I saw just how good someone else&#x27;s workflow was and I wanted it for myself.&lt;&#x2F;p&gt;
+&lt;p&gt;So I installed &lt;code&gt;lazygit&lt;&#x2F;code&gt; and started using it instead of &lt;code&gt;vim-fugitive&lt;&#x2F;code&gt;.
+It took me a couple of days before I was comfortable with it, but now it feels great and I love using it.
+I especially love how &lt;code&gt;lazygit&lt;&#x2F;code&gt; lays out so much information about your repo all at once.
+It has helped me a lot with visualizing my commit history and current working changes.
+It has changed the way I think about and use &lt;code&gt;git&lt;&#x2F;code&gt;.
+Recently, I started using it to only stage selected portions or specific lines within a file.
+I always knew that was possible, but &lt;code&gt;lazygit&lt;&#x2F;code&gt; makes it so easy to do that I finally tried it out and realized how useful it is.
+So, now I can work on multiple changes at once, like adding a blog post to this blog while also writing some CSS tweaks.
+Then when I&#x27;m ready to commit. I will only stage and commit the files or lines that are relevant to my CSS tweaks.
+Then I can stage the new blog post as a separate commit.
+This may sound like a small or unimportant feature, but it has been great for keeping changes separate.
+I haven&#x27;t needed to roll back a botched deployment before, but I&#x27;ve heard that keeping commits focused on a single feature&#x2F;change makes it way easier to roll back bad changes.&lt;&#x2F;p&gt;
+&lt;p&gt;My main takeaway from my journey with &lt;code&gt;git&lt;&#x2F;code&gt; is the importance of figuring things out for yourself and pushing yourself.
+It is great when other people give you advice or teach you things, but ultimately, you are in charge of your learning and development.
+You are responsible for your growth as a software engineer.
+I am not comfortable remaining at my current skill level.
+I always want to be learning something new and pushing myself.
+I want to be an expert at what I do.
+Because being an expert is more fun.
+Thanks for reading!&lt;&#x2F;p&gt;
+</content>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>Integrating a Music Player into NeoVim</title>
+        <published>2025-03-27T00:00:00+00:00</published>
+        <updated>2025-03-27T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Elias Prescott
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://eliasprescott.github.io/blog/nvim-music-player/"/>
+        <id>https://eliasprescott.github.io/blog/nvim-music-player/</id>
+        
+        <content type="html" xml:base="https://eliasprescott.github.io/blog/nvim-music-player/">&lt;p&gt;A while back, I wanted to start listening to my music playlist from the terminal (as one does).
+So, I looked around for different music &lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;Text-based_user_interface&quot;&gt;TUIs&lt;&#x2F;a&gt; and I eventually found &lt;a href=&quot;https:&#x2F;&#x2F;mpv.io&#x2F;&quot;&gt;mpv&lt;&#x2F;a&gt;.
+I enjoy using &lt;code&gt;mpv&lt;&#x2F;code&gt;, but I wondered if there could be a way to integrate it in my NeoVim setup.
+The answer, as it usually is with NeoVim, is yes you can, but you probably shouldn&#x27;t.&lt;&#x2F;p&gt;
+&lt;p&gt;I think my NeoVim config is set up in a fairly standard way, but I haven&#x27;t read through other people&#x27;s configs to confirm that.
+I have a &lt;code&gt;lua&#x2F;&lt;&#x2F;code&gt; folder in the root of my config (which lives in &lt;code&gt;~&#x2F;.config&#x2F;nvim&#x2F;&lt;&#x2F;code&gt;).
+Then I have a &lt;code&gt;lua&#x2F;custom&#x2F;&lt;&#x2F;code&gt; folder where I stash any scripts or helpers I am working on.
+So I decided to place my new music player integration in that folder to keep everything organized.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;lua&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-lua &quot;&gt;&lt;code class=&quot;language-lua&quot; data-lang=&quot;lua&quot;&gt;&lt;span style=&quot;color:#6272a4;&quot;&gt;-- lua&#x2F;custom&#x2F;music.lua
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;local &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;M &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;{}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;This is a trick I learned from &lt;a href=&quot;https:&#x2F;&#x2F;www.youtube.com&#x2F;@teej_dv&quot;&gt;teej_dv&lt;&#x2F;a&gt; and is a fairly standard way of defining modules in Lua as far as I know.
+Basically you define a local table &lt;code&gt;M&lt;&#x2F;code&gt;, add a bunch of methods onto it, then you can return &lt;code&gt;M&lt;&#x2F;code&gt; at the end so other files can use your module like &lt;code&gt;require(...).whatever()&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;Before we go any further, we need to talk a little bit about how NeoVim works.
+NeoVim works on the concept of buffers.
+A buffer is, on a very abstract level, just a collection of text on which NeoVim can run lots of different operations, like inserting whatever characters you type when you are in insert mode.
+So for every file you open, NeoVim will load that file into a buffer.
+But it won&#x27;t automatically delete that buffer after you load into a different file.
+NeoVim keeps these buffers around in the background.
+If you want to list all your current buffers, you can run &lt;code&gt;:ls&lt;&#x2F;code&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;eliasprescott.github.io&#x2F;blog&#x2F;nvim-music-player&#x2F;.&#x2F;list-buffers.png&quot; alt=&quot;Running :ls in NeoVim and getting a list of two open buffers&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;Another important thing to know about NeoVim is that it has a terminal mode where you can run a terminal emulator inside of the editor.
+When you run the &lt;code&gt;:term&lt;&#x2F;code&gt; command, NeoVim will spawn a new instance of your &lt;code&gt;$SHELL&lt;&#x2F;code&gt;, and hook up its I&#x2F;O to a new buffer.
+We can &lt;s&gt;ab&lt;&#x2F;s&gt;use that to our advantage by spawning &lt;code&gt;mpv&lt;&#x2F;code&gt; in a terminal buffer, and then sending commands to it.&lt;&#x2F;p&gt;
+&lt;p&gt;Let&#x27;s start with opening our background terminal buffer:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;lua&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-lua &quot;&gt;&lt;code class=&quot;language-lua&quot; data-lang=&quot;lua&quot;&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;local &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;function &lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;start_music&lt;&#x2F;span&gt;&lt;span&gt;()
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;local &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;current_buf &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;vim&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;fn&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;bufnr&lt;&#x2F;span&gt;&lt;span&gt;()
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;local &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;player_buf &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;vim&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;fn&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;bufnr&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;MusicPlayer&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;player_buf &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;== -&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;1 &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;then
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;vim&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;cmd&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39;:term&amp;#39;&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;vim&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;cmd&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39;:file MusicPlayer&amp;#39;&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;local &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;channel &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;vim&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;bo&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;channel
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;vim&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;api&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;nvim_chan_send&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;channel&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;vim&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;api&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;nvim_replace_termcodes&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;mpv ~&#x2F;Music --shuffle&amp;lt;cr&amp;gt;&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;true&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;false&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;true&lt;&#x2F;span&gt;&lt;span&gt;))
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;else
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;send_command_to_player&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39;&amp;lt;Space&amp;gt;&amp;#39;&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;end
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;vim&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;cmd&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39;:b &amp;#39; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;.. &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;current_buf&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;end
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Calling &lt;code&gt;vim.fn.bufnr()&lt;&#x2F;code&gt; without any arguments will return the ID of our current buffer, which we will need later to jump back to it.
+Calling that same function with a string allows you to get a buffer by its name, which is helpful because that means we don&#x27;t have to keep track of its ID.
+So, if &lt;code&gt;player_buf&lt;&#x2F;code&gt; is &lt;code&gt;-1&lt;&#x2F;code&gt;, then we don&#x27;t already have a music buffer and we need to create one.&lt;&#x2F;p&gt;
+&lt;p&gt;To create our music player, first we use &lt;code&gt;vim.cmd()&lt;&#x2F;code&gt; to call &lt;code&gt;:term&lt;&#x2F;code&gt; to create a new terminal buffer and switch to it.
+Then, &lt;code&gt;:file MusicPlayer&lt;&#x2F;code&gt; sets the name of our current buffer (the new terminal we just created) to &lt;code&gt;MusicPlayer&lt;&#x2F;code&gt;.
+We then grab the channel ID, which allows us to send text to the buffer as input.
+I believe that channels on terminal buffers are special in some sense, so NeoVim has some plumbing that helps hook up whatever you send to the channel to the stdin of the running program.
+Which is great for us, because it means all we need to do is grab the channel ID for our &lt;code&gt;MusicPlayer&lt;&#x2F;code&gt; buffer, then we can send input to it just like if we were using it ourselves.&lt;&#x2F;p&gt;
+&lt;p&gt;To finish off creating the music player buffer, you can send whatever command you use to start your music player.
+&lt;code&gt;nvim_replace_termcodes&lt;&#x2F;code&gt; is important because it will translate all the nice-looking NeoVim key codes into what they actually need to be for the terminal to actually pick up on them.
+So, the &lt;code&gt;&amp;lt;cr&amp;gt;&lt;&#x2F;code&gt; in our command will be replaced by an actual carriage return or newline.&lt;&#x2F;p&gt;
+&lt;p&gt;Now if &lt;code&gt;player_buf&lt;&#x2F;code&gt; is not equal to &lt;code&gt;-1&lt;&#x2F;code&gt;, then we know that our player buffer is already open.
+You could just ignore calls to &lt;code&gt;start_music()&lt;&#x2F;code&gt; when the player already exists, but I wanted it to also pause&#x2F;unpause the player whenever I hook it up to a keymapping, so I send &lt;code&gt;&amp;lt;Space&amp;gt;&lt;&#x2F;code&gt; which tells &lt;code&gt;mpv&lt;&#x2F;code&gt; to toggle the paused state.&lt;&#x2F;p&gt;
+&lt;p&gt;Now that we can play the music, it would be nice to have a function to kill the music player:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;lua&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-lua &quot;&gt;&lt;code class=&quot;language-lua&quot; data-lang=&quot;lua&quot;&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;local &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;function &lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;stop_music&lt;&#x2F;span&gt;&lt;span&gt;()
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;local &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;player_buf &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;vim&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;fn&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;bufnr&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;MusicPlayer&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;player_buf &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;~= -&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;1 &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;then
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;vim&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;cmd&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39;:bd! &amp;#39; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;.. &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;player_buf&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;end
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;end
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;&lt;code&gt;:bd!&lt;&#x2F;code&gt; closes whatever buffer ID you give it, so it&#x27;s a simple way to stop the music player entirely.&lt;&#x2F;p&gt;
+&lt;p&gt;Now we are ready to hook up some keymappings and start using the player:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;lua&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-lua &quot;&gt;&lt;code class=&quot;language-lua&quot; data-lang=&quot;lua&quot;&gt;&lt;span style=&quot;color:#6272a4;&quot;&gt;-- lua&#x2F;custom&#x2F;music.lua
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;M&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;setup &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;function&lt;&#x2F;span&gt;&lt;span&gt;()
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;vim&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;keymap&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;set&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39;n&amp;#39;&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39;&amp;lt;leader&amp;gt;mp&amp;#39;&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;start_music&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;vim&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;keymap&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;set&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39;n&amp;#39;&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39;&amp;lt;leader&amp;gt;ms&amp;#39;&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;stop_music&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;vim&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;keymap&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;set&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39;n&amp;#39;&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39;&amp;lt;leader&amp;gt;m&amp;gt;&amp;#39;&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;function&lt;&#x2F;span&gt;&lt;span&gt;() &lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;send_command_to_player&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39;&amp;gt;&amp;#39;&lt;&#x2F;span&gt;&lt;span&gt;) &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;end&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;vim&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;keymap&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;set&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39;n&amp;#39;&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39;&amp;lt;leader&amp;gt;m&amp;lt;&amp;#39;&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;function&lt;&#x2F;span&gt;&lt;span&gt;() &lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;send_command_to_player&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39;&amp;lt;&amp;#39;&lt;&#x2F;span&gt;&lt;span&gt;) &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;end&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;end
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;M
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6272a4;&quot;&gt;-- init.lua
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#8be9fd;&quot;&gt;require&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;custom.music&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;setup&lt;&#x2F;span&gt;&lt;span&gt;()
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;I just defined a &lt;code&gt;setup()&lt;&#x2F;code&gt; method for initializing all the keymaps, then we can call that from &lt;code&gt;init.lua&lt;&#x2F;code&gt; (or wherever else you want).
+Another benefit of our &lt;code&gt;send_command_to_player()&lt;&#x2F;code&gt; function is that it becomes trivial to support whatever shortcuts your music player uses.
+&lt;code&gt;mpv&lt;&#x2F;code&gt; uses &lt;code&gt;&amp;lt;&lt;&#x2F;code&gt; and &lt;code&gt;&amp;gt;&lt;&#x2F;code&gt; to seek, and I wanted to be able to skip songs that I&#x27;ve grown tired of.&lt;&#x2F;p&gt;
+&lt;p&gt;We could stop there, but I wanted some visual indication in my editor that music is playing.
+So, I decided to parse &lt;code&gt;mpv&lt;&#x2F;code&gt;&#x27;s output so I could display it in my status line.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;lua&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-lua &quot;&gt;&lt;code class=&quot;language-lua&quot; data-lang=&quot;lua&quot;&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;M&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;get_current_song &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;function&lt;&#x2F;span&gt;&lt;span&gt;()
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;local &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;player_buf &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;vim&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;fn&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;bufnr&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;MusicPlayer&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;player_buf &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;== -&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;1 &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;then
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;end
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;local &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;lines &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;vim&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;api&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;nvim_buf_get_lines&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;player_buf&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;0&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;-&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;true&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;local &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;last_song_entry &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;nil
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;local &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;last_non_empty_index &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;0
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;for &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;index&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;line &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;in &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8be9fd;&quot;&gt;pairs&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;lines&lt;&#x2F;span&gt;&lt;span&gt;) &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;do
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6be5fd;&quot;&gt;string&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#8be9fd;&quot;&gt;match&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;line&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39;^Playing: &amp;#39;&lt;&#x2F;span&gt;&lt;span&gt;) &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;then
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;last_song_entry &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;line
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;end
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;line &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;~= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;&amp;quot; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;then
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;last_non_empty_index &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;index
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;end
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;end
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;local &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;is_paused &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;false
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;local &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;percentage_played &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39;&amp;#39;
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;local &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;last_entry &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;lines&lt;&#x2F;span&gt;&lt;span&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;last_non_empty_index&lt;&#x2F;span&gt;&lt;span&gt;]
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;last_entry &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;~= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;nil &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;then
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6be5fd;&quot;&gt;string&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#8be9fd;&quot;&gt;match&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;last_entry&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39;^%(Paused%)&amp;#39;&lt;&#x2F;span&gt;&lt;span&gt;) &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;then
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;is_paused &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;true
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;end
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;percentage_played &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6be5fd;&quot;&gt;string&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#8be9fd;&quot;&gt;match&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;last_entry&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39;%(%d+%%%)&amp;#39;&lt;&#x2F;span&gt;&lt;span&gt;) &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;or &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39;&amp;#39;
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;end
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;local &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;filename &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;vim&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;fs&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;basename&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;last_song_entry&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;filename &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;== &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;nil &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;then
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;&amp;quot;
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;end
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;percentage_played &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;~= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39;&amp;#39; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;then
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6272a4;&quot;&gt;-- need to double the % to escape it for lualine
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;percentage_played &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39; &amp;#39; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;.. &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6be5fd;&quot;&gt;string&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#8be9fd;&quot;&gt;gsub&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;percentage_played&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39;%%&amp;#39;&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39;%%%%&amp;#39;&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;end
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;is_paused &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;then
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39;🎵 Paused: &amp;#39; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;.. &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;filename &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;.. &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;percentage_played
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;else
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;return &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39;🎵 Playing: &amp;#39; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;.. &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;filename &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;.. &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;percentage_played
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;end
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;end
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;I won&#x27;t go through it entirely.
+Basically it just grabs the latest relevant entries because those will be for the current song.
+Then it tries to grab out the audio file name and the playback progress percentage.
+Once you have those you can display them wherever you feel like.
+I use &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;nvim-lualine&#x2F;lualine.nvim&quot;&gt;lualine.nvim&lt;&#x2F;a&gt; for my status line, so here is a snippet of my config for that:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;lua&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-lua &quot;&gt;&lt;code class=&quot;language-lua&quot; data-lang=&quot;lua&quot;&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;config &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;function&lt;&#x2F;span&gt;&lt;span&gt;()
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;local &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;music_player &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8be9fd;&quot;&gt;require&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39;custom.music&amp;#39;&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8be9fd;&quot;&gt;require&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39;lualine&amp;#39;&lt;&#x2F;span&gt;&lt;span&gt;)&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;setup &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6272a4;&quot;&gt;-- rest of config omitted for clarity
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;sections &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;lualine_a &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;{&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39;mode&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span&gt;,
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;lualine_b &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;{&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39;branch&amp;#39;&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39;diff&amp;#39;&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39;diagnostics&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span&gt;,
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;lualine_c &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39;filename&amp;#39;&lt;&#x2F;span&gt;&lt;span&gt;,
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;file_status &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;true&lt;&#x2F;span&gt;&lt;span&gt;,
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;newfile_status &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;true&lt;&#x2F;span&gt;&lt;span&gt;,
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;path &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;1&lt;&#x2F;span&gt;&lt;span&gt;,
+&lt;&#x2F;span&gt;&lt;span&gt;          &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;shorting_target &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;40&lt;&#x2F;span&gt;&lt;span&gt;,
+&lt;&#x2F;span&gt;&lt;span&gt;        &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;}
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span&gt;,
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;lualine_x &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;{&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39;filetype&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span&gt;,
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;lualine_y &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;{&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39;progress&amp;#39;&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39;location&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span&gt;,
+&lt;&#x2F;span&gt;&lt;span&gt;      &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;lualine_z &lt;&#x2F;span&gt;&lt;span&gt;= &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;{music_player&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;get_current_song&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span&gt;,
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;}&lt;&#x2F;span&gt;&lt;span&gt;,
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;}
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;end
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;And here is the final result:&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;eliasprescott.github.io&#x2F;blog&#x2F;nvim-music-player&#x2F;.&#x2F;final-result.png&quot; alt=&quot;My NeoVim status line with a section that reads: &amp;quot;Playing: Programming Playlist 1.mp3 (0%)&amp;quot;&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;eliasprescott.github.io&#x2F;blog&#x2F;nvim-music-player&#x2F;.&#x2F;final-result-alt.png&quot; alt=&quot;The status line section that now reads: &amp;quot;Paused: Programming Playlist 1.mp3 (11%)&amp;quot;&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;I hope you enjoy this crazy idea as much as I do.
+Thanks for reading!&lt;&#x2F;p&gt;
+</content>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>Study of Philippians 2:12-30</title>
+        <published>2025-03-27T00:00:00+00:00</published>
+        <updated>2025-03-27T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Elias Prescott
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://eliasprescott.github.io/blog/phillipians-2-part-2/"/>
+        <id>https://eliasprescott.github.io/blog/phillipians-2-part-2/</id>
+        
+        <content type="html" xml:base="https://eliasprescott.github.io/blog/phillipians-2-part-2/">&lt;aside class=&quot;callout&quot;&gt;
+  &lt;div class=&quot;body&quot;&gt;
+    &lt;h5 class=&quot;label&quot;&gt;Note&lt;&#x2F;h5&gt;
+
+    I have recently switched to using the &lt;a href=&quot;https:&#x2F;&#x2F;csbible.com&#x2F;&quot;&gt;Christian Standard Bible (CSB)&lt;&#x2F;a&gt; for most of my private study and verse references.
+I have found it to be just as accurate as mainstream translations like the ESV, while also flowing more naturally by using a more modern, colloquial English.
+If you haven&#x27;t before, I would recommend you try reading it side-by-side with your primary translation and see what you think.&lt;&#x2F;p&gt;
+&lt;p&gt;An interesting comparison to the ESV in this study comes from the end of Philippians 2:16.
+The CSB renders &quot;Then I can boast in the day of Christ that I didn’t run or labor for nothing&quot;, while the ESV reads &quot;so that in the day of Christ I may be proud that I did not run in vain or labor in vain.&quot;
+The CSB feels much more compact and uses the contraction &quot;didn&#x27;t&quot;, which is part of why I think it feels so natural to read.
+  &lt;&#x2F;div&gt;
+&lt;&#x2F;aside&gt;
+&lt;p&gt;To start off, we can refresh our memories of where we are in Philippians.
+Paul is writing this book from prison, likely in Rome, Caesarea, or possibly &lt;a href=&quot;https:&#x2F;&#x2F;hermeneutics.stackexchange.com&#x2F;a&#x2F;77731&quot;&gt;in Ephesus&lt;&#x2F;a&gt;.
+Despite his imprisonment, Paul has spent much of Philippians writing about joy.
+He is modeling the attitude that we should have as Christians.
+No matter what hardships this life may bring, nothing can take away that joy.&lt;&#x2F;p&gt;
+&lt;p&gt;So, we&#x27;ll be looking at chapter 2, verses 12 through 30.&lt;&#x2F;p&gt;
+&lt;aside class=&quot;callout&quot;&gt;
+  &lt;div class=&quot;body&quot;&gt;
+    &lt;h5 class=&quot;label&quot;&gt;Philippians 2:12 CSB&lt;&#x2F;h5&gt;
+
+    Therefore, my dear friends, just as you have always obeyed, so now, not only in my presence but even more in my absence, work out your own salvation with fear and trembling.
+  &lt;&#x2F;div&gt;
+&lt;&#x2F;aside&gt;
+&lt;p&gt;Just as the believers in Philippi obeyed and believed with Paul, he&#x27;s encouraging them to stay steadfast in his absence.
+Paul talking about his absence is a common theme throughout Philippians that we&#x27;ll see more of later.&lt;&#x2F;p&gt;
+&lt;p&gt;&quot;Work out your own salvation with fear and trembling&quot; is an interesting phrase that you&#x27;ll hear a lot.
+At first, it can sound antithetical to the joy that Paul talks about throughout Philippians.
+How can Christians be filled with joy, while also having to work out their salvation with fear and trembling?&lt;&#x2F;p&gt;
+&lt;p&gt;A simple answer would be that it&#x27;s just a turn of phrase Paul uses to emphasize the importance of our faith.
+Just as the believers obeyed God in the past when God was with them, Paul is emphasizing how they need to continue believing to &quot;work out their salvation.&quot;&lt;&#x2F;p&gt;
+&lt;p&gt;This idea of working out your own salvation can be challenging because it seems opposed to our idea of where our salvation comes from.
+We know that our salvation is a gift from God, freely given and never earned.
+But how can our salvation be given from God, but also be something we work out?
+Working out our salvation sounds awfully close to earning it.&lt;&#x2F;p&gt;
+&lt;p&gt;We get a good answer to this if we keep reading into verse 13:&lt;&#x2F;p&gt;
+&lt;aside class=&quot;callout&quot;&gt;
+  &lt;div class=&quot;body&quot;&gt;
+    &lt;h5 class=&quot;label&quot;&gt;Philippians 2:13 CSB&lt;&#x2F;h5&gt;
+
+    For it is God who is working in you both to will and to work according to his good purpose.
+  &lt;&#x2F;div&gt;
+&lt;&#x2F;aside&gt;
+&lt;p&gt;So it&#x27;s God who is working in us.
+All we can do is to accept God and his work in us, which results in our salvation.
+Working out our salvation is the process of accepting God&#x27;s guidance and will for our lives.&lt;&#x2F;p&gt;
+&lt;aside class=&quot;callout&quot;&gt;
+  &lt;div class=&quot;body&quot;&gt;
+    &lt;h5 class=&quot;label&quot;&gt;Philippians 2:14-16 CSB&lt;&#x2F;h5&gt;
+
+    &lt;sup&gt;14&lt;&#x2F;sup&gt; Do everything without grumbling and arguing,
+&lt;sup&gt;15&lt;&#x2F;sup&gt; so that you may be blameless and pure, children of God who are faultless in a crooked and perverted generation,
+among whom you shine like stars in the world,
+&lt;sup&gt;16&lt;&#x2F;sup&gt; by holding firm to the word of life.
+Then I can boast in the day of Christ that I didn&#x27;t run or labor for nothing.
+  &lt;&#x2F;div&gt;
+&lt;&#x2F;aside&gt;
+&lt;p&gt;It would be fine if verse 14 just said &quot;don&#x27;t grumble or argue.&quot;
+But instead it says we have to &quot;do everything&quot; without grumbling.
+I don&#x27;t know about you, but I find that to be very challenging.
+Whenever things in life get hard, or someone does something I don&#x27;t like, a lot of times my first reaction is to complain.
+Some of us are worse about complaining than others, but it feels like something we all struggle with at times.
+But going back to Paul&#x27;s theme of joy, I think there is little to no room for grumbling if we have a truly joyful heart.&lt;&#x2F;p&gt;
+&lt;p&gt;The reason Paul gives for not grumbling and arguing is very interesting.
+&quot;So that you may be blameless and pure, children of God who are faultless in a crooked and perverted generation...&quot;
+I think you can find this kind of idea all throughout the Old and New Testaments.
+Whether it was the Israelites in the Old Testament, or the early church in the New Testament, God wants his people to stand out from the rest of the world.
+As Christians, we are called to a strict standard of living, and it is important that our lives reflect that standard.
+If we are constantly grumbling or arguing, then we are not reflecting God to the rest of the world.&lt;&#x2F;p&gt;
+&lt;p&gt;I also find the last line interesting: &quot;Then I can boast in the day of Christ that I didn&#x27;t run or labor for nothing.&quot;
+So, if I don&#x27;t grumble and if I hold firm to the word of life, then I can boast in Christ that I didn&#x27;t labor for nothing.
+First off, I love the idea of boasting in Christ.
+I don&#x27;t often boast in myself because I don&#x27;t feel like I have anything worth boasting in.
+I think that the world around us is extremely prideful and everyone is far too quick to boast.
+So, I like how Christians have our own way that we can boast that still sets us apart from the rest of the world.
+Rather than boasting in my myself, I can boast in my Lord.
+If something good happens, even if I worked hard for it, I should give the credit to God and boast in him because it is only by him that I can accomplish anything.&lt;&#x2F;p&gt;
+&lt;p&gt;I also love the idea that we can boast because we didn&#x27;t run or labor for nothing.
+Because I don&#x27;t know about you, but I would be a miserable atheist.
+I mean it.
+If I were an atheist, what would be the point of my life?
+If I believed that there was no God or purpose to life, that we were just random flukes drifting in a cold cosmos, then there would be no meaning to my life.
+Without God, good and bad and morality lose all meaning.
+Without a God, my life would have no purpose.
+All my work would be for nothing.
+But, because God is real and because I trust in him, I have the confidence that my life is not lived in vain.
+Personally, a lot of my joy as a Christian comes from knowing that God has given meaning and purpose to my life.
+I can&#x27;t remember the exact video, but in one of his videos, theologian N.T. Wright twists the words of Descartes&#x27;s famous quote &quot;I think, therefore I am.&quot;
+Wright says the Christian version is &quot;I am loved, therefore I am.&quot;
+The idea being that God&#x27;s love is what gives us meaning, purpose, and value.
+To an atheist, this idea is likely offensive (maybe even ludicrous), to a Christian, this idea is beautiful and profoundly true.
+It&#x27;s another reason we can find great joy in our Christian faith.&lt;&#x2F;p&gt;
+&lt;p&gt;There is another interpretation of that last line about boasting in the day of Christ that I almost didn&#x27;t catch at first.
+I think it&#x27;s important to notice that Paul is likely referring to himself with that last line.
+Verses 14, 15, and the start of 16 are addressing his readers and telling them what they should do.
+Then, the latter half of 16 switches to Paul saying that &lt;em&gt;he&lt;&#x2F;em&gt; can boast in the day of Christ &lt;em&gt;if&lt;&#x2F;em&gt; the readers of Philippians take his advice to heart and practice it.
+I don&#x27;t think this detail changes my earlier interpretations of the verses, I just thought it was interesting.
+I have a bad habit of taking scripture and only applying it to my life and my circumstances.
+While I think this is an important thing to do with the Bible, we also cannot forget the different contexts of each book and we must consider who the authors and original readers were.&lt;&#x2F;p&gt;
+&lt;aside class=&quot;callout&quot;&gt;
+  &lt;div class=&quot;body&quot;&gt;
+    &lt;h5 class=&quot;label&quot;&gt;Philippians 2:17-18 CSB&lt;&#x2F;h5&gt;
+
+    &lt;sup&gt;17&lt;&#x2F;sup&gt; But even if I am poured out as a drink offering on the sacrificial service of your faith, I am glad and rejoice with all of you. &lt;sup&gt;18&lt;&#x2F;sup&gt; In the same way you should also be glad and rejoice with me.
+  &lt;&#x2F;div&gt;
+&lt;&#x2F;aside&gt;
+&lt;p&gt;Here we can see Paul&#x27;s joy in spite of his circumstances.
+Even if Paul is &quot;poured out&quot; as a sacrifice, he can still be glad and rejoice.
+Paul has such complete trust and faith in God that he is no longer afraid to die.
+We know that earlier in Philippians chapter 1, Paul said that he longs to depart and be with Christ.
+He has complete faith that God will take care of him while he is alive, and after he passes on.
+This level of confidence in God is an important step in a Christian&#x27;s faith.
+I believe it goes hand-in-hand with the joy that Paul is talking about.
+If we are still afraid of death or of this world, then we will struggle to find the same level of joy that Paul found.&lt;&#x2F;p&gt;
+&lt;aside class=&quot;callout&quot;&gt;
+  &lt;div class=&quot;body&quot;&gt;
+    &lt;h5 class=&quot;label&quot;&gt;Philippians 2:19-30 CSB&lt;&#x2F;h5&gt;
+
+    &lt;sup&gt;19&lt;&#x2F;sup&gt; Now I hope in the Lord Jesus to send Timothy to you soon so that I too may be encouraged by news about you. &lt;sup&gt;20&lt;&#x2F;sup&gt; For I have no one else like-minded who will genuinely care about your interests; &lt;sup&gt;21&lt;&#x2F;sup&gt; all seek their own interests, not those of Jesus Christ. &lt;sup&gt;22&lt;&#x2F;sup&gt; But you know his proven character, because he has served with me in the gospel ministry like a son with a father. &lt;sup&gt;23&lt;&#x2F;sup&gt; Therefore, I hope to send him as soon as I see how things go with me. &lt;sup&gt;24&lt;&#x2F;sup&gt; I am confident in the Lord that I myself will also come soon.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;sup&gt;25&lt;&#x2F;sup&gt; But I considered it necessary to send you Epaphroditus #— #my brother, coworker, and fellow soldier, as well as your messenger and minister to my need  #— # &lt;sup&gt;26&lt;&#x2F;sup&gt; since he has been longing for all of you and was distressed because you heard that he was sick. &lt;sup&gt;27&lt;&#x2F;sup&gt; Indeed, he was so sick that he nearly died. However, God had mercy on him, and not only on him but also on me, so that I would not have sorrow upon sorrow. &lt;sup&gt;28&lt;&#x2F;sup&gt; For this reason, I am very eager to send him so that you may rejoice again when you see him and I may be less anxious. &lt;sup&gt;29&lt;&#x2F;sup&gt; Therefore, welcome him in the Lord with great joy and hold people like him in honor, &lt;sup&gt;30&lt;&#x2F;sup&gt; because he came close to death for the work of Christ, risking his life to make up what was lacking in your ministry to me.
+  &lt;&#x2F;div&gt;
+&lt;&#x2F;aside&gt;
+&lt;p&gt;In verse 19, I like how Paul longs to hear news of the believers in Philippi.
+With how important the Bible is and the fact that its authors were divinely inspired, it&#x27;s easy to forget that they were human too.
+You can see more of Paul&#x27;s humanity in verse 27 where he says that he would have &quot;sorrow upon sorrow&quot; if something were to happen to Epaphroditus.&lt;&#x2F;p&gt;
+&lt;p&gt;In 25 and onwards, we learn that the Philippian church sent Epaphroditus as a &quot;messenger and minister&quot; to Paul in his time of need.
+That is why Paul considered it good that he could send Epaphroditus back to the church, so that Epaphroditus and the church could be reunited.
+This whole section may seem minor, but I love it because it&#x27;s an example of the kind of community we should have as Christians.
+Paul shows a genuine care for the church and for Epaphroditus, and he indicates that the church was distressed to hear that Epaphroditus was sick.&lt;&#x2F;p&gt;
+&lt;p&gt;Along with joy, this kind of pure Christian community is one of the fruits of faithfulness to God.
+Whenever we look past our own needs and desires, we free ourselves up to care more for our fellow man.
+The community that we see in the early church is something we should strive to emulate today.
+So many Americans are so-called &quot;shallow Christians&quot;, or Christians in name only and not in their deeds.
+They treat church as a meaningless ritual or appointment, and they think little of God or their Christian community during the rest of the week.
+Church should be so much more than a building we meet in once or twice a week.
+A church is supposed to be a community of believers engaged in fellowship and encouragement.&lt;&#x2F;p&gt;
+&lt;p&gt;I&#x27;ll close there, but I&#x27;ll leave you with a few questions:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;How do you think God has been working in your life recently?&lt;&#x2F;li&gt;
+&lt;li&gt;What is something that you grumble about, and what could you start doing instead of grumbling?&lt;&#x2F;li&gt;
+&lt;li&gt;Do you ever joyful? When? Or why?&lt;&#x2F;li&gt;
+&lt;li&gt;What is something you could do to engage more with your fellow Christians?&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+</content>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>Working with OCaml expect tests in NeoVim</title>
+        <published>2025-03-25T00:00:00+00:00</published>
+        <updated>2025-03-25T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Elias Prescott
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://eliasprescott.github.io/blog/ocaml-expect-tests-in-nvim/"/>
+        <id>https://eliasprescott.github.io/blog/ocaml-expect-tests-in-nvim/</id>
+        
+        <content type="html" xml:base="https://eliasprescott.github.io/blog/ocaml-expect-tests-in-nvim/">&lt;p&gt;This is just a quick note and not a full-on post.
+I&#x27;ve been playing around with inline expect tests in OCaml using the &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;janestreet&#x2F;ppx_expect&quot;&gt;ppx_expect&lt;&#x2F;a&gt; library.
+The way these expect tests work is that they will capture &lt;code&gt;stdout&lt;&#x2F;code&gt; from select parts of your test function, then they will either store that as their value if you are running it for the first time, or they will compare the output against their stored value.
+If the new output is different from the stored output, then &lt;code&gt;dune&lt;&#x2F;code&gt; will give you a nice diff and tell you that it stored a corrected version of that file.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;diff&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-diff &quot;&gt;&lt;code class=&quot;language-diff&quot; data-lang=&quot;diff&quot;&gt;&lt;span style=&quot;color:#6272a4;&quot;&gt;--- a&#x2F;_build&#x2F;default&#x2F;lib&#x2F;query.ml
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6272a4;&quot;&gt;+++ b&#x2F;_build&#x2F;.sandbox&#x2F;6248834ca8898cf067c96e6df4119c43&#x2F;default&#x2F;lib&#x2F;query.ml.corrected
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6272a4;&quot;&gt;@@ -15,7 +15,7 @@ let print = sexp_of_t &amp;gt;&amp;gt; Sexp.to_string
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt; let%expect_test &amp;quot;parse load csv&amp;quot; =
+&lt;&#x2F;span&gt;&lt;span&gt;   printf &amp;quot;%s&amp;quot; (print (parse &amp;quot;(LoadCSV blah.csv)&amp;quot;));
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;-  [%expect {| |}]
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;+  [%expect {| (LoadCSV blah.csv) |}]
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;If you decide you want to accept that diff, then you can run &lt;code&gt;dune promote&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;camalbrarian&lt;&#x2F;span&gt;&lt;span&gt; (main) &lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; dune promote
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;Promoting&lt;&#x2F;span&gt;&lt;span&gt; _build&#x2F;default&#x2F;lib&#x2F;query.ml.corrected to lib&#x2F;query.ml.
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;I want to read through all of the &lt;a href=&quot;https:&#x2F;&#x2F;dune.readthedocs.io&#x2F;en&#x2F;stable&#x2F;&quot;&gt;dune docs&lt;&#x2F;a&gt; and maybe write a post dedicated to &lt;code&gt;dune&lt;&#x2F;code&gt;&#x27;s features, but I love the integration between &lt;code&gt;dune&lt;&#x2F;code&gt; and the testing library.
+This workflows feels great even if you are switching tabs&#x2F;terminals to manually run &lt;code&gt;dune promote&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;But, I use NeoVim, so of course, I have to make my own keymappings so I can do all of this within my editor:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;lua&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-lua &quot;&gt;&lt;code class=&quot;language-lua&quot; data-lang=&quot;lua&quot;&gt;&lt;span style=&quot;color:#6272a4;&quot;&gt;-- Run all tests and try to promote the current file
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;vim&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;keymap&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;set&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39;n&amp;#39;&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39;&amp;lt;leader&amp;gt;rp&amp;#39;&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39;:silent !dune runtest&amp;lt;cr&amp;gt;:silent !dune promote %&amp;lt;cr&amp;gt;&amp;#39;&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6272a4;&quot;&gt;-- Run all tests and show the results
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;vim&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span&gt;keymap&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;set&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39;n&amp;#39;&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39;&amp;lt;leader&amp;gt;rr&amp;#39;&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39;:!dune runtest&amp;lt;cr&amp;gt;&amp;#39;&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;These keymaps have been working great so far!
+My only complaint is that &lt;code&gt;dune&lt;&#x2F;code&gt; does not support running inline tests for a single file (as far as I can tell).
+So, you have to run all the tests in a project.
+But, at least &lt;code&gt;dune promote&lt;&#x2F;code&gt; can take in a file parameter, so I can only promote the changes for the file I&#x27;m looking at.&lt;&#x2F;p&gt;
+&lt;p&gt;Most of the time, I like to run &lt;code&gt;&amp;lt;leader&amp;gt;rr&lt;&#x2F;code&gt; first to view the changes in NeoVim to make sure they look good.
+Then I run &lt;code&gt;&amp;lt;leader&amp;gt;rp&lt;&#x2F;code&gt; to run and promote.
+Now that I think about it, I may just change &lt;code&gt;&amp;lt;leader&amp;gt;rp&lt;&#x2F;code&gt; to only promote and let it promote changes for all files.&lt;&#x2F;p&gt;
+&lt;p&gt;I&#x27;m usually only working on writing one test at a time anyways.&lt;&#x2F;p&gt;
+&lt;p&gt;I hope you enjoyed the NeoVim + OCaml tip.
+Thanks for reading!&lt;&#x2F;p&gt;
+</content>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>Making a Database with OCaml</title>
+        <published>2025-03-24T00:00:00+00:00</published>
+        <updated>2025-03-24T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Elias Prescott
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://eliasprescott.github.io/blog/making-a-db-with-ocaml/"/>
+        <id>https://eliasprescott.github.io/blog/making-a-db-with-ocaml/</id>
+        
+        <content type="html" xml:base="https://eliasprescott.github.io/blog/making-a-db-with-ocaml/">&lt;p&gt;I&#x27;ve been playing around with OCaml recently and really enjoying it.
+I love functional programming and have also enjoyed playing around with F#, Elixir, and Haskell in the past, but I&#x27;ve never gotten super far with any of those languages for various reasons.
+So, I wanted to take on a more serious project to really kick the tires on the language and start building some deeper knowledge.
+In the past, I read a book about the pure relational algebra that inspires modern relational databases (&lt;a href=&quot;https:&#x2F;&#x2F;a.co&#x2F;d&#x2F;jartLNm&quot;&gt;Amazon book link&lt;&#x2F;a&gt;).
+Taking what I learned from the book, I wrote a small Rust library that would parse a query language and use it to run queries against CSV files.
+That project never turned into a full-on database engine, but I enjoyed the project a lot and thought it would be a good project to recreate in OCaml for a few reasons.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;getting-started&quot;&gt;Getting Started&lt;&#x2F;h2&gt;
+&lt;p&gt;If you want to follow along, you&#x27;ll need &lt;a href=&quot;https:&#x2F;&#x2F;opam.ocaml.org&#x2F;&quot;&gt;&lt;code&gt;opam&lt;&#x2F;code&gt;&lt;&#x2F;a&gt; and &lt;a href=&quot;https:&#x2F;&#x2F;dune.build&#x2F;&quot;&gt;&lt;code&gt;dune&lt;&#x2F;code&gt;&lt;&#x2F;a&gt; installed.&lt;&#x2F;p&gt;
+&lt;p&gt;We can use &lt;code&gt;dune&lt;&#x2F;code&gt; to quickly initialize the new project:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;development&lt;&#x2F;span&gt;&lt;span&gt; $ dune init project camalbrarian
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;Success:&lt;&#x2F;span&gt;&lt;span&gt; initialized project component named camalbrarian
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;aside class=&quot;callout&quot;&gt;
+  &lt;div class=&quot;body&quot;&gt;
+    &lt;h5 class=&quot;label&quot;&gt;Note&lt;&#x2F;h5&gt;
+
+    Yes, camalbrarian stands for Camel Librarian, because we&#x27;ll be starting with the query engine, and a query engine is basically a specialized librarian.
+And no, the typo in &quot;camal&quot; was not intentional, but let&#x27;s just roll with it.
+  &lt;&#x2F;div&gt;
+&lt;&#x2F;aside&gt;
+&lt;p&gt;We can &lt;code&gt;cd&lt;&#x2F;code&gt; into the new folder and create an Opam switch.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;development&lt;&#x2F;span&gt;&lt;span&gt; $ cd camalbrarian
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;camalbrarian&lt;&#x2F;span&gt;&lt;span&gt; $ opam switch create . 5.3.0
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;If you haven&#x27;t used OCaml before, you&#x27;re probably already confused why I created a &quot;switch.&quot;
+Essentially, &lt;code&gt;opam&lt;&#x2F;code&gt; switches are &quot;isolated OCaml environments&quot; (&lt;a href=&quot;https:&#x2F;&#x2F;ocaml.org&#x2F;docs&#x2F;opam-switch-introduction&quot;&gt;source&lt;&#x2F;a&gt;).
+Switches allow you to have different versions of OCaml installed at the same time, so you can &quot;switch&quot; between them.
+Where I found switches confusing at first is that they also manage all packages that you install.
+I&#x27;m used to the C# or Rust model where installed packages are stored&#x2F;managed within the project directory (e.g. &lt;code&gt;dotnet add package ...&lt;&#x2F;code&gt; or &lt;code&gt;cargo add ...&lt;&#x2F;code&gt;) and language versions are managed separately.
+But &lt;code&gt;opam&lt;&#x2F;code&gt; switches manage the language, tooling, and packages all at the same time.&lt;&#x2F;p&gt;
+&lt;p&gt;This means that you could create a single switch, maybe for a specific version of OCaml like 5.3.0, and then you could use that switch for all your projects.
+Sharing a switch between multiple projects would be faster, but it also means that all projects would be sharing versions of everything by default.
+This might be fine at first, but eventually you would want to use a different version of the language or a particular package, and then you would want another switch.
+Thankfully, &lt;code&gt;opam&lt;&#x2F;code&gt; has an easy solution for creating project-specific switches. &lt;code&gt;opam&lt;&#x2F;code&gt; calls these &quot;local switches&quot;, while shared switches are called &quot;global switches.&quot;&lt;&#x2F;p&gt;
+&lt;p&gt;To understand the difference better, we can peruse the &lt;code&gt;opam switch&lt;&#x2F;code&gt; man page by running &lt;code&gt;opam switch --help&lt;&#x2F;code&gt; or &lt;code&gt;man opam-switch&lt;&#x2F;code&gt;.
+If you run that and search for the &lt;code&gt;create&lt;&#x2F;code&gt; subcommand, you&#x27;ll find this blurb:&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;create SWITCH [COMPILER]&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;blockquote&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Create a new switch, and install the given compiler there. SWITCH can be a plain name, or a directory, absolute or relative, in which case a local switch is created below the given directory. COMPILER, if omitted, defaults to SWITCH if it is a plain name, unless --packages, --formula or --empty is specified. When creating a local switch, and none of these options are present, the compiler is chosen according to the configuration default (see opam-init(1)). If the chosen directory contains package definitions, a compatible compiler is searched within the default selection, and the packages will automatically get installed.&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;If you are allergic to man pages (Windows user! 🫵) or if you want more info, you can read through &lt;a href=&quot;https:&#x2F;&#x2F;ocaml.org&#x2F;docs&#x2F;opam-switch-introduction#types-of-switches&quot;&gt;Introduction to opam Switches&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;My takeaway is that you should almost always want to create a local switch by running something like &lt;code&gt;opam switch create .&lt;&#x2F;code&gt; in your project directory.
+This will most closely mimic how other language package managers work and should provide the level of project isolation that you are used to.&lt;&#x2F;p&gt;
+&lt;p&gt;After my create switch command finished installing everything, it recommened that I run &lt;code&gt;eval $(opam env)&lt;&#x2F;code&gt; to update my current shell environment.
+After we run that, we can poke around a little bit to understand what &lt;code&gt;opam&lt;&#x2F;code&gt; did for us.&lt;&#x2F;p&gt;
+&lt;p&gt;I&#x27;ll start by trying to source our &lt;code&gt;ocaml&lt;&#x2F;code&gt; binary with the &lt;code&gt;which&lt;&#x2F;code&gt; command:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;camalbrarian&lt;&#x2F;span&gt;&lt;span&gt; $ which ocaml
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;~&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;&#x2F;development&#x2F;camalbrarian&#x2F;_opam&#x2F;bin&#x2F;ocaml
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Okay so &lt;code&gt;opam&lt;&#x2F;code&gt; made a little &lt;code&gt;bin&#x2F;&lt;&#x2F;code&gt; folder local to our project. Let&#x27;s investigate that a little bit:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;camalbrarian&lt;&#x2F;span&gt;&lt;span&gt; $ ls _opam&#x2F;bin&#x2F;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;ocaml&lt;&#x2F;span&gt;&lt;span&gt;                   ocamlcp                 ocamldoc                ocamlmklib              ocamlopt                ocamlrun
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;ocamlc&lt;&#x2F;span&gt;&lt;span&gt;                  ocamldebug              ocamldoc.opt            ocamlmktop              ocamlopt.byte           ocamlrund
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;ocamlc.byte&lt;&#x2F;span&gt;&lt;span&gt;             ocamldep                ocamllex                ocamlobjinfo            ocamlopt.opt            ocamlruni
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;ocamlc.opt&lt;&#x2F;span&gt;&lt;span&gt;              ocamldep.byte           ocamllex.byte           ocamlobjinfo.byte       ocamloptp               ocamlyacc
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;ocamlcmt&lt;&#x2F;span&gt;&lt;span&gt;                ocamldep.opt            ocamllex.opt            ocamlobjinfo.opt        ocamlprof
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Looks good to me 👍&lt;&#x2F;p&gt;
+&lt;p&gt;I still haven&#x27;t used OCaml enough to know what all of these are for, but you can chase down their man pages if you really care.
+The names indicate that they are all different tools that are useful for the compilation process.&lt;&#x2F;p&gt;
+&lt;p&gt;If we want to see what switch we are currently on, you can use &lt;code&gt;switch list&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;camalbrarian&lt;&#x2F;span&gt;&lt;span&gt; $ opam switch list
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#6272a4;&quot;&gt;#  switch                      compiler                                           description
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;→  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;~&lt;&#x2F;span&gt;&lt;span&gt;&#x2F;development&#x2F;camalbrarian  ocaml-base-compiler.5.3.0,ocaml-options-vanilla.1  ocaml-base-compiler = 5.3.0 &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;| &lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;ocaml-system&lt;&#x2F;span&gt;&lt;span&gt; = 5.3.0
+&lt;&#x2F;span&gt;&lt;span&gt;   &lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;5.3.0&lt;&#x2F;span&gt;&lt;span&gt;                       ocaml-base-compiler.5.3.0,ocaml-options-vanilla.1  ocaml-base-compiler = 5.3.0 &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;| &lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;ocaml-system&lt;&#x2F;span&gt;&lt;span&gt; = 5.3.0
+&lt;&#x2F;span&gt;&lt;span&gt;   &lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;default&lt;&#x2F;span&gt;&lt;span&gt;                     ocaml.5.2.0                                        default
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;[NOTE]&lt;&#x2F;span&gt;&lt;span&gt; Current switch has been selected based on the current directory.
+&lt;&#x2F;span&gt;&lt;span&gt;       &lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;The&lt;&#x2F;span&gt;&lt;span&gt; current global system switch is 5.3.0.
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;If you are a mega-nerd (which is likely if you are still reading) then you might be wondering what that &lt;code&gt;eval $(opam env)&lt;&#x2F;code&gt; command did earlier.&lt;&#x2F;p&gt;
+&lt;p&gt;Well let&#x27;s see:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;camalbrarian&lt;&#x2F;span&gt;&lt;span&gt; $ opam env
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;OPAM_LAST_ENV&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39;~&#x2F;.opam&#x2F;.last-env&#x2F;env-21ef9d7979f317c6a64e8577a7d09daf-0&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;; export &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;OPAM_LAST_ENV&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;OPAM_SWITCH_PREFIX&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39;~&#x2F;development&#x2F;camalbrarian&#x2F;_opam&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;; export &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;OPAM_SWITCH_PREFIX&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;OCAMLTOP_INCLUDE_PATH&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39;~&#x2F;development&#x2F;camalbrarian&#x2F;_opam&#x2F;lib&#x2F;toplevel&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;; export &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;OCAMLTOP_INCLUDE_PATH&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;CAML_LD_LIBRARY_PATH&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39;~&#x2F;development&#x2F;camalbrarian&#x2F;_opam&#x2F;lib&#x2F;stublibs:~&#x2F;development&#x2F;camalbrarian&#x2F;_opam&#x2F;lib&#x2F;ocaml&#x2F;stublibs:~&#x2F;development&#x2F;camalbrarian&#x2F;_opam&#x2F;lib&#x2F;ocaml&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;; export &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;CAML_LD_LIBRARY_PATH&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;OCAML_TOPLEVEL_PATH&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39;~&#x2F;development&#x2F;camalbrarian&#x2F;_opam&#x2F;lib&#x2F;toplevel&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;; export &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;OCAML_TOPLEVEL_PATH&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;PATH&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;#39;~&#x2F;development&#x2F;camalbrarian&#x2F;_opam&#x2F;bin:{rest of PATH omitted for privacy}&amp;#39;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;; export &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;PATH&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;I was worried that &lt;code&gt;opam env&lt;&#x2F;code&gt; would be some crazy complicated shell script, but it&#x27;s refreshingly simple.
+It just sets up some environment variables to keep track of a few paths, and then it adds the local switch &lt;code&gt;bin&#x2F;&lt;&#x2F;code&gt; folder to my &lt;code&gt;PATH&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;Before we write any OCaml code (one day we will, I promise), I would like to at least set up an &lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;Language_Server_Protocol&quot;&gt;LSP&lt;&#x2F;a&gt;.
+The primary LSP for OCaml is &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;ocaml&#x2F;ocaml-lsp&quot;&gt;ocaml-lsp&lt;&#x2F;a&gt; and it has some simple install instructions if you are using &lt;code&gt;opam&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;camalbrarian&lt;&#x2F;span&gt;&lt;span&gt; $ opam install ocaml-lsp-server
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;aside class=&quot;callout&quot;&gt;
+  &lt;div class=&quot;body&quot;&gt;
+    &lt;h5 class=&quot;label&quot;&gt;Note&lt;&#x2F;h5&gt;
+
+    The README for &lt;code&gt;ocaml-lsp&lt;&#x2F;code&gt; has this note:&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;you will need to install ocaml-lsp-server in every switch where you would like to use it.&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;I think it&#x27;s a little unfortunate that you have to reinstall your tooling on every new switch, because that can feel like a drag if you are just starting to learn the language and starting lots of new projects.
+But it might be unavoidable.
+Part of me wonders if you could have a local and global switch registered at the same time.
+So, new library packages would be installed in the local switch, but you could also specify that tooling packages should be installed in your global switch.
+Then, both switches would be registered on your &lt;code&gt;PATH&lt;&#x2F;code&gt; when you run &lt;code&gt;eval $(opam env)&lt;&#x2F;code&gt;, with the local switch first so it takes precedence.
+Maybe that&#x27;s a bad idea or maybe that&#x27;s already how it works and I just don&#x27;t know enough about &lt;code&gt;opam&lt;&#x2F;code&gt; yet.
+  &lt;&#x2F;div&gt;
+&lt;&#x2F;aside&gt;
+&lt;p&gt;After that install finishes, we can investigate our new LSP binary:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;camalbrarian&lt;&#x2F;span&gt;&lt;span&gt; $ which ocamllsp
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;~&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;&#x2F;development&#x2F;camalbrarian&#x2F;_opam&#x2F;bin&#x2F;ocamllsp
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Very nice. I&#x27;ll register that LSP in my NeoVim config (I use NeoVim btw 😎), and then we are ready to roll.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;actually-programming-now&quot;&gt;Actually Programming Now&lt;&#x2F;h2&gt;
+&lt;p&gt;Whenever we ran &lt;code&gt;dune init project camalbrarian&lt;&#x2F;code&gt;, the &quot;project&quot; argument told &lt;code&gt;dune&lt;&#x2F;code&gt; that we want a full project.
+That includes a library package (located in &lt;code&gt;lib&#x2F;&lt;&#x2F;code&gt;), a binary&#x2F;executable package (&lt;code&gt;bin&#x2F;&lt;&#x2F;code&gt;), and a test package (&lt;code&gt;test&#x2F;&lt;&#x2F;code&gt;).
+We will use all three of those packages eventually, but if you haven&#x27;t run any OCaml yet, you&#x27;ll want to start with the &lt;code&gt;bin&#x2F;&lt;&#x2F;code&gt; folder just so you can see some code execute.&lt;&#x2F;p&gt;
+&lt;p&gt;If you open up &lt;code&gt;bin&#x2F;main.ml&lt;&#x2F;code&gt;, you may see this error message from your LSP:&lt;&#x2F;p&gt;
+&lt;pre style=&quot;background-color:#282a36;color:#f8f8f2;&quot;&gt;&lt;code&gt;&lt;span&gt;No config found for file bin&#x2F;main.ml. Try calling &amp;#39;dune build&amp;#39;.
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;If you do what the friendly error message says and run &lt;code&gt;dune build&lt;&#x2F;code&gt;, then it should go away and you will be ready to write some code.&lt;&#x2F;p&gt;
+&lt;p&gt;Now, we can finally run our executable package and see the default output:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;camalbrarian&lt;&#x2F;span&gt;&lt;span&gt; $ dune exec camalbrarian
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;Hello,&lt;&#x2F;span&gt;&lt;span&gt; World!
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Great! Let&#x27;s get into some database-specific code.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;designing-a-query-language&quot;&gt;Designing a Query Language&lt;&#x2F;h2&gt;
+&lt;p&gt;Now that we have a project established, I&#x27;ll try to speed up and explain things more with code rather than long diatribes.&lt;&#x2F;p&gt;
+&lt;aside class=&quot;callout&quot;&gt;
+  &lt;div class=&quot;body&quot;&gt;
+    &lt;h5 class=&quot;label&quot;&gt;Diatribe&lt;&#x2F;h5&gt;
+
+    Seeing the word &quot;diatribe&quot; made me think of &quot;diabetes&quot;, which then made me wonder about the common prefix &quot;dia-&quot;.&lt;&#x2F;p&gt;
+&lt;p&gt;It turns out that &quot;dia-&quot; comes from Ancient Greek and can mean &quot;through, across, by, over&quot; (&lt;a href=&quot;https:&#x2F;&#x2F;en.wiktionary.org&#x2F;wiki&#x2F;dia-&quot;&gt;source&lt;&#x2F;a&gt;).
+  &lt;&#x2F;div&gt;
+&lt;&#x2F;aside&gt;
+&lt;p&gt;Anyway, OCaml has a rich type system that deserves its own article (&lt;a href=&quot;https:&#x2F;&#x2F;ocaml.org&#x2F;docs&#x2F;basic-data-types&quot;&gt;&quot;Basic Data Types and Pattern Matching&quot;&lt;&#x2F;a&gt;).
+What I am interested in are the Variant types because they will be great for representing our query language.
+If you have engaged with programming language design discourse before, you may have heard the term &lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;Abstract_syntax_tree&quot;&gt;AST&lt;&#x2F;a&gt;.
+Essentially, abstract syntax trees are a great technique for representing the structure and content of a language.
+Part of what makes ASTs so useful is that they provide a common language&#x2F;interface for all parts of your system to reason about the language.
+So for a database, your parser will take text input and produce an AST object, then your query optimizer might analyze the AST and simplify it where possible, then a query planner can analyze the AST again to determine the best query plan, then an executor can finally execute the AST to run the query.&lt;&#x2F;p&gt;
+&lt;p&gt;All that to say, OCaml&#x27;s variant types are fantastic for representing an AST with minimal boilerplate.
+So, let&#x27;s make &lt;code&gt;lib&#x2F;query.ml&lt;&#x2F;code&gt; and start writing our type:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;ocaml&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-ocaml &quot;&gt;&lt;code class=&quot;language-ocaml&quot; data-lang=&quot;ocaml&quot;&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;type &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;t &lt;&#x2F;span&gt;&lt;span&gt;= 
+&lt;&#x2F;span&gt;&lt;span&gt;  | LoadCSV &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;of &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;string
+&lt;&#x2F;span&gt;&lt;span&gt;  | Rename &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;of &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;string &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;* &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;string
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;aside class=&quot;callout&quot;&gt;
+  &lt;div class=&quot;body&quot;&gt;
+    &lt;h5 class=&quot;label&quot;&gt;Note&lt;&#x2F;h5&gt;
+
+    I had to run &lt;code&gt;dune build lib&#x2F;&lt;&#x2F;code&gt; so my LSP could find the new file.
+  &lt;&#x2F;div&gt;
+&lt;&#x2F;aside&gt;
+&lt;p&gt;So we have a basic variant type with two cases, &lt;code&gt;LoadCSV&lt;&#x2F;code&gt; and &lt;code&gt;Rename&lt;&#x2F;code&gt;.
+There are two points of interest here, how OCaml modules work and where our query language&#x27;s operators are coming from.
+I&#x27;ll start with OCaml modules.&lt;&#x2F;p&gt;
+&lt;p&gt;OCaml modules are similar to modules or namespaces in other languages, so far as they are a way of organizing related definitions together.
+The main point I wanted to bring up now is why we named our variant type just &lt;code&gt;t&lt;&#x2F;code&gt;.
+The reason is because we are already inside the &lt;code&gt;Query&lt;&#x2F;code&gt; module, so I didn&#x27;t want our type to be referred to as &lt;code&gt;Query.query&lt;&#x2F;code&gt;.
+You might be wondering &quot;How are we inside the &lt;code&gt;Query&lt;&#x2F;code&gt; module, we never declared a module?&quot;
+But OCaml has &lt;a href=&quot;https:&#x2F;&#x2F;ocaml.org&#x2F;docs&#x2F;modules#file-based-modules&quot;&gt;file-based modules&lt;&#x2F;a&gt;, so just by being inside of &lt;code&gt;lib&#x2F;query.ml&lt;&#x2F;code&gt;, our type &lt;code&gt;t&lt;&#x2F;code&gt; is part of the &lt;code&gt;Query&lt;&#x2F;code&gt; module.
+There is a lot more to say about modules and we may cover some more as it comes up, but for now I recommend you read the official OCaml docs on &lt;a href=&quot;https:&#x2F;&#x2F;ocaml.org&#x2F;docs&#x2F;modules&quot;&gt;modules&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;Now onto the operators.
+We are making a database that is based on relational algebra.
+I can&#x27;t do relational algebgra justice here, so I recommend you read the &lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;Relational_algebra&quot;&gt;Wikipedia&lt;&#x2F;a&gt; article to get up to speed.
+Aside from the theory, that article also introduces some of the basic operators that we will be implementing in our query language.
+I&#x27;m just starting with the rename operator for now because it is the simplest to reason about.
+&lt;code&gt;LoadCSV&lt;&#x2F;code&gt; is certainly not part of the relational algebra, but CSV files are a great source of test data because they are simple for machines and humans to work with.&lt;&#x2F;p&gt;
+&lt;aside class=&quot;callout&quot;&gt;
+  &lt;div class=&quot;body&quot;&gt;
+    &lt;h5 class=&quot;label&quot;&gt;Musing&lt;&#x2F;h5&gt;
+
+    All your code has to run inside of a human&#x27;s brain before it can run in your computer&#x27;s &quot;brain.&quot;
+So, optimizing code for human understanding can often be more important than optimizing it for computers.
+Using CSV files as a starting point is important because it gives us a cheap way to handle real data without worrying about pages and indexes and all the scary things that real databases have to handle.
+  &lt;&#x2F;div&gt;
+&lt;&#x2F;aside&gt;
+&lt;h2 id=&quot;getting-parsing-for-free&quot;&gt;Getting Parsing for Free&lt;&#x2F;h2&gt;
+&lt;p&gt;Now that we have a way to represent our query language, we need a way of converting plaintext input into that representation (AKA parsing).
+We could write our own parser by hand or use a fancy &lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;Parser_combinator&quot;&gt;parser combinator&lt;&#x2F;a&gt; library, but I would rather get our parsing for free, because free is awesome.
+To do that, first we need to talk about preprocessing, alternative standard libraries, and a high-frequency trading firm...&lt;&#x2F;p&gt;
+&lt;p&gt;I know, I know, that sounds insane, but it&#x27;s true.
+We have a lot of groundwork to lay to understand the OCaml ecosystem and how we can profit from it.&lt;&#x2F;p&gt;
+&lt;p&gt;I&#x27;ll explain things quickly and throw a couple of links at you.&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;First, OCaml has &lt;a href=&quot;https:&#x2F;&#x2F;ocaml.org&#x2F;docs&#x2F;metaprogramming&quot;&gt;metaprogramming&lt;&#x2F;a&gt; which allows you to run raw-text preproccessors or PPX preproccessors which transform the OCaml language AST (yes, OCaml uses an AST as well. I told you they are useful!).&lt;&#x2F;li&gt;
+&lt;li&gt;Second, OCaml has historically had a small standard library, so there are multiple alternative standard library packages that provide lots of useful stuff. The one we are interested in is called &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;janestreet&#x2F;base&quot;&gt;Core&lt;&#x2F;a&gt;. There is a PPX inside of the &lt;code&gt;Core&lt;&#x2F;code&gt; library that can essentially auto-generate a parser for our query type.&lt;&#x2F;li&gt;
+&lt;li&gt;Third, the &lt;code&gt;Core&lt;&#x2F;code&gt; library is made by a high-frequency trading firm called &lt;a href=&quot;https:&#x2F;&#x2F;www.janestreet.com&#x2F;&quot;&gt;Jane Street&lt;&#x2F;a&gt;. Jane Street is (probably) the biggest industrial user of OCaml and they drive a significant portion of the OCaml ecosystem. They are doing lots of interesting things with OCaml and they have made some very useful libraries to help them do that. Which means, people like me get to benefit from that work so I don&#x27;t have to write my own parser (for now, maybe I&#x27;ll write a fancier one later).&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;Makes sense? I hope so.&lt;&#x2F;p&gt;
+&lt;p&gt;Let&#x27;s start by installing the &lt;code&gt;Core&lt;&#x2F;code&gt; library:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;camalbrarian&lt;&#x2F;span&gt;&lt;span&gt; $ opam install core
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;While that&#x27;s installing, let&#x27;s talk about s-expressions.
+&lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;s-expression&quot;&gt;s-expressions&lt;&#x2F;a&gt; (sexps or sexpr for short) come from how Lisp languages represent data and code (data is code, and code is data λ).
+If you are using Lisp, then s-expressions are essentially the entire syntax you are using to write your code, but they are also how data is represented and (sometimes) serialized.
+For reasons beyond my knowledge, Jane Street decided that they would also use s-expressions as a common means of representing data.
+I would guess it&#x27;s because s-expressions are fairly simple and easy to grasp, and they probably have quite a few Lisp nerds working there which would make it a natural choice.
+Since Jane Street has already done the leg work and provided a PPX that can generate s-expression serialization&#x2F;deserialization functions for OCaml types, we are going to &lt;s&gt;steal&lt;&#x2F;s&gt; use that PPX for our query type.&lt;&#x2F;p&gt;
+&lt;p&gt;After &lt;code&gt;Core&lt;&#x2F;code&gt; has finished installing, you will need to declare the dependency in &lt;code&gt;lib&#x2F;dune&lt;&#x2F;code&gt; and we need to register the &lt;code&gt;ppx_sexp_conv&lt;&#x2F;code&gt; PPX for... reasons. Probably good reasons too:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;clojure&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-clojure &quot;&gt;&lt;code class=&quot;language-clojure&quot; data-lang=&quot;clojure&quot;&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;library
+&lt;&#x2F;span&gt;&lt;span&gt; (&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span&gt; camalbrarian)
+&lt;&#x2F;span&gt;&lt;span&gt; (&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;libraries&lt;&#x2F;span&gt;&lt;span&gt; core)
+&lt;&#x2F;span&gt;&lt;span&gt; (&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;preprocess &lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;pps&lt;&#x2F;span&gt;&lt;span&gt; ppx_sexp_conv)))
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Now we can finally add the s-expression PPX to our type:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;ocaml&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-ocaml &quot;&gt;&lt;code class=&quot;language-ocaml&quot; data-lang=&quot;ocaml&quot;&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;open &lt;&#x2F;span&gt;&lt;span&gt;Core
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;type &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;t &lt;&#x2F;span&gt;&lt;span&gt;= 
+&lt;&#x2F;span&gt;&lt;span&gt;  | LoadCSV &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;of &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;string
+&lt;&#x2F;span&gt;&lt;span&gt;  | Rename &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;of &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;string &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;* &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;string
+&lt;&#x2F;span&gt;&lt;span&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;@@&lt;&#x2F;span&gt;&lt;span&gt;deriving &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;sexp&lt;&#x2F;span&gt;&lt;span&gt;]
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;We opened the &lt;code&gt;Core&lt;&#x2F;code&gt; library so we could have access to the various s-expression functions that it defines.
+&lt;code&gt;[@@deriving sexp]&lt;&#x2F;code&gt; specifies that the &lt;code&gt;sexp&lt;&#x2F;code&gt; PPX should be used to process our type.
+That PPX will generate some code that allows us to use different &lt;code&gt;sexp&lt;&#x2F;code&gt; functions on it.&lt;&#x2F;p&gt;
+&lt;p&gt;For example, we can now define some of the simplest parsing and printing functions ever:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;ocaml&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-ocaml &quot;&gt;&lt;code class=&quot;language-ocaml&quot; data-lang=&quot;ocaml&quot;&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;let &lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;(&amp;gt;&amp;gt;) &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ffb86c;&quot;&gt;f g x &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span&gt; g (f x)
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;let &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;parse &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span&gt;Sexp.of_string &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;&amp;gt;&amp;gt;&lt;&#x2F;span&gt;&lt;span&gt; t_of_sexp
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;let &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;print &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span&gt; sexp_of_t &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;&amp;gt;&amp;gt; &lt;&#x2F;span&gt;&lt;span&gt;Sexp.to_string 
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Okay, &lt;code&gt;&amp;gt;&amp;gt;&lt;&#x2F;code&gt; is a little obtuse, but I just like composing functions and OCaml doesn&#x27;t provide a built-in operator for it.
+If we were in F# land, then I could &lt;code&gt;&amp;gt;&amp;gt;&lt;&#x2F;code&gt; by default, but you have to define it yourself in OCaml.
+You could also use &lt;code&gt;Core.Fn.compose&lt;&#x2F;code&gt; since we installed &lt;code&gt;Core&lt;&#x2F;code&gt;, but its first two args are flipped compared to F#&#x27;s &lt;code&gt;&amp;gt;&amp;gt;&lt;&#x2F;code&gt;.
+And if we were using Haskell, then you could do the same using the &lt;code&gt;.&lt;&#x2F;code&gt; operator.&lt;&#x2F;p&gt;
+&lt;p&gt;Anyway, &lt;code&gt;&amp;gt;&amp;gt;&lt;&#x2F;code&gt; will run the first function, then take the result of that and pass it to the second argument.
+It&#x27;s also worth noting that &lt;code&gt;parse&lt;&#x2F;code&gt; and &lt;code&gt;print&lt;&#x2F;code&gt; are written in a &quot;point-free&quot; style, which means something smart that I forgot exactly and I&#x27;m too lazy to look it up.
+Basically it just means that they don&#x27;t take arguments and they use implicit arguments instead.
+So, I could have written &lt;code&gt;parse&lt;&#x2F;code&gt; like this:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;ocaml&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-ocaml &quot;&gt;&lt;code class=&quot;language-ocaml&quot; data-lang=&quot;ocaml&quot;&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;let &lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;parse &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ffb86c;&quot;&gt;input &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span&gt; t_of_sexp (Sexp.of_string input) 
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;And it would have been exactly the same, just less cool looking.&lt;&#x2F;p&gt;
+&lt;p&gt;To test out our new functions, we are going to use OCaml&#x27;s de-facto standard REPL, &lt;code&gt;utop&lt;&#x2F;code&gt;, to test it.
+If you don&#x27;t know what a REPL is, it stands for &lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;Read%E2%80%93eval%E2%80%93print_loop&quot;&gt;read, eval, print, loop&lt;&#x2F;a&gt; and it&#x27;s a great way of interacting with your code.
+I don&#x27;t know yet how great the REPL story is in OCaml, but for most Lisps you can integrate your REPL with your editor and you basically never have to run your project through the command line.
+Instead, you are able to evaluate select Lisp forms so you have a lot greater control over what code you want to run and when.&lt;&#x2F;p&gt;
+&lt;p&gt;Anyway, since OCaml tools are just packages that add a binary to your switch&#x27;s &lt;code&gt;_opam&#x2F;bin&#x2F;&lt;&#x2F;code&gt; folder, we have to install &lt;code&gt;utop&lt;&#x2F;code&gt; to our local switch before running it:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;camalbrarian&lt;&#x2F;span&gt;&lt;span&gt; $ opam install utop
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;With that done, we can enter the REPL with &lt;code&gt;dune utop&lt;&#x2F;code&gt;.
+I won&#x27;t explain how to use the REPL here.
+If you need help, follow along with &lt;a href=&quot;https:&#x2F;&#x2F;ocaml.org&#x2F;docs&#x2F;toplevel-introduction&quot;&gt;this&lt;&#x2F;a&gt; page and come back.&lt;&#x2F;p&gt;
+&lt;p&gt;Once you are in the REPL, you can load our &lt;code&gt;Query&lt;&#x2F;code&gt; module with &lt;code&gt;#use &quot;lib&#x2F;query.ml&quot;;;&lt;&#x2F;code&gt;.
+Once you enter an expression ending with &lt;code&gt;;;&lt;&#x2F;code&gt;, &lt;code&gt;utop&lt;&#x2F;code&gt; will execute your code and spit back out the results.
+Here is what my REPL session looked like when I tested the query module:&lt;&#x2F;p&gt;
+&lt;aside class=&quot;callout&quot;&gt;
+  &lt;div class=&quot;body&quot;&gt;
+    &lt;h5 class=&quot;label&quot;&gt;Note&lt;&#x2F;h5&gt;
+
+    Inputs are denoted with a &lt;code&gt;utop # &lt;&#x2F;code&gt; prefix.
+Outputs are any lines immediately following the inputs.
+  &lt;&#x2F;div&gt;
+&lt;&#x2F;aside&gt;
+&lt;pre data-lang=&quot;ocaml&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-ocaml &quot;&gt;&lt;code class=&quot;language-ocaml&quot; data-lang=&quot;ocaml&quot;&gt;&lt;span&gt;utop # &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;#use &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;lib&#x2F;query.ml&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;type &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;t &lt;&#x2F;span&gt;&lt;span&gt;= LoadCSV &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;of &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;string &lt;&#x2F;span&gt;&lt;span&gt;| Rename &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;of &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;string &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;* &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;string
+&lt;&#x2F;span&gt;&lt;span&gt;val ( &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;&amp;gt;&amp;gt;&lt;&#x2F;span&gt;&lt;span&gt; ) : (&amp;#39;a -&amp;gt; &amp;#39;b) -&amp;gt; (&amp;#39;b -&amp;gt; &amp;#39;c) -&amp;gt; &amp;#39;a -&amp;gt; &amp;#39;c &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &amp;lt;&lt;&#x2F;span&gt;&lt;span&gt;fun&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span&gt;File &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;lib&#x2F;query.ml&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;, line &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;10&lt;&#x2F;span&gt;&lt;span&gt;, characters &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;30-39&lt;&#x2F;span&gt;&lt;span&gt;:
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;10 &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;| let &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;parse &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span&gt;Sexp.of_string &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;&amp;gt;&amp;gt;&lt;&#x2F;span&gt;&lt;span&gt; t_of_sexp
+&lt;&#x2F;span&gt;&lt;span&gt;                                   &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;^^^^^^^^^
+&lt;&#x2F;span&gt;&lt;span&gt;Error: Unbound value t_of_sexp
+&lt;&#x2F;span&gt;&lt;span&gt;Hint: Did you mean int_of_sexp &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;or&lt;&#x2F;span&gt;&lt;span&gt; mat_of_sexp?
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Doh. That&#x27;s not what we wanted.
+If we look up the error message, someone else has run into the &lt;a href=&quot;https:&#x2F;&#x2F;discuss.ocaml.org&#x2F;t&#x2F;no-t-of-sexp-generated-by-deriving-sexp&#x2F;1999&quot;&gt;same thing&lt;&#x2F;a&gt; and Jane Street&#x27;s OCamler in Chief came along with some helpful advice:&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Try typing &lt;code&gt;#require &quot;ppx_jane&quot;;;&lt;&#x2F;code&gt; first.&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;pre data-lang=&quot;ocaml&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-ocaml &quot;&gt;&lt;code class=&quot;language-ocaml&quot; data-lang=&quot;ocaml&quot;&gt;&lt;span&gt;utop # &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;#require &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;ppx_jane&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;;;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;utop # &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;#use &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;lib&#x2F;query.ml&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;type &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;t &lt;&#x2F;span&gt;&lt;span&gt;= LoadCSV &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;of &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;string &lt;&#x2F;span&gt;&lt;span&gt;| Rename &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;of &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;string &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;* &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;string
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;val &lt;&#x2F;span&gt;&lt;span&gt;t_of_sexp : Sexp&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;.t &lt;&#x2F;span&gt;&lt;span&gt;-&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;t &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &amp;lt;&lt;&#x2F;span&gt;&lt;span&gt;fun&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;val &lt;&#x2F;span&gt;&lt;span&gt;sexp_of_t : &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;t &lt;&#x2F;span&gt;&lt;span&gt;-&amp;gt; Sexp&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;.t &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &amp;lt;&lt;&#x2F;span&gt;&lt;span&gt;fun&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span&gt;val ( &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;&amp;gt;&amp;gt;&lt;&#x2F;span&gt;&lt;span&gt; ) : (&amp;#39;a -&amp;gt; &amp;#39;b) -&amp;gt; (&amp;#39;b -&amp;gt; &amp;#39;c) -&amp;gt; &amp;#39;a -&amp;gt; &amp;#39;c &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &amp;lt;&lt;&#x2F;span&gt;&lt;span&gt;fun&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;val &lt;&#x2F;span&gt;&lt;span&gt;parse : &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;string &lt;&#x2F;span&gt;&lt;span&gt;-&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;t &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &amp;lt;&lt;&#x2F;span&gt;&lt;span&gt;fun&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;val &lt;&#x2F;span&gt;&lt;span&gt;print : &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;t &lt;&#x2F;span&gt;&lt;span&gt;-&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;string &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &amp;lt;&lt;&#x2F;span&gt;&lt;span&gt;fun&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Okay now it works. I would recommend reading through the thread above if you want to know a little more about why that works, but I&#x27;ll skip over it for brevity.
+I have mixed feelings about the whole PPX ecosystem because it seems very powerful but I&#x27;ve struggled with it so far.
+I&#x27;ve already lost a couple of hours in total just fighting with the sexpr and JSON PPX libraries and I haven&#x27;t even been using OCaml that long.
+It&#x27;s part of the reason why I decided to write about my experiences with OCaml, so I could firm up my own understanding and document some of the frustrations.&lt;&#x2F;p&gt;
+&lt;p&gt;So far, it seems like more documentation would help. Right now, the PPXs I&#x27;ve used feel like a bit of a black box.
+I probably need to give it more time and maybe even try writing a PPX of my own so I can understand what&#x27;s happening better, but a lot of OCaml beginners would likely quit trying rather than digging into the internals to understand what&#x27;s going wrong.&lt;&#x2F;p&gt;
+&lt;p&gt;I know from my experience with Rust&#x27;s macro system that macros can become very complicated very quickly, and most programmers I know would rather not bother.
+But if using a language&#x27;s macro system requires you to almost be an expert in that language, then you are cutting off a significant portion of beginners from using it.
+Requiring someone to be an expert before they can write macros makes sense to me, but the barrier to entry should be a lot lower for just using macros.&lt;&#x2F;p&gt;
+&lt;p&gt;Okay, rant over. Now we can actually parse and print some queries:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;ocaml&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-ocaml &quot;&gt;&lt;code class=&quot;language-ocaml&quot; data-lang=&quot;ocaml&quot;&gt;&lt;span style=&quot;color:#6272a4;&quot;&gt;(* continuing the same utop session from above *)
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;utop # parse &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;(LoadCSV &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;\&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;people.csv&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;\&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;)&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;-&lt;&#x2F;span&gt;&lt;span&gt; : t &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span&gt;LoadCSV &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;people.csv&amp;quot;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Yup, that works.&lt;&#x2F;p&gt;
+&lt;p&gt;Whenever I was about to test the rename operator I realized that we have an issue with it.
+Right now, the rename case is of type &lt;code&gt;string * string&lt;&#x2F;code&gt;, but actually it needs to be &lt;code&gt;t * string * string&lt;&#x2F;code&gt; so it can take in an input query to rename.
+Here is what the updated type looks like:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;ocaml&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-ocaml &quot;&gt;&lt;code class=&quot;language-ocaml&quot; data-lang=&quot;ocaml&quot;&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;type &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;t &lt;&#x2F;span&gt;&lt;span&gt;= 
+&lt;&#x2F;span&gt;&lt;span&gt;  | LoadCSV &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;of &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;string
+&lt;&#x2F;span&gt;&lt;span&gt;  | Rename &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;of &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;t &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;* &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;string &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;* &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;string
+&lt;&#x2F;span&gt;&lt;span&gt;[&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;@@&lt;&#x2F;span&gt;&lt;span&gt;deriving &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;sexp&lt;&#x2F;span&gt;&lt;span&gt;]
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Now we can reload our module in &lt;code&gt;utop&lt;&#x2F;code&gt; and test a more complicated query:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;ocaml&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-ocaml &quot;&gt;&lt;code class=&quot;language-ocaml&quot; data-lang=&quot;ocaml&quot;&gt;&lt;span&gt;utop # &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;#use &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;lib&#x2F;query.ml&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;type &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;t &lt;&#x2F;span&gt;&lt;span&gt;= LoadCSV &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;of &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;string &lt;&#x2F;span&gt;&lt;span&gt;| Rename &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;of &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;t &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;* &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;string &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;* &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;string
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;val &lt;&#x2F;span&gt;&lt;span&gt;t_of_sexp : Sexp&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;.t &lt;&#x2F;span&gt;&lt;span&gt;-&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;t &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &amp;lt;&lt;&#x2F;span&gt;&lt;span&gt;fun&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;val &lt;&#x2F;span&gt;&lt;span&gt;sexp_of_t : &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;t &lt;&#x2F;span&gt;&lt;span&gt;-&amp;gt; Sexp&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;.t &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &amp;lt;&lt;&#x2F;span&gt;&lt;span&gt;fun&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span&gt;val ( &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;&amp;gt;&amp;gt;&lt;&#x2F;span&gt;&lt;span&gt; ) : (&amp;#39;a -&amp;gt; &amp;#39;b) -&amp;gt; (&amp;#39;b -&amp;gt; &amp;#39;c) -&amp;gt; &amp;#39;a -&amp;gt; &amp;#39;c &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &amp;lt;&lt;&#x2F;span&gt;&lt;span&gt;fun&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;val &lt;&#x2F;span&gt;&lt;span&gt;parse : &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;string &lt;&#x2F;span&gt;&lt;span&gt;-&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;t &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &amp;lt;&lt;&#x2F;span&gt;&lt;span&gt;fun&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;val &lt;&#x2F;span&gt;&lt;span&gt;print : &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;t &lt;&#x2F;span&gt;&lt;span&gt;-&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;string &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &amp;lt;&lt;&#x2F;span&gt;&lt;span&gt;fun&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;utop # parse &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;(Rename (LoadCSV &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;\&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;people.csv&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;\&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;) &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;\&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;FirstName&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;\&amp;quot; \&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;name&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;\&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;)&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;;;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;-&lt;&#x2F;span&gt;&lt;span&gt; : t &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span&gt;Rename (LoadCSV &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;people.csv&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;FirstName&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;name&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Perfect, now we should be ready to write a simple query executor.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;executing-queries&quot;&gt;Executing Queries&lt;&#x2F;h2&gt;
+&lt;p&gt;So we have something to query against, I&#x27;ll make &lt;code&gt;employees.csv&lt;&#x2F;code&gt; using some data from the Wikipedia article on relational algebra that I linked earlier:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;csv&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-csv &quot;&gt;&lt;code class=&quot;language-csv&quot; data-lang=&quot;csv&quot;&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;Name&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;,&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;EmpId&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;,&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;DeptName
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;Harry&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;,&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;3415&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;,&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;Finance
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;Sally&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;,&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;2241&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;,&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;Sales
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;George&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;,&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;3401&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;,&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;Finance
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;Harriet&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;,&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;2202&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;,&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;Sales
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;Mary&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;,&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;1257&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;,&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;Human Resources
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;I&#x27;ll write all the execution code in a new file, &lt;code&gt;lib&#x2F;exec.ml&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;ocaml&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-ocaml &quot;&gt;&lt;code class=&quot;language-ocaml&quot; data-lang=&quot;ocaml&quot;&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;open &lt;&#x2F;span&gt;&lt;span&gt;Core
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;module &lt;&#x2F;span&gt;&lt;span&gt;TupleValue &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= struct
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;type &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;t &lt;&#x2F;span&gt;&lt;span&gt;=
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#6272a4;&quot;&gt;(* For now, just load everything as a string to keep CSV loading simple *)
+&lt;&#x2F;span&gt;&lt;span&gt;    | String &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;of &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;string
+&lt;&#x2F;span&gt;&lt;span&gt;  [&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;@@&lt;&#x2F;span&gt;&lt;span&gt;deriving &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;sexp&lt;&#x2F;span&gt;&lt;span&gt;]
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;end
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;module &lt;&#x2F;span&gt;&lt;span&gt;Tuple &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= struct
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;type &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;t &lt;&#x2F;span&gt;&lt;span&gt;= Tuple &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;of &lt;&#x2F;span&gt;&lt;span&gt;TupleValue&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;.t list
+&lt;&#x2F;span&gt;&lt;span&gt;  [&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;@@&lt;&#x2F;span&gt;&lt;span&gt;deriving &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;sexp&lt;&#x2F;span&gt;&lt;span&gt;]
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;end
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;module &lt;&#x2F;span&gt;&lt;span&gt;Relation &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= struct
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;type &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;t &lt;&#x2F;span&gt;&lt;span&gt;= {
+&lt;&#x2F;span&gt;&lt;span&gt;    tuples : Tuple&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;.t list&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;    header_type : &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;string list&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;  }
+&lt;&#x2F;span&gt;&lt;span&gt;  [&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;@@&lt;&#x2F;span&gt;&lt;span&gt;deriving &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;sexp&lt;&#x2F;span&gt;&lt;span&gt;]
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;end
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;To start, I am defining types to represent data within our database.
+&lt;code&gt;TupleValue&lt;&#x2F;code&gt; is a single scalar value and currently only supports strings because that&#x27;s simple.
+&lt;code&gt;Tuple&lt;&#x2F;code&gt; is just a &lt;code&gt;TupleValue&lt;&#x2F;code&gt; list.
+And &lt;code&gt;Relation&lt;&#x2F;code&gt; is a &lt;code&gt;Tuple&lt;&#x2F;code&gt; list and a list of strings which represents the header names.
+This is probably not an ideal design, especially if you are trying to make a real database, but it works for now.&lt;&#x2F;p&gt;
+&lt;p&gt;This is also the first time we are seeing record types.
+They are basically immutable maps&#x2F;records&#x2F;structs which allow you to associate named keys with values, similar to what lots of other languages provide.
+If you want to read more about them, go &lt;a href=&quot;https:&#x2F;&#x2F;ocaml.org&#x2F;docs&#x2F;basic-data-types#records&quot;&gt;here&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;Since the only way we have of getting real data is through CSV files, let&#x27;s make some simple logic for loading CSVs:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;ocaml&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-ocaml &quot;&gt;&lt;code class=&quot;language-ocaml&quot; data-lang=&quot;ocaml&quot;&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;let &lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;_process_header_line &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ffb86c;&quot;&gt;line &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;=
+&lt;&#x2F;span&gt;&lt;span&gt;  String.split line &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;~on:&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;&amp;#39;,&amp;#39;
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;let &lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;_process_csv_line &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ffb86c;&quot;&gt;line &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;=
+&lt;&#x2F;span&gt;&lt;span&gt;  String.split line &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;~on:&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;&amp;#39;,&amp;#39;
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;|&amp;gt; &lt;&#x2F;span&gt;&lt;span&gt;List.map &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;~f:&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;fun &lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ffb86c;&quot;&gt;x&lt;&#x2F;span&gt;&lt;span&gt;) -&amp;gt; TupleValue.String x)
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;|&amp;gt; fun &lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ffb86c;&quot;&gt;x&lt;&#x2F;span&gt;&lt;span&gt;) -&amp;gt; Tuple.Tuple x
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;let &lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;_load_csv &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ffb86c;&quot;&gt;path &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;=
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;let &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;lines &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span&gt;In_channel.read_lines path &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;in
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;match&lt;&#x2F;span&gt;&lt;span&gt; lines &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;with
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;| &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ffb86c;&quot;&gt;first&lt;&#x2F;span&gt;&lt;span&gt;::&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ffb86c;&quot;&gt;rst &lt;&#x2F;span&gt;&lt;span&gt;-&amp;gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    {
+&lt;&#x2F;span&gt;&lt;span&gt;      Relation.header_type&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span&gt; _process_header_line first;
+&lt;&#x2F;span&gt;&lt;span&gt;      Relation.tuples &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span&gt; rst &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;|&amp;gt; &lt;&#x2F;span&gt;&lt;span&gt;List.map &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;~f:&lt;&#x2F;span&gt;&lt;span&gt;_process_csv_line;
+&lt;&#x2F;span&gt;&lt;span&gt;    }
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;| &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;[] &lt;&#x2F;span&gt;&lt;span&gt;-&amp;gt; failwith &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;Cannot load an empty CSV&amp;quot;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;&lt;code&gt;_load_csv&lt;&#x2F;code&gt; will load a file from a given path, process the first line as a header, process the remaining lines as tuples, then spit out a &lt;code&gt;Relation&lt;&#x2F;code&gt;.
+This is a fairly standard functional style of programming.
+The main part that I found interesting is the use of &lt;code&gt;~{keyword}:{value}&lt;&#x2F;code&gt; to specify named values in OCaml.
+I thought I wouldn&#x27;t like it at first, but it&#x27;s been growing on me and I&#x27;ve come to enjoy those labels.
+I feel like that makes it a lot easier to parse out separate arguments, especially for higher-order functions.&lt;&#x2F;p&gt;
+&lt;p&gt;I also wish that variant case constructors would be considered more like plain functions so I could pipe values into them, that would allow me to rewrite &lt;code&gt;_process_csv_line&lt;&#x2F;code&gt; like this:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;ocaml&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-ocaml &quot;&gt;&lt;code class=&quot;language-ocaml&quot; data-lang=&quot;ocaml&quot;&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;let &lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;_process_csv_line &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ffb86c;&quot;&gt;line &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;=
+&lt;&#x2F;span&gt;&lt;span&gt;  String.split line &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;~on:&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;&amp;#39;,&amp;#39;
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;|&amp;gt; &lt;&#x2F;span&gt;&lt;span&gt;List.map &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;~f:&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;fun &lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ffb86c;&quot;&gt;x&lt;&#x2F;span&gt;&lt;span&gt;) -&amp;gt; TupleValue.String x)
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;|&amp;gt; &lt;&#x2F;span&gt;&lt;span&gt;Tuple.Tuple
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;I don&#x27;t think it really matters, I just feel like this style would flow better.
+There are probably valid reasons for why OCaml won&#x27;t let me do it.&lt;&#x2F;p&gt;
+&lt;p&gt;Now that we have CSV parsing, let&#x27;s also write the logic for our rename operator:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;ocaml&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-ocaml &quot;&gt;&lt;code class=&quot;language-ocaml&quot; data-lang=&quot;ocaml&quot;&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;let &lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;_rename_relation &lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ffb86c;&quot;&gt;from&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ffb86c;&quot;&gt;to_&lt;&#x2F;span&gt;&lt;span&gt;) &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ffb86c;&quot;&gt;relation &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;=
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;let open&lt;&#x2F;span&gt;&lt;span&gt; Relation &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;in
+&lt;&#x2F;span&gt;&lt;span&gt;  { relation &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;with&lt;&#x2F;span&gt;&lt;span&gt; header_type &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span&gt; relation.header_type &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;|&amp;gt; &lt;&#x2F;span&gt;&lt;span&gt;List.map &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;~f:&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;fun &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ffb86c;&quot;&gt;x &lt;&#x2F;span&gt;&lt;span&gt;-&amp;gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span&gt;String.equal x from &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;then&lt;&#x2F;span&gt;&lt;span&gt; to_ &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;else&lt;&#x2F;span&gt;&lt;span&gt; x) }
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;The &lt;code&gt;let open Relation in&lt;&#x2F;code&gt; line allows you to access the items within that module for the rest of your current scope.
+The &lt;code&gt;{ relation with ... }&lt;&#x2F;code&gt; syntax is a record update, which isn&#x27;t technically updating the record but instead it allocates a new record.&lt;&#x2F;p&gt;
+&lt;aside class=&quot;callout&quot;&gt;
+  &lt;div class=&quot;body&quot;&gt;
+    &lt;h5 class=&quot;label&quot;&gt;Note&lt;&#x2F;h5&gt;
+
+    Theoretically, with &lt;a href=&quot;https:&#x2F;&#x2F;blog.janestreet.com&#x2F;oxidizing-ocaml-ownership&#x2F;&quot;&gt;recent advances&lt;&#x2F;a&gt; in the OCaml compiler, it should be able to automatically optimize an immutable record update into a mutable update in certain circumstances. If you could statically guarantee that your reference is unique using some kind of ownership annotations (like in Rust), then you could optimize these immutable copies into mutable updates, which is great because allocation is expensive.&lt;&#x2F;p&gt;
+&lt;p&gt;You could also manually mark the field as mutable and do a mutable update instead, but then you&#x27;re introducing extra mental overhead.
+Wouldn&#x27;t it be great if the compiler could do the optimization for you so you don&#x27;t have to constantly track if you need a mutable&#x2F;immutable update every time you make a change?
+  &lt;&#x2F;div&gt;
+&lt;&#x2F;aside&gt;
+&lt;p&gt;Finally, we can pattern match on our query AST to evaluate it:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;ocaml&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-ocaml &quot;&gt;&lt;code class=&quot;language-ocaml&quot; data-lang=&quot;ocaml&quot;&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;let rec &lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;exec &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ffb86c;&quot;&gt;query &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;=
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;match&lt;&#x2F;span&gt;&lt;span&gt; query &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;with
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;| &lt;&#x2F;span&gt;&lt;span&gt;Query.LoadCSV &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ffb86c;&quot;&gt;path &lt;&#x2F;span&gt;&lt;span&gt;-&amp;gt; _load_csv path
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;| &lt;&#x2F;span&gt;&lt;span&gt;Query.Rename (&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ffb86c;&quot;&gt;inner_query&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ffb86c;&quot;&gt;from&lt;&#x2F;span&gt;&lt;span&gt;, &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ffb86c;&quot;&gt;to_&lt;&#x2F;span&gt;&lt;span&gt;) -&amp;gt; exec inner_query &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;|&amp;gt;&lt;&#x2F;span&gt;&lt;span&gt; _rename_relation (from, to_)
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Specifying a function with &lt;code&gt;rec&lt;&#x2F;code&gt; before the name marks it as recursive, which is very useful for our use case here.
+This kind of recursive evaluation is &lt;em&gt;very&lt;&#x2F;em&gt; common when working with recursive types like an AST.
+We could already use this &lt;code&gt;exec&lt;&#x2F;code&gt; function in &lt;code&gt;utop&lt;&#x2F;code&gt;, but instead I want to build a dedicated REPL for this database.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;ocaml&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-ocaml &quot;&gt;&lt;code class=&quot;language-ocaml&quot; data-lang=&quot;ocaml&quot;&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;let rec &lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;repl &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#ffb86c;&quot;&gt;() &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;=
+&lt;&#x2F;span&gt;&lt;span&gt;  print_string &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;&amp;gt; &amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;;
+&lt;&#x2F;span&gt;&lt;span&gt;  Out_channel.(flush stdout);
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;let &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;input &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span&gt;In_channel.(input_line_exn stdin) &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;in
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;let &lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;ast &lt;&#x2F;span&gt;&lt;span&gt;: &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#8be9fd;&quot;&gt;Query.t &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span&gt;Query.parse input &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;in
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;let &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;result &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span&gt; exec ast &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;in
+&lt;&#x2F;span&gt;&lt;span&gt;  &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;let &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ffffff;&quot;&gt;sexp &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;= &lt;&#x2F;span&gt;&lt;span&gt;Relation.sexp_of_t result &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;in
+&lt;&#x2F;span&gt;&lt;span&gt;  print_endline (Sexp.to_string_hum &lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;~indent:&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;4&lt;&#x2F;span&gt;&lt;span&gt; sexp);
+&lt;&#x2F;span&gt;&lt;span&gt;  repl &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;()
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Since we initialized this as a full-featured project ealier using &lt;code&gt;dune&lt;&#x2F;code&gt;, we already have our &lt;code&gt;bin&#x2F;&lt;&#x2F;code&gt; application folder which would be perfect for running a REPL.
+Let&#x27;s hook that up by call our &lt;code&gt;repl&lt;&#x2F;code&gt; function from &lt;code&gt;bin&#x2F;main.ml&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;ocaml&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-ocaml &quot;&gt;&lt;code class=&quot;language-ocaml&quot; data-lang=&quot;ocaml&quot;&gt;&lt;span&gt;Camalbrarian.Exec.repl &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;()
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Simple! Let&#x27;s see if it works. Calling &lt;code&gt;dune exec&lt;&#x2F;code&gt; in the shell should automatically load our project and evaluate &lt;code&gt;bin&#x2F;main.ml&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#282a36;color:#f8f8f2;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;camalbrarian&lt;&#x2F;span&gt;&lt;span&gt; $ dune exec camalbrarian
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#ff79c6;&quot;&gt;&amp;gt; &lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;Rename&lt;&#x2F;span&gt;&lt;span&gt; (LoadCSV &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;employees.csv&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;) &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;Name&amp;quot; &amp;quot;FirstName&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;)
+&lt;&#x2F;span&gt;&lt;span&gt;  ((&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;tuples
+&lt;&#x2F;span&gt;&lt;span&gt;    ((Tuple ((String Harry) (String &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;3415&lt;&#x2F;span&gt;&lt;span&gt;) (String Finance)))
+&lt;&#x2F;span&gt;&lt;span&gt;     (Tuple ((String Sally) (String &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;2241&lt;&#x2F;span&gt;&lt;span&gt;) (String Sales)))
+&lt;&#x2F;span&gt;&lt;span&gt;     (Tuple ((String George) (String &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;3401&lt;&#x2F;span&gt;&lt;span&gt;) (String Finance)))
+&lt;&#x2F;span&gt;&lt;span&gt;     (Tuple ((String Harriet) (String &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;2202&lt;&#x2F;span&gt;&lt;span&gt;) (String Sales)))
+&lt;&#x2F;span&gt;&lt;span&gt;     (Tuple ((String Mary) (String &lt;&#x2F;span&gt;&lt;span style=&quot;color:#bd93f9;&quot;&gt;1257&lt;&#x2F;span&gt;&lt;span&gt;) (String &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f1fa8c;&quot;&gt;&amp;quot;Human Resources&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;)))))
+&lt;&#x2F;span&gt;&lt;span&gt;   (&lt;&#x2F;span&gt;&lt;span style=&quot;color:#50fa7b;&quot;&gt;header_type&lt;&#x2F;span&gt;&lt;span&gt; (FirstName EmpId DeptName)))
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Success!
+Our CSV loading worked great, and the rename operator worked because the first header is now &quot;FirstName&quot; instead of &quot;Name&quot;.&lt;&#x2F;p&gt;
+&lt;aside class=&quot;callout&quot;&gt;
+  &lt;div class=&quot;body&quot;&gt;
+    &lt;h5 class=&quot;label&quot;&gt;Tip&lt;&#x2F;h5&gt;
+
+    If you are on a UNIX-like operating system, you probably have (or could install) &lt;code&gt;rlwrap&lt;&#x2F;code&gt;, which can make your custom REPL experience a lot nicer.
+If you have it, just run &lt;code&gt;rlwrap dune exec camalbrarian&lt;&#x2F;code&gt;.
+  &lt;&#x2F;div&gt;
+&lt;&#x2F;aside&gt;
+&lt;p&gt;If you want to take this further there is a lot more interesting stuff to implement. Like:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;More relational algebra operators:
+&lt;ul&gt;
+&lt;li&gt;projection, selection, natural joins, equijoins, semijoins, antijoins, and division!&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;More data sources:
+&lt;ul&gt;
+&lt;li&gt;Just querying CSVs is pretty boring. This would get a lot more interesting if it could query other databases like Postgres, MySQL, and SQL Server&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;Query Optimization&#x2F;Planning:
+&lt;ul&gt;
+&lt;li&gt;Optimizing queries before running them would be a great way to get into more advanced pattern matching features like guard clauses. It can get very complicated (especially if paired with the next idea), but there are also a few simple optimizations that would be fun to add.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;Storing data:
+&lt;ul&gt;
+&lt;li&gt;This project would get &lt;em&gt;extremely fun&lt;&#x2F;em&gt; if we started supporting insertions&#x2F;updates&#x2F;deletes and storing our data on disk.
+If you care about performance, storing relational data gets complicated fast because now you have to worry about concurrency, filesystem corruption, indexing, and a million other things. Interestingly, you would also need a separate language for describing modifications if you wanted to maintain relational algebra purity because, as far as I know, the relational algebra doesn&#x27;t include any operators that mutate relations. It&#x27;s very similar to functional programming in that sense.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;I may tackle a few of the earlier ideas in a future post, but I&#x27;ll stop here for now.
+If you&#x27;re trying to get better with OCaml like I am, hopefully reading through my rants helped you a little bit.
+There were a lot of points where I could have chased a rabbit or dug into something deeper, but I decided not to just so I could finish the post.
+I&#x27;d like to write more about OCaml in the future because it helps me process what I&#x27;m learning and I hope it could help advertise the language to others who are curious about the functional way of doing things.
+Thanks for reading!&lt;&#x2F;p&gt;
+</content>
+        
+    </entry>
+</feed>

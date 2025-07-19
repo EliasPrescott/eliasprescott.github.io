@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Software Musings | Making Memes with Typst</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Mono:ital,wght@0,200..800;1,200..800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+  <link href="/styles.css" rel="stylesheet">
+  <link rel="alternate" type="application/atom+xml" title="All Posts Feed" href="https://eliasprescott.github.io/atom.xml">
+  
+  
+    
+    
+    <link rel="alternate" type="application/atom+xml" title="All Posts about Bible Study" href="https://eliasprescott.github.io/tags/bible-study/atom.xml">
+  
+    
+    
+    <link rel="alternate" type="application/atom+xml" title="All Posts about Christianity" href="https://eliasprescott.github.io/tags/christianity/atom.xml">
+  
+    
+    
+    <link rel="alternate" type="application/atom+xml" title="All Posts about Databases" href="https://eliasprescott.github.io/tags/databases/atom.xml">
+  
+    
+    
+    <link rel="alternate" type="application/atom+xml" title="All Posts about Lua" href="https://eliasprescott.github.io/tags/lua/atom.xml">
+  
+    
+    
+    <link rel="alternate" type="application/atom+xml" title="All Posts about NeoVim" href="https://eliasprescott.github.io/tags/neovim/atom.xml">
+  
+    
+    
+    <link rel="alternate" type="application/atom+xml" title="All Posts about OCaml" href="https://eliasprescott.github.io/tags/ocaml/atom.xml">
+  
+    
+    
+    <link rel="alternate" type="application/atom+xml" title="All Posts about Programming" href="https://eliasprescott.github.io/tags/programming/atom.xml">
+  
+    
+    
+    <link rel="alternate" type="application/atom+xml" title="All Posts about Rails" href="https://eliasprescott.github.io/tags/rails/atom.xml">
+  
+    
+    
+    <link rel="alternate" type="application/atom+xml" title="All Posts about Ruby" href="https://eliasprescott.github.io/tags/ruby/atom.xml">
+  
+    
+    
+    <link rel="alternate" type="application/atom+xml" title="All Posts about Typst" href="https://eliasprescott.github.io/tags/typst/atom.xml">
+  
+</head>
+
+<body>
+  <header>
+    <a href="/">
+      <h1 class="title">
+        Software Musings
+      </h1>
+    </a>
+
+    <nav>
+      
+      <a href="https://eliasprescott.github.io/tags/programming/">Programming</a>
+      
+      <a href="https://eliasprescott.github.io/tags/christianity/">Christianity</a>
+    </nav>
+
+    <div></div>
+  </header>
+  <section class="section">
+    <div class="container">
+      
+<h1 class="title">
+  Making Memes with Typst
+</h1>
+
+
+<div class="taglist">
+
+  
+  <span class="tag">
+    <a href="https://eliasprescott.github.io/tags/programming/">Programming</a>
+  </span>
+
+  
+  <span class="tag">
+    <a href="https://eliasprescott.github.io/tags/typst/">Typst</a>
+  </span>
+
+</div>
+
+<p class="subtitle"><sub>Posted 2025-07-19</sub></p>
+<p class="subtitle"><sub>~1 minute read time</sub></p>
+
+<hr />
+
+<p>I've been having fun using <a href="https://typst.app/">Typst</a> to make various documents, and the thought struck me that I should try making a meme with it.</p>
+<h2 id="code">Code:</h2>
+<pre data-lang="typst" style="background-color:#282a36;color:#f8f8f2;" class="language-typst "><code class="language-typst" data-lang="typst"><span>#set page(width: auto, height: auto, margin: 0pt)
+</span><span>#set text(48pt, font: &quot;Impact&quot;, fill: white, stroke: (paint: black, thickness: 2pt))
+</span><span>
+</span><span>#image(&quot;griffin.jpg&quot;, width: 800pt)
+</span><span>
+</span><span>#place(
+</span><span>  center + bottom,
+</span><span>  dy: -10pt,
+</span><span>  [Don&#39;t use Typst to make memes],
+</span><span>)
+</span></code></pre>
+<h2 id="command">Command:</h2>
+<pre data-lang="shell" style="background-color:#282a36;color:#f8f8f2;" class="language-shell "><code class="language-shell" data-lang="shell"><span>typst compile meme.typ --format png
+</span></code></pre>
+<h2 id="output">Output:</h2>
+<p><img src="https://eliasprescott.github.io/blog/making-memes-with-typst/./meme.png" alt="An image of Peter Griffin running from an airplane with the caption &quot;Don&#39;t use Typst to make memes&quot;" /></p>
+
+
+    </div>
+  </section>
+</body>
+</html>
